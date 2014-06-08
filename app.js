@@ -11,7 +11,9 @@ var methodOverride = require('method-override');
 var errorHandler = require('errorhandler');
 var app = express();
 
-// Configuration
+/**
+ * Configuration
+ */
 
 var env = process.env.NODE_ENV || 'development';
 
@@ -20,7 +22,10 @@ app.set('view engine', 'jade');
 app.use(bodyParser());
 app.use(methodOverride());
 
-// Routes
+/**
+ * Routes
+ */
+
 var index = require("./routes");
 var image = require("./routes/image.js");
 var task = require("./routes/task.js");
@@ -39,12 +44,22 @@ app.get("/tag", tag.index);
 app.get("/action", action.index);
 app.get("/segmentation", segmentation.index);
 
-// Static Files
+/**
+ * Static Files
+ */
 
 app.use(express.static(__dirname + '/public'));
 
+/**
+ * Storage
+ * This files are the one uploaded to the server
+ */
 
-// Error Handling
+app.use(express.static(__dirname + '/storage'));
+
+/**
+ *Error Handling
+ */
 
 app.use(index.invalidRoute);
 
@@ -56,6 +71,10 @@ if ('development' === env) {
     console.log(clc.red("Unknown environment: ") + env);
     process.exit(1);
 }
+
+/**
+ * Server initialization
+ */
 
 var port = process.env.port || 3000;
 
