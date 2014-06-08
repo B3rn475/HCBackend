@@ -22,8 +22,20 @@ app.use(methodOverride());
 
 // Routes
 var index = require("./routes");
+var image = require("./routes/image.js");
+var task = require("./routes/task.js");
+var session = require("./routes/session.js");
+var mask = require("./routes/mask.js");
+var tag = require("./routes/tag.js");
+var action = require("./routes/action.js");
 
 app.get("/", index.index);
+app.get("/image", image.index);
+app.get("/task", task.index);
+app.get("/session", session.index);
+app.get("/mask", mask.index);
+app.get("/tag", tag.index);
+app.get("/action", action.index);
 
 // Static Files
 
