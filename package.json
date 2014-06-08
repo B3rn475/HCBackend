@@ -1,9 +1,23 @@
 {
-    "name": "application-name"
+    "name": "SketchnessBackend"
   , "version": "0.0.1"
   , "private": true
+  , "repository" : { "type" : "git"
+    , "url" : "http://github.com/B3rn475/SketchnessBackend.git"
+  }
+  , "author" : {
+      "name" : "Carlo Bernaschina"
+    , "email" : "carlo@bernaschina.com"
+    , "url" : "www.bernaschina.com"
+  }
   , "dependencies": {
-      "express": "2.5.8"
+      "express": "4.x"
+    , "connect" : "*"
+    , "body-parser": "*"
+    , "method-override": "*"
+    , "errorhandler": "*"
     , "jade": ">= 0.0.1"
+    , "mongoose": "*"
+    , "cli-color" : "*"
   }
 }

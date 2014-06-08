@@ -4,29 +4,43 @@
  * Module dependencies.
  */
 
+var clc = require("cli-color");
 var express = require('express');
-
-var app = module.exports = express.createServer();
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var errorHandler = require('errorhandler');
+var app = express();
 
 // Configuration
 
-app.configure(function () {
-    app.set('views', __dirname + '/views');
-    app.set('view engine', 'jade');
-    app.use(express.bodyParser());
-    app.use(express.methodOverride());
-    app.use(app.router);
-    app.use(express.static(__dirname + '/public'));
-});
+var env = process.env.NODE_ENV || 'development';
 
-app.configure('development', function () {
-    app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-});
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+app.use(bodyParser());
+app.use(methodOverride());
 
-app.configure('production', function () {
-    app.use(express.errorHandler());
-});
+// Routes
 
-app.listen(3000, function () {
-    console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+
+// Static Files
+
+app.use(express.static(__dirname + '/public'));
+
+
+// Error Handling
+
+if ('development' === env) {
+    app.use(errorHandler({ dumpExceptions: true, showStack: true }));
+} else if ('production' === env) {
+    app.use(errorHandler());
+} else {
+    console.log(clc.red("Unknown environmnet: ") + env);
+    process.exit(1);
+}
+
+var port = process.env.port || 3000;
+
+app.listen(port, function () {
+    console.log(clc.green("Express server listening on port ") + "%d" + clc.green(" in ") + "%s" + clc.green(" mode"), port, app.settings.env);
 });
