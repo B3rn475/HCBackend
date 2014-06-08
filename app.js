@@ -39,7 +39,7 @@ if ('development' === env) {
 } else if ('production' === env) {
     app.use(errorHandler());
 } else {
-    console.log(clc.red("Unknown environmnet: ") + env);
+    console.log(clc.red("Unknown environment: ") + env);
     process.exit(1);
 }
 
