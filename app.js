@@ -9,6 +9,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var errorHandler = require('errorhandler');
+var mongoose = require('mongoose');
 var app = express();
 
 /**
@@ -68,13 +69,24 @@ if ('development' === env) {
 } else if ('production' === env) {
     app.use(errorHandler());
 } else {
-    console.log(clc.red("Unknown environment: ") + env);
+    console.error(clc.red("Unknown environment: ") + env);
     process.exit(1);
 }
 
 /**
  * Server initialization
  */
+
+var db = process.env.db || 'mongodb://localhost/test';
+
+mongoose.connect(db, function (err) {
+    if (err) {
+        console.error(clc.red(err));
+        process.exit(1);
+    } else {
+        console.log(clc.green("Connected to database at: ") + db);
+    };
+});
 
 var port = process.env.port || 3000;
 
