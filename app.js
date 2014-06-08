@@ -28,6 +28,7 @@ var session = require("./routes/session.js");
 var mask = require("./routes/mask.js");
 var tag = require("./routes/tag.js");
 var action = require("./routes/action.js");
+var segmentation = require("./routes/segmentation.js");
 
 app.get("/", index.index);
 app.get("/image", image.index);
@@ -36,6 +37,7 @@ app.get("/session", session.index);
 app.get("/mask", mask.index);
 app.get("/tag", tag.index);
 app.get("/action", action.index);
+app.get("/segmentation", segmentation.index);
 
 // Static Files
 
