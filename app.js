@@ -21,7 +21,9 @@ app.use(bodyParser());
 app.use(methodOverride());
 
 // Routes
+var index = require("./routes");
 
+app.get("/", index.index);
 
 // Static Files
 
@@ -29,6 +31,8 @@ app.use(express.static(__dirname + '/public'));
 
 
 // Error Handling
+
+app.use(index.invalidRoute);
 
 if ('development' === env) {
     app.use(errorHandler({ dumpExceptions: true, showStack: true }));

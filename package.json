@@ -16,7 +16,6 @@
     , "body-parser": "*"
     , "method-override": "*"
     , "errorhandler": "*"
-    , "jade": ">= 0.0.1"
     , "mongoose": "*"
     , "cli-color" : "*"
   }
