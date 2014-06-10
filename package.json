@@ -17,6 +17,7 @@
     , "method-override": "*"
     , "errorhandler": "*"
     , "mongoose": "*"
+    , "mongoose-auto-increment": "*"
     , "cli-color" : "*"
   }
 }

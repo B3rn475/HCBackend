@@ -10,6 +10,7 @@ var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var errorHandler = require('errorhandler');
 var mongoose = require('mongoose');
+var mongooseAI = require('mongoose-auto-increment');
 var app = express();
 
 /**
@@ -22,6 +23,38 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(bodyParser());
 app.use(methodOverride());
+
+/**
+ * DB
+ */
+
+var db = process.env.db || 'mongodb://localhost/test';
+
+var connection = mongoose.connect(db);
+// When successfully connected
+mongoose.connection.once('open', function () {
+    console.log(clc.green("Connected to database at: ") + db);
+});
+
+// If the connection throws an error
+mongoose.connection.on('error', function (err) {
+    console.log(clc.red('Mongoose default connection error: ') + err);
+});
+
+// When the connection is disconnected
+mongoose.connection.on('disconnected', function () {
+    console.log(clc.red('Mongoose default connection disconnected'));
+});
+
+mongooseAI.initialize(connection);
+
+// If the Node process ends, close the Mongoose connection
+process.on('SIGINT', function () {
+    mongoose.connection.close(function () {
+        console.log('Mongoose default connection disconnected through app termination');
+        process.exit(1);
+    });
+});
 
 /**
  * Routes
@@ -38,6 +71,7 @@ var segmentation = require("./routes/segmentation.js");
 
 app.get("/", index.index);
 app.get("/image", image.index);
+app.post("/image", image.add);
 app.get("/task", task.index);
 app.get("/session", session.index);
 app.get("/mask", mask.index);
@@ -49,14 +83,14 @@ app.get("/segmentation", segmentation.index);
  * Static Files
  */
 
-app.use(express.static(__dirname + '/public'));
+app.use('/static', express.static(__dirname + '/public'));
 
 /**
  * Storage
  * This files are the one uploaded to the server
  */
 
-app.use(express.static(__dirname + '/storage'));
+app.use('/storage', express.static(__dirname + '/storage'));
 
 /**
  *Error Handling
@@ -76,17 +110,6 @@ if ('development' === env) {
 /**
  * Server initialization
  */
-
-var db = process.env.db || 'mongodb://localhost/test';
-
-mongoose.connect(db, function (err) {
-    if (err) {
-        console.error(clc.red(err));
-        process.exit(1);
-    } else {
-        console.log(clc.green("Connected to database at: ") + db);
-    }
-});
 
 var port = process.env.port || 3000;
 
