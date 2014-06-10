@@ -85,7 +85,7 @@ mongoose.connect(db, function (err) {
         process.exit(1);
     } else {
         console.log(clc.green("Connected to database at: ") + db);
-    };
+    }
 });
 
 var port = process.env.port || 3000;

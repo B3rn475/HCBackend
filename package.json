@@ -1,9 +1,9 @@
 {
-    "name": "SketchnessBackend"
+    "name": "HCBackend"
   , "version": "0.0.1"
   , "private": true
   , "repository" : { "type" : "git"
-    , "url" : "http://github.com/B3rn475/SketchnessBackend.git"
+    , "url" : "http://github.com/B3rn475/HCBackend.git"
   }
   , "author" : {
       "name" : "Carlo Bernaschina"
