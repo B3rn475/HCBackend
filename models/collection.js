@@ -5,8 +5,7 @@ var mongoose = require("mongoose");
 var mongooseAI = require("mongoose-auto-increment");
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
-                                    app_id: { type: Number, min: 1},
-                                    app_user_id: { type: Number, min: 1}
+                                images : [{type: Number, min: 0, ref: "Image"}]
                                 }, { id: false});
 
 schema.virtual('id').get(function () { return this._id; });
@@ -20,15 +19,15 @@ schema.options.toJSON = {
     }
 };
 
-schema.statics.json_list_property = "users";
-schema.statics.pname = "user";
+schema.statics.json_list_property = "collections";
+schema.statics.pname = "collection";
 
 exports.schema = schema;
 
-schema.plugin(mongooseAI.plugin, { model: 'User', field: '_id' });
+schema.plugin(mongooseAI.plugin, { model: 'Collection', field: '_id' });
 
-var model = mongoose.model('User',
+var model = mongoose.model('Collection',
                            schema,
-                           'User');
+                           'Collection');
 
 exports.model = model;

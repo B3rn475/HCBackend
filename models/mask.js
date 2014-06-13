@@ -8,9 +8,9 @@ var computeMediaLocator = function (id) {
     return "/storage/mask/" + id + ".png";
 };
 
-var minId = 0;
-
-var schema = mongoose.Schema({ _id: { type: Number, min: minId, index: { unique: true }, select: false},
+var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
+                                    image: {type: Number, ref: "Image"},
+                                    tag: {type: Number, ref: "Tag"},
                                     quality: { type: Number},
                                     segmentations: { type: Number, min: 1},
                                     updated_at: {type: Date}
@@ -20,9 +20,9 @@ schema.virtual('id').get(function () { return this._id; });
 schema.virtual('mediaLocator').get(function () { return computeMediaLocator(this._id); });
 
 schema.pre('save', function(next){
-  now = new Date();
-  this.updated_at = now;
-  next();
+    var now = new Date();
+    this.updated_at = now;
+    next();
 });
 
 schema.options.toJSON = {
@@ -38,6 +38,9 @@ schema.options.toJSON = {
 schema.statics.getMediaLocationFromID = function (id) {
     return computeMediaLocator(id);
 };
+
+schema.statics.json_list_property = "masks";
+schema.statics.pname = "mask";
 
 exports.schema = schema;
 

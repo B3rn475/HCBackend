@@ -4,9 +4,7 @@
 var mongoose = require("mongoose");
 var mongooseAI = require("mongoose-auto-increment");
 
-var minId = 0;
-
-var schema = mongoose.Schema({ _id: { type: Number, min: minId, index: { unique: true }, select: false},
+var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                 nomenclatures : [{language: {type: String}, name: {type: String}}]
                                 }, { id: false});
 
@@ -20,6 +18,9 @@ schema.options.toJSON = {
         return ret;
     }
 };
+
+schema.statics.json_list_property = "tags";
+schema.statics.pname = "tag";
 
 exports.schema = schema;
 

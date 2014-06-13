@@ -61,6 +61,9 @@ process.on('SIGINT', function () {
  */
 
 var index = require("./routes");
+
+app.use(index.middlewares.init);
+
 var image = require("./routes/image.js");
 var task = require("./routes/task.js");
 var session = require("./routes/session.js");
@@ -69,6 +72,7 @@ var tag = require("./routes/tag.js");
 var action = require("./routes/action.js");
 var segmentation = require("./routes/segmentation.js");
 var user = require("./routes/user.js");
+var collection = require("./routes/collection");
 
 /**
  * Routes Params
@@ -77,35 +81,60 @@ var user = require("./routes/user.js");
 app.param("imageId", image.params.id);
 app.param("userId", user.params.id);
 app.param("tagId", tag.params.id);
+app.param("taskId", task.params.id);
+app.param("sessionId", session.params.id);
+app.param("maskId", mask.params.id);
+app.param("actionId", action.params.id);
+app.param("segmentationId", segmentation.params.id);
+app.param("collectionId", collection.params.id);
+
 
 /**
  * Get Routes
  */
 
-app.get("/image/:imageId", image.routes.get);
+app.get("/image/:imageId", index.query.populate, image.routes.get);
 app.get("/user/:userId", user.routes.get);
 app.get("/tag/:tagId", tag.routes.get);
+app.get("/task/:taskId", index.query.populate, task.routes.get);
+app.get("/session/:sessionId", index.query.populate, session.routes.get);
+app.get("/mask/:maskId", index.query.populate, mask.routes.get);
+app.get("/action/:actionId", index.query.populate, action.routes.get);
+app.get("/segmentation/:segmentationId", index.query.populate, segmentation.routes.get);
+app.get("/collection/:collectionId", index.query.populate, collection.routes.get);
+
+/**
+ * Update Routes
+ */
+
+app.put("/mask/:maskId", mask.body.payload, mask.body.quality, mask.body.segmentations, mask.routes.update);
+
 
 /**
  * Add Routes
  */
 
-app.post("/image", index.query.count, image.routes.add);
-app.post("/user", index.query.count, user.routes.add);
-app.post("/tag", index.query.count, tag.routes.add);
+app.post("/image", image.body.width, image.body.height, image.body.payload, image.routes.add);
+app.post("/user", user.body.app_id, user.body.app_user_id, user.routes.add);
+app.post("/tag", tag.routes.add);
+app.post("/mask", image.body.id, tag.body.id, mask.body.payload, mask.body.quality, mask.body.segmentations, mask.routes.add);
+app.post("/collection/:collectionId", image.body.id, collection.routes.addImage);
+app.delete("/collection/:collectionId", image.body.id, collection.routes.removeImage);
+app.post("/collection", collection.routes.add);
 
 /**
  * Index Routes
  */
 
-app.get("/image", image.routes.index);
-app.get("/user", user.routes.index);
-app.get("/tag", tag.routes.index);
-app.get("/task", task.index);
-app.get("/session", session.index);
-app.get("/mask", mask.index);
-app.get("/action", action.index);
-app.get("/segmentation", segmentation.index);
+app.get("/image", index.query.count, index.query.since_id, index.query.max_id, image.routes.index);
+app.get("/user", index.query.count, index.query.since_id, index.query.max_id, user.routes.index);
+app.get("/tag", index.query.count, index.query.since_id, index.query.max_id, tag.routes.index);
+app.get("/task", index.query.count, index.query.since_id, index.query.max_id, task.routes.index);
+app.get("/session", index.query.count, index.query.since_id, index.query.max_id, session.routes.index);
+app.get("/mask", index.query.count, index.query.since_id, index.query.max_id, mask.routes.index);
+app.get("/action", index.query.count, index.query.since_id, index.query.max_id, action.routes.index);
+app.get("/segmentation", index.query.count, index.query.since_id, index.query.max_id, segmentation.routes.index);
+app.get("/collection", index.query.count, index.query.since_id, index.query.max_id, collection.routes.index);
 app.get("/", index.routes.index);
 
 /**

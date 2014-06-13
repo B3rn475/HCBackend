@@ -8,9 +8,7 @@ var computeMediaLocator = function (id) {
     return "/storage/image/" + id + ".jpg";
 };
 
-var minId = 0;
-
-var schema = mongoose.Schema({ _id: { type: Number, min: minId, index: { unique: true }, select: false},
+var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                     width: { type: Number, min: 1},
                                     height: { type: Number, min: 1}
                                 }, { id: false});
@@ -27,6 +25,9 @@ schema.options.toJSON = {
         return ret;
     }
 };
+
+schema.statics.json_list_property = "images";
+schema.statics.pname = "image";
 
 schema.statics.getMediaLocationFromID = function (id) {
     return computeMediaLocator(id);
