@@ -77,8 +77,8 @@ exports.routes.removeImage = function (req, res, next) {
         json: function () {
             var collection = req.attached.collection,
                 image = req.attached.image;
-            if (collection.images.contains(image)) {
-                collection.images.remove(image.id);
+            if (_.contains(collection.images, image.id)) {
+                collection.images = _.without(collection.images, image.id);
                 collection.save(function (err, collection) {
                     if (err) {
                         next(err);

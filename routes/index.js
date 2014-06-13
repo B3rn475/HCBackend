@@ -271,6 +271,26 @@ exports.params.id = function (req, res, next, Model, inId) {
     }
 };
 
+exports.params.regexp = function (req, res, next, property, exp, value) {
+    var error;
+    if (!exp.test(value)) {
+        error = "Invalid '" + property + "' field, it is not a valid value";
+    }
+    if (error) {
+        res.format({
+            html: function () {
+                res.send(501, "not implemented");
+            },
+            json: function () {
+                res.send(400, { status: "KO", error: error});
+            }
+        });
+    } else {
+        req.attached[property] = value;
+        next();
+    }
+};
+
 exports.body.id = function (req, res, next, Model) {
     exports.body.number_min_max_value(req, res, function () {
         Model.findOne({_id : req.attached[Model.pname]}, function (err, obj) {
@@ -338,6 +358,31 @@ exports.body.base64_value = function (req, res, next, property) {
     } else {
         if (new RegExp("!^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$").test(value)) {
             error = "Invalid '" + property + "' field, it is not a valid base64 string";
+        }
+    }
+    if (error) {
+        res.format({
+            html: function () {
+                res.send(501, "not implemented");
+            },
+            json: function () {
+                res.send(400, { status: "KO", error: error});
+            }
+        });
+    } else {
+        req.attached[property] = value;
+        next();
+    }
+};
+
+exports.body.regexp = function (req, res, next, property, exp) {
+    var error,
+        value = req.body[property];
+    if (value === undefined) {
+        error = "Missing '" + property + "' field";
+    } else {
+        if (!exp.test(value)) {
+            error = "Invalid '" + property + "' field, it is not a valid value";
         }
     }
     if (error) {

@@ -87,6 +87,7 @@ app.param("maskId", mask.params.id);
 app.param("actionId", action.params.id);
 app.param("segmentationId", segmentation.params.id);
 app.param("collectionId", collection.params.id);
+app.param("language", tag.params.language);
 
 
 /**
@@ -117,10 +118,18 @@ app.put("/mask/:maskId", mask.body.payload, mask.body.quality, mask.body.segment
 app.post("/image", image.body.width, image.body.height, image.body.payload, image.routes.add);
 app.post("/user", user.body.app_id, user.body.app_user_id, user.routes.add);
 app.post("/tag", tag.routes.add);
+app.post("/tag/:tagId/alias", tag.body.language, tag.body.name, tag.routes.addAlias);
 app.post("/mask", image.body.id, tag.body.id, mask.body.payload, mask.body.quality, mask.body.segmentations, mask.routes.add);
-app.post("/collection/:collectionId", image.body.id, collection.routes.addImage);
-app.delete("/collection/:collectionId", image.body.id, collection.routes.removeImage);
+app.post("/collection/:collectionId/image", image.body.id, collection.routes.addImage);
 app.post("/collection", collection.routes.add);
+
+/**
+ * Delete Routes
+ */
+app.delete("/collection/:collectionId/image/:imageId", collection.routes.removeImage);
+app.delete("/collection/:collectionId/image", image.body.id, collection.routes.removeImage);
+app.delete("/tag/:tagId/alias/:language", tag.routes.removeAlias);
+app.delete("/tag/:tagId/alias", tag.body.language, tag.routes.removeAlias);
 
 /**
  * Index Routes

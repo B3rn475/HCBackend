@@ -4,8 +4,10 @@
 var mongoose = require("mongoose");
 var mongooseAI = require("mongoose-auto-increment");
 
+var alias = mongoose.Schema({language: {type: String}, name: {type: String}}, { id: false, _id: false});
+
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
-                                nomenclatures : [{language: {type: String}, name: {type: String}}]
+                                aliases : [alias]
                                 }, { id: false});
 
 schema.virtual('id').get(function () { return this._id; });
