@@ -2,7 +2,7 @@
 "use strict";
 
 var fs = require("fs"),
-    Image = require("../models/image.js").model;
+    User = require("../models/user.js").model;
 
 exports.routes = {};
 exports.params = {};
@@ -21,11 +21,14 @@ exports.routes.index = function (req, res) {
         }
     }
     
-    Image.find(query,
+    User.find(query,
                {},
                {sort: {_id: -1}, limit: req.count},
-               function (err, images) {
+               function (err, users) {
             res.format({
+                text: function () {
+                    res.send(501, "not implemented");
+                },
                 html: function () {
                     res.send(501, "not implemented");
                 },
@@ -39,10 +42,10 @@ exports.routes.index = function (req, res) {
                     if (req.since_id !== undefined) {
                         search_metadata.since_id = req.since_id;
                     }
-                    if (images.length > 0) {
-                        search_metadata.refresh_url = "?since_id=" + images[0].id + "&count=" + req.count;
-                        if (images.length === req.count) {
-                            min_id = images[images.length - 1].id;
+                    if (users.length > 0) {
+                        search_metadata.refresh_url = "?since_id=" + users[0].id + "&count=" + req.count;
+                        if (users.length === req.count) {
+                            min_id = users[users.length - 1].id;
                             if (min_id > 0) {
                                 search_metadata.next_results = "?max_id=" + min_id - 1;
                                 if (req.since_id !== undefined) {
@@ -54,7 +57,7 @@ exports.routes.index = function (req, res) {
                     }
                     res.send({
                         status: "OK",
-                        images: images,
+                        users: users,
                         search_metadata: search_metadata
                     });
                 }
@@ -64,40 +67,32 @@ exports.routes.index = function (req, res) {
 
 exports.routes.add = function (req, res, next) {
     var obj = {},
-        image,
+        user,
         error;
     
-    if (req.body.width === undefined) {
-        error = "Missing 'width' field";
+    if (req.body.app_id === undefined) {
+        error = "Missing 'app_id' field";
     } else {
-        obj.width = parseInt(req.body.width, 10);
-        if (obj.width.toString() !== req.body.width) {
-            error = "Invalid 'width', it is not a number";
+        obj.app_id = parseInt(req.body.app_id, 10);
+        if (obj.app_id.toString() !== req.body.app_id) {
+            error = "Invalid 'app_id', it is not a number";
         } else {
-            if (obj.width < 1) {
-                error = "invalid 'width' field, out of bound";
+            if (obj.app_id < 1) {
+                error = "invalid 'app_id' field, out of bound";
             }
         }
     }
     
-    if (!error && req.body.height === undefined) {
-        error = "Missing 'height' field";
+    if (!error && req.body.app_user_id === undefined) {
+        error = "Missing 'app_user_id' field";
     } else {
-        obj.height = parseInt(req.body.height, 10);
-        if (obj.height.toString() !== req.body.height) {
-            error = "Invalid 'height' field, it is not a number";
+        obj.app_user_id = parseInt(req.body.app_user_id, 10);
+        if (obj.app_user_id.toString() !== req.body.app_user_id) {
+            error = "Invalid 'app_user_id' field, it is not a number";
         } else {
-            if (obj.height < 1) {
-                error = "invalid 'height' field, out of bound";
+            if (obj.app_user_id < 1) {
+                error = "invalid 'app_user_id' field, out of bound";
             }
-        }
-    }
-    
-    if (!error && req.body.payload === undefined) {
-        error = "Missing 'payload' parameter";
-    } else {
-        if (new RegExp("!^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$").test(req.body.payload)) {
-            error = "Invalid 'payload' field, it is not a valid base64 string";
         }
     }
     
@@ -111,34 +106,25 @@ exports.routes.add = function (req, res, next) {
             }
         });
     } else {
-        image = new Image(obj);
-        image.save(function (err, image) {
+        user = new User(obj);
+        user.save(function (err, user) {
             if (err) {
                 next(err);
                 return;
             }
-            image.mediaLocator = '/storage/image/' + image.id.toString() + ".jpg";
-            image.save(function (err, image) {
+            user.save(function (err, user) {
                 if (err) {
                     next(err);
                     return;
                 }
-                fs.writeFile("./storage/image/" + image.id.toString() + ".jpg", new Buffer(req.body.payload, "base64"),
-                             function (err) {
-                        if (err) {
-                            next(err);
-                            image.delete();
-                            return;
-                        }
-                        res.format({
-                            html: function () {
-                                res.send(501, "not implemented");
-                            },
-                            json: function () {
-                                res.send({ status: "OK", id: image.id});
-                            }
-                        });
-                    });
+                res.format({
+                    html: function () {
+                        res.send(501, "not implemented");
+                    },
+                    json: function () {
+                        res.send({ status: "OK", id: user.id});
+                    }
+                });
             });
         });
     }
@@ -146,6 +132,9 @@ exports.routes.add = function (req, res, next) {
 
 exports.routes.get = function (req, res) {
     res.format({
+        text: function () {
+            res.send(501, "not implemented");
+        },
         html: function () {
             res.send(501, "not implemented");
         },
@@ -160,10 +149,10 @@ exports.params.id = function (req, res, next, inId) {
         idStr = inId.toString(),
         id = parseInt(idStr.toString(), 10);
     if (idStr !== id.toString()) {
-        error = "Invalid Image 'id', it is not a number";
+        error = "Invalid User 'id', it is not a number";
     } else {
         if (id < 0) {
-            error = "Invalid Image 'id', must be greater than 0";
+            error = "Invalid User 'id', must be greater than 0";
         }
     }
     if (error) {
@@ -176,15 +165,15 @@ exports.params.id = function (req, res, next, inId) {
             }
         });
     } else {
-        Image.find({_id : id}, function (err, image) {
-            console.log(image);
+        Image.find({_id : id}, function (err, user) {
+            console.log(user);
             if (err) {
                 next(err);
-            } else if (image) {
-                req.image = image;
+            } else if (user) {
+                req.user = user;
                 next();
             } else {
-                err = "Unable to find Image " + id;
+                err = "Unable to find User " + id;
                 res.format({
                     html: function () {
                         res.send(501, "not implemented");

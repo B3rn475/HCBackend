@@ -7,7 +7,8 @@ var mongooseAI = require("mongoose-auto-increment");
 var minId = 0;
 
 var schema = mongoose.Schema({ _id: { type: Number, min: minId, index: { unique: true }, select: false},
-                                nomenclatures : [{language: {type: String}, name: {type: String}}]
+                                    app_id: { type: Number, min: 1},
+                                    app_user_id: { type: Number, min: 1}
                                 }, { id: false});
 
 schema.virtual('id').get(function () { return this._id; });
@@ -23,10 +24,10 @@ schema.options.toJSON = {
 
 exports.schema = schema;
 
-schema.plugin(mongooseAI.plugin, { model: 'Tag', field: '_id' });
+schema.plugin(mongooseAI.plugin, { model: 'User', field: '_id' });
 
-var model = mongoose.model('Tag',
+var model = mongoose.model('User',
                            schema,
-                           'Tag');
+                           'User');
 
 exports.model = model;

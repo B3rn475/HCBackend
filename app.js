@@ -68,16 +68,45 @@ var mask = require("./routes/mask.js");
 var tag = require("./routes/tag.js");
 var action = require("./routes/action.js");
 var segmentation = require("./routes/segmentation.js");
+var user = require("./routes/user.js");
 
-app.get("/", index.index);
-app.get("/image", image.index);
-app.post("/image", image.add);
+/**
+ * Routes Params
+ */
+
+app.param("imageId", image.params.id);
+app.param("userId", user.params.id);
+app.param("tagId", tag.params.id);
+
+/**
+ * Get Routes
+ */
+
+app.get("/image/:imageId", image.routes.get);
+app.get("/user/:userId", user.routes.get);
+app.get("/tag/:tagId", tag.routes.get);
+
+/**
+ * Add Routes
+ */
+
+app.post("/image", index.query.count, image.routes.add);
+app.post("/user", index.query.count, user.routes.add);
+app.post("/tag", index.query.count, tag.routes.add);
+
+/**
+ * Index Routes
+ */
+
+app.get("/image", image.routes.index);
+app.get("/user", user.routes.index);
+app.get("/tag", tag.routes.index);
 app.get("/task", task.index);
 app.get("/session", session.index);
 app.get("/mask", mask.index);
-app.get("/tag", tag.index);
 app.get("/action", action.index);
 app.get("/segmentation", segmentation.index);
+app.get("/", index.routes.index);
 
 /**
  * Static Files
@@ -96,7 +125,7 @@ app.use('/storage', express.static(__dirname + '/storage'));
  *Error Handling
  */
 
-app.use(index.invalidRoute);
+app.use(index.routes.invalidRoute);
 
 if ('development' === env) {
     app.use(errorHandler({ dumpExceptions: true, showStack: true }));
