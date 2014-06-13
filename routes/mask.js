@@ -85,7 +85,7 @@ exports.body.payload = function (req, res, next) {
 };
 
 exports.body.quality = function (req, res, next) {
-    index.body.number_min_max_value(req, res, next, "quality");
+    index.body.float_min_max_value(req, res, next, "quality");
 };
 
 exports.body.segmentations = function (req, res, next) {

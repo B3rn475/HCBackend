@@ -20,7 +20,7 @@ exports.routes.index = function (req, res, next) {
 };
 
 exports.routes.add = function (req, res, next) {
-    var obj = {app_id: req.app_id, app_user_id: req.app_user_id};
+    var obj = {app_id: req.attached.app_id, app_user_id: req.attached.app_user_id};
     res.format({
         html: function () {
             index.algorithms.html.add(req, res, next, User, obj);
@@ -44,6 +44,10 @@ exports.routes.get = function (req, res, next) {
 
 exports.params.id = function (req, res, next, inId) {
     index.params.id(req, res, next, User, inId);
+};
+
+exports.body.id = function (req, res, next) {
+    index.body.id(req, res, next, User);
 };
 
 exports.body.app_id = function (req, res, next) {

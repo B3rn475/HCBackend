@@ -108,7 +108,9 @@ app.get("/collection/:collectionId", index.query.populate, collection.routes.get
  * Update Routes
  */
 
+app.put("/session/:sessionId", session.checkers.open, session.routes.close);
 app.put("/mask/:maskId", mask.body.payload, mask.body.quality, mask.body.segmentations, mask.routes.update);
+app.put("/action/:actionId", action.checkers.open, action.body.tag, action.body.segmentation, action.routes.close);
 
 
 /**
@@ -119,7 +121,11 @@ app.post("/image", image.body.width, image.body.height, image.body.payload, imag
 app.post("/user", user.body.app_id, user.body.app_user_id, user.routes.add);
 app.post("/tag", tag.routes.add);
 app.post("/tag/:tagId/alias", tag.body.language, tag.body.name, tag.routes.addAlias);
+app.post("/session/:sessionId/action", session.checkers.open, action.body.id, session.routes.addAction);
+app.post("/session", session.routes.add);
 app.post("/mask", image.body.id, tag.body.id, mask.body.payload, mask.body.quality, mask.body.segmentations, mask.routes.add);
+app.post("/action", image.body.id, user.body.id, action.body.type, action.body.tag, action.routes.add);
+app.post("/segmentation", segmentation.body.points, segmentation.routes.add);
 app.post("/collection/:collectionId/image", image.body.id, collection.routes.addImage);
 app.post("/collection", collection.routes.add);
 

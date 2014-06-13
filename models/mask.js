@@ -19,7 +19,7 @@ var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: tru
 schema.virtual('id').get(function () { return this._id; });
 schema.virtual('mediaLocator').get(function () { return computeMediaLocator(this._id); });
 
-schema.pre('save', function(next){
+schema.pre('save', function (next) {
     var now = new Date();
     this.updated_at = now;
     next();

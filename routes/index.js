@@ -328,7 +328,43 @@ exports.body.number_min_max_value = function (req, res, next, property, min, max
         iValue = iValue.toString();
         oValue = parseInt(iValue, 10);
         if (oValue.toString() !== iValue) {
-            error = "Invalid '" + property + "', it is not a number";
+            error = "Invalid '" + property + "', it is not an integer number";
+        } else {
+            if ((min && oValue < min) || (max && oValue > max)) {
+                error = "invalid '" + property + "' field, out of bound";
+            }
+        }
+    }
+    if (error) {
+        res.format({
+            html: function () {
+                res.send(501, "not implemented");
+            },
+            json: function () {
+                res.send(400, { status: "KO", error: error});
+            }
+        });
+    } else {
+        req.attached[property] = oValue;
+        next();
+    }
+};
+
+exports.body.float_min_max_value = function (req, res, next, property, min, max, dvalue) {
+    var error,
+        iValue = req.body[property],
+        oValue;
+    if (iValue === undefined) {
+        if (dvalue === undefined) {
+            error = "Missing '" + property + "' field";
+        } else {
+            oValue = dvalue;
+        }
+    } else {
+        iValue = iValue.toString();
+        oValue = parseFloat(iValue, 10);
+        if (oValue.toString() !== iValue) {
+            error = "Invalid '" + property + "', it is not a floating point number";
         } else {
             if ((min && oValue < min) || (max && oValue > max)) {
                 error = "invalid '" + property + "' field, out of bound";
@@ -396,6 +432,46 @@ exports.body.regexp = function (req, res, next, property, exp) {
         });
     } else {
         req.attached[property] = value;
+        next();
+    }
+};
+
+exports.body.array = function (req, res, next, property, checkcb, mapper) {
+    var error,
+        array;
+    try {
+        array = JSON.parse(req.body[property]);
+        if (array === undefined) {
+            error = "Missing '" + property + "' field";
+        } else {
+            if (_.isArray(array)) {
+                if (checkcb !== undefined) {
+                    if (!_.every(array, checkcb)) {
+                        error = "Invalid '" + property + "' field, some array items are not valid";
+                    }
+                }
+            } else {
+                error = "Invalid '" + property + "' field, it is not an array";
+            }
+        }
+    } catch (ex) {
+        error = "Invalid '" + property + "' field";
+    }
+    if (error) {
+        res.format({
+            html: function () {
+                res.send(501, "not implemented");
+            },
+            json: function () {
+                res.send(400, { status: "KO", error: error});
+            }
+        });
+    } else {
+        if (mapper) {
+            req.attached[property] = _.map(array, mapper);
+        } else {
+            req.attached[property] = array;
+        }
         next();
     }
 };
