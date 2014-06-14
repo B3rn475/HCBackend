@@ -5,9 +5,11 @@ var Session = require("../models/session.js").model,
     index = require("./index.js"),
     _ = require("underscore-node");
 
+/**
+ * Routes
+ */
+
 exports.routes = {};
-exports.params = {};
-exports.checkers = {};
 
 exports.routes.index = function (req, res, next) {
     res.format({
@@ -52,15 +54,19 @@ exports.routes.close = function (req, res, next) {
             res.send(501, "not implemented");
         },
         json: function () {
-            var session = req.attached.session;
-            session.ended_at = new Date();
-            session.save(function (err, action) {
-                if (err) {
-                    next(err);
-                } else {
-                    res.send({status: "OK"});
-                }
-            });
+            if (req.errors.length) {
+                index.algorithms.json.error(req, res);
+            } else {
+                var session = req.attached.session;
+                session.ended_at = new Date();
+                session.save(function (err, action) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.send({status: "OK"});
+                    }
+                });
+            }
         }
     });
 };
@@ -71,27 +77,43 @@ exports.routes.addAction = function (req, res, next) {
             res.send(501, "not implemented");
         },
         json: function () {
-            var session = req.attached.session,
-                action = req.attached.action;
-            if (_.contains(session.actions, action.id)) {
-                res.send({ status: "OK" });
+            if (req.errors.length) {
+                index.algorithms.json.error(req, res);
             } else {
-                session.actions.push(action.id);
-                session.save(function (err, session) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        res.send({ status: "OK" });
-                    }
-                });
+                var session = req.attached.session,
+                    action = req.attached.action;
+                if (_.contains(session.actions, action.id)) {
+                    res.send({ status: "OK" });
+                } else {
+                    session.actions.push(action.id);
+                    session.save(function (err, session) {
+                        if (err) {
+                            next(err);
+                        } else {
+                            res.send({ status: "OK" });
+                        }
+                    });
+                }
             }
         }
     });
 };
 
+/**
+ * Url Params
+ */
+
+exports.params = {};
+
 exports.params.id = function (req, res, next, inId) {
     index.params.id(req, res, next, Session, inId);
 };
+
+/**
+ * Checkers
+ */
+
+exports.checkers = {};
 
 exports.checkers.open = function (req, res, next) {
     res.format({

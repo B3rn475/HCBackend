@@ -5,9 +5,11 @@ var fs = require("fs"),
     Image = require("../models/image.js").model,
     index = require("./index.js");
 
+/**
+ * Routes
+ */
+
 exports.routes = {};
-exports.params = {};
-exports.body = {};
 
 exports.routes.index = function (req, res, next) {
     res.format({
@@ -46,22 +48,54 @@ exports.routes.get = function (req, res, next) {
     });
 };
 
+/**
+ * Url Params
+ */
+
+exports.params = {};
+
 exports.params.id = function (req, res, next, inId) {
     index.params.id(req, res, next, Image, inId);
 };
 
-exports.body.id = function (req, res, next) {
-    index.body.id(req, res, next, Image);
+/**
+ * Body Params
+ */
+
+exports.body = {
+    mandatory: {},
+    optional: {},
+    route: {}
 };
 
-exports.body.width = function (req, res, next) {
-    index.body.number_min_max_value(req, res, next, "width", 1);
+exports.body.mandatory.id = function (req, res, next) {
+    index.body.mandatory.id(req, res, next, Image);
 };
 
-exports.body.height = function (req, res, next) {
-    index.body.number_min_max_value(req, res, next, "height", 1);
+exports.body.optional.id = function (req, res, next) {
+    index.body.optional.id(req, res, next, Image);
 };
 
-exports.body.payload = function (req, res, next) {
-    index.body.base64_value(req, res, next, "payload");
+exports.body.mandatory.width = function (req, res, next) {
+    index.body.mandatory.integer(req, res, next, "width", 1);
+};
+
+exports.body.optional.width = function (req, res, next) {
+    index.body.optional.integer(req, res, next, "width", 1);
+};
+
+exports.body.mandatory.height = function (req, res, next) {
+    index.body.mandatory.integer(req, res, next, "height", 1);
+};
+
+exports.body.optional.height = function (req, res, next) {
+    index.body.optional.integer(req, res, next, "height", 1);
+};
+
+exports.body.mandatory.payload = function (req, res, next) {
+    index.body.mandatory.base64(req, res, next, "payload");
+};
+
+exports.body.optional.payload = function (req, res, next) {
+    index.body.optional.base64(req, res, next, "payload");
 };

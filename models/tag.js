@@ -21,6 +21,13 @@ schema.options.toJSON = {
     }
 };
 
+schema.pre('save', function (next) {
+    if (this.aliases === undefined) {
+        this.aliases = [];
+    }
+    next();
+});
+
 schema.statics.json_list_property = "tags";
 schema.statics.pname = "tag";
 

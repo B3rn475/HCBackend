@@ -5,9 +5,11 @@ var fs = require("fs"),
     Mask = require("../models/mask.js").model,
     index = require("./index.js");
 
+/**
+ * Routes
+ */
+
 exports.routes = {};
-exports.params = {};
-exports.body = {};
 
 exports.routes.index = function (req, res, next) {
     res.format({
@@ -57,37 +59,69 @@ exports.routes.update = function (req, res, next) {
             res.send(501, "not implemented");
         },
         json: function () {
-            mask.quality = req.attached.quality;
-            mask.segmentations = req.attached.segmentations;
-            mask.save(function (err, mask) {
-                if (err) {
-                    next(err);
-                } else {
-                    fs.writeFile("./storage/mask/" + mask.id.toString() + ".png", new Buffer(req.body.payload, "base64"), function (err) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.send({ status: "OK"});
-                        }
-                    });
-                }
-            });
+            if (req.errors.length) {
+                exports.algorithms.json.error(req, res);
+            } else {
+                mask.quality = req.attached.quality;
+                mask.segmentations = req.attached.segmentations;
+                mask.save(function (err, mask) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        fs.writeFile("./storage/mask/" + mask.id.toString() + ".png", new Buffer(req.body.payload, "base64"), function (err) {
+                            if (err) {
+                                next(err);
+                            } else {
+                                res.send({ status: "OK"});
+                            }
+                        });
+                    }
+                });
+            }
         }
     });
 };
+
+/**
+ * Url Params
+ */
+
+exports.params = {};
 
 exports.params.id = function (req, res, next, inId) {
     index.params.id(req, res, next, Mask, inId);
 };
 
-exports.body.payload = function (req, res, next) {
-    index.body.base64_value(req, res, next, "payload");
+/**
+ * Body Params
+ */
+
+exports.body = {
+    mandatory: {},
+    optional: {},
+    route: {}
 };
 
-exports.body.quality = function (req, res, next) {
-    index.body.float_min_max_value(req, res, next, "quality");
+exports.body.mandatory.payload = function (req, res, next) {
+    index.body.mandatory.base64(req, res, next, "payload");
 };
 
-exports.body.segmentations = function (req, res, next) {
-    index.body.number_min_max_value(req, res, next, "segmentations");
+exports.body.optional.payload = function (req, res, next) {
+    index.body.optional.base64(req, res, next, "payload");
+};
+
+exports.body.mandatory.quality = function (req, res, next) {
+    index.body.mandatory.float(req, res, next, "quality");
+};
+
+exports.body.optional.quality = function (req, res, next) {
+    index.body.optional.float(req, res, next, "quality");
+};
+
+exports.body.mandatory.segmentations = function (req, res, next) {
+    index.body.mandatory.integer(req, res, next, "segmentations", 1);
+};
+
+exports.body.optional.segmentations = function (req, res, next) {
+    index.body.optional.integer(req, res, next, "segmentations", 1);
 };

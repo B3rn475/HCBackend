@@ -5,9 +5,11 @@ var Segmentation = require("../models/segmentation.js").model,
     index = require("./index.js"),
     _ = require("underscore-node");
 
+/**
+ * Routes
+ */
+
 exports.routes = {};
-exports.params = {};
-exports.body = {};
 
 exports.routes.index = function (req, res, next) {
     res.format({
@@ -43,9 +45,26 @@ exports.routes.get = function (req, res, next) {
     });
 };
 
+/**
+ * Url Params
+ */
+
+exports.params = {};
+
 exports.params.id = function (req, res, next, inId) {
     index.params.id(req, res, next, Segmentation, inId);
 };
+
+/**
+ * Body Params
+ */
+
+exports.body = {
+    mandatory: {},
+    optional: {},
+    route: {}
+};
+
 
 var checkInteger = function (int, min, max) {
     if (_.isUndefined(int)) { return false; }
@@ -56,22 +75,30 @@ var checkInteger = function (int, min, max) {
     return true;
 };
 
-exports.body.points = function (req, res, next) {
-    index.body.array(req, res, next, "points", function (item) {
-        if (!checkInteger(item.x, 0)) { return false; }
-        if (!checkInteger(item.y, 0)) { return false; }
-        if (_.isUndefined(item.color)) { return false; }
-        if (!checkInteger(item.color.r, 0, 255)) { return false; }
-        if (!checkInteger(item.color.g, 0, 255)) { return false; }
-        if (!checkInteger(item.color.b, 0, 255)) { return false; }
-        if (!_.isBoolean(item.removed)) { return false; }
-        return true;
-    }, function (item) {
-        return {
-            x: item.x,
-            y: item.y,
-            color: {r: item.color.r, g: item.color.g, b: item.color.b},
-            removed: item.removed
-        };
-    });
+var checkPoint = function (item) {
+    if (!checkInteger(item.x, 0)) { return false; }
+    if (!checkInteger(item.y, 0)) { return false; }
+    if (_.isUndefined(item.color)) { return false; }
+    if (!checkInteger(item.color.r, 0, 255)) { return false; }
+    if (!checkInteger(item.color.g, 0, 255)) { return false; }
+    if (!checkInteger(item.color.b, 0, 255)) { return false; }
+    if (!_.isBoolean(item.removed)) { return false; }
+    return true;
+};
+
+var mapPoint = function (item) {
+    return {
+        x: item.x,
+        y: item.y,
+        color: {r: item.color.r, g: item.color.g, b: item.color.b},
+        removed: item.removed
+    };
+};
+
+exports.body.mandatory.points = function (req, res, next) {
+    index.body.mandatory.array(req, res, next, "points", checkPoint, mapPoint);
+};
+
+exports.body.optional.points = function (req, res, next) {
+    index.body.optional.array(req, res, next, "points", checkPoint, mapPoint);
 };

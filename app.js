@@ -94,62 +94,125 @@ app.param("language", tag.params.language);
  * Get Routes
  */
 
-app.get("/image/:imageId", index.query.populate, image.routes.get);
+app.get("/image/:imageId", index.query.optional.populate,
+        image.routes.get);
 app.get("/user/:userId", user.routes.get);
 app.get("/tag/:tagId", tag.routes.get);
-app.get("/task/:taskId", index.query.populate, task.routes.get);
-app.get("/session/:sessionId", index.query.populate, session.routes.get);
-app.get("/mask/:maskId", index.query.populate, mask.routes.get);
-app.get("/action/:actionId", index.query.populate, action.routes.get);
-app.get("/segmentation/:segmentationId", index.query.populate, segmentation.routes.get);
-app.get("/collection/:collectionId", index.query.populate, collection.routes.get);
+app.get("/task/:taskId", index.query.optional.populate,
+        task.routes.get);
+app.get("/session/:sessionId", index.query.optional.populate,
+        session.routes.get);
+app.get("/mask/:maskId", index.query.optional.populate,
+        mask.routes.get);
+app.get("/action/:actionId", index.query.optional.populate,
+        action.routes.get);
+app.get("/segmentation/:segmentationId", index.query.optional.populate,
+        segmentation.routes.get);
+app.get("/collection/:collectionId", index.query.optional.populate,
+        collection.routes.get);
 
 /**
  * Update Routes
  */
 
-app.put("/session/:sessionId", session.checkers.open, session.routes.close);
-app.put("/mask/:maskId", mask.body.payload, mask.body.quality, mask.body.segmentations, mask.routes.update);
-app.put("/action/:actionId", action.checkers.open, action.body.tag, action.body.segmentation, action.routes.close);
+app.put("/session/:sessionId", session.checkers.open,
+        session.routes.close);
+app.put("/mask/:maskId", mask.body.mandatory.payload,
+        mask.body.mandatory.quality,
+        mask.body.mandatory.segmentations,
+        mask.routes.update);
+app.put("/action/:actionId", action.checkers.open,
+        action.body.route.close.tag,
+        action.body.route.close.segmentation,
+        action.routes.close);
 
 
 /**
  * Add Routes
  */
 
-app.post("/image", image.body.width, image.body.height, image.body.payload, image.routes.add);
-app.post("/user", user.body.app_id, user.body.app_user_id, user.routes.add);
+app.post("/image", image.body.mandatory.width,
+         image.body.mandatory.height,
+         image.body.mandatory.payload,
+         image.routes.add);
+app.post("/user", user.body.mandatory.app_id,
+         user.body.mandatory.app_user_id,
+         user.routes.add);
 app.post("/tag", tag.routes.add);
-app.post("/tag/:tagId/alias", tag.body.language, tag.body.name, tag.routes.addAlias);
-app.post("/session/:sessionId/action", session.checkers.open, action.body.id, session.routes.addAction);
+app.post("/tag/:tagId/alias", tag.body.mandatory.language,
+         tag.body.mandatory.name,
+         tag.routes.addAlias);
+app.post("/session/:sessionId/action", session.checkers.open,
+         action.body.mandatory.id,
+         session.routes.addAction);
 app.post("/session", session.routes.add);
-app.post("/mask", image.body.id, tag.body.id, mask.body.payload, mask.body.quality, mask.body.segmentations, mask.routes.add);
-app.post("/action", image.body.id, user.body.id, action.body.type, action.body.tag, action.routes.add);
-app.post("/segmentation", segmentation.body.points, segmentation.routes.add);
-app.post("/collection/:collectionId/image", image.body.id, collection.routes.addImage);
+app.post("/mask", image.body.mandatory.id,
+         tag.body.mandatory.id,
+         mask.body.mandatory.payload,
+         mask.body.mandatory.quality,
+         mask.body.mandatory.segmentations,
+         mask.routes.add);
+app.post("/action", image.body.mandatory.id,
+         user.body.mandatory.id,
+         action.body.mandatory.type,
+         action.body.route.add.tag,
+         action.routes.add);
+app.post("/segmentation", segmentation.body.mandatory.points,
+         segmentation.routes.add);
+app.post("/collection/:collectionId/image", image.body.mandatory.id,
+         collection.routes.addImage);
 app.post("/collection", collection.routes.add);
 
 /**
  * Delete Routes
  */
 app.delete("/collection/:collectionId/image/:imageId", collection.routes.removeImage);
-app.delete("/collection/:collectionId/image", image.body.id, collection.routes.removeImage);
+app.delete("/collection/:collectionId/image", image.body.mandatory.id,
+           collection.routes.removeImage);
 app.delete("/tag/:tagId/alias/:language", tag.routes.removeAlias);
-app.delete("/tag/:tagId/alias", tag.body.language, tag.routes.removeAlias);
+app.delete("/tag/:tagId/alias", tag.body.mandatory.language,
+           tag.routes.removeAlias);
 
 /**
  * Index Routes
  */
 
-app.get("/image", index.query.count, index.query.since_id, index.query.max_id, image.routes.index);
-app.get("/user", index.query.count, index.query.since_id, index.query.max_id, user.routes.index);
-app.get("/tag", index.query.count, index.query.since_id, index.query.max_id, tag.routes.index);
-app.get("/task", index.query.count, index.query.since_id, index.query.max_id, task.routes.index);
-app.get("/session", index.query.count, index.query.since_id, index.query.max_id, session.routes.index);
-app.get("/mask", index.query.count, index.query.since_id, index.query.max_id, mask.routes.index);
-app.get("/action", index.query.count, index.query.since_id, index.query.max_id, action.routes.index);
-app.get("/segmentation", index.query.count, index.query.since_id, index.query.max_id, segmentation.routes.index);
-app.get("/collection", index.query.count, index.query.since_id, index.query.max_id, collection.routes.index);
+app.get("/image", index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        image.routes.index);
+app.get("/user", index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        user.routes.index);
+app.get("/tag", index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        tag.routes.index);
+app.get("/task", index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        task.routes.index);
+app.get("/session", index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        session.routes.index);
+app.get("/mask", index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        mask.routes.index);
+app.get("/action", index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        action.routes.index);
+app.get("/segmentation", index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        segmentation.routes.index);
+app.get("/collection", index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        collection.routes.index);
 app.get("/", index.routes.index);
 
 /**

@@ -5,8 +5,11 @@ var Collection = require("../models/collection.js").model,
     index = require("./index.js"),
     _ = require("underscore-node");
 
+/**
+ * Routes
+ */
+
 exports.routes = {};
-exports.params = {};
 
 exports.routes.index = function (req, res, next) {
     res.format({
@@ -51,19 +54,23 @@ exports.routes.addImage = function (req, res, next) {
             res.send(501, "not implemented");
         },
         json: function () {
-            var collection = req.attached.collection,
-                image = req.attached.image;
-            if (_.contains(collection.images, image.id)) {
-                res.send({ status: "OK" });
+            if (req.errors.length) {
+                index.algorithms.json.error(req, res);
             } else {
-                collection.images.push(image.id);
-                collection.save(function (err, collection) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        res.send({ status: "OK" });
-                    }
-                });
+                var collection = req.attached.collection,
+                    image = req.attached.image;
+                if (_.contains(collection.images, image.id)) {
+                    res.send({ status: "OK" });
+                } else {
+                    collection.images.push(image.id);
+                    collection.save(function (err, collection) {
+                        if (err) {
+                            next(err);
+                        } else {
+                            res.send({ status: "OK" });
+                        }
+                    });
+                }
             }
         }
     });
@@ -75,23 +82,33 @@ exports.routes.removeImage = function (req, res, next) {
             res.send(501, "not implemented");
         },
         json: function () {
-            var collection = req.attached.collection,
-                image = req.attached.image;
-            if (_.contains(collection.images, image.id)) {
-                collection.images = _.without(collection.images, image.id);
-                collection.save(function (err, collection) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        res.send({ status: "OK" });
-                    }
-                });
+            if (req.errors.length) {
+                index.algorithms.json.error(req, res);
             } else {
-                res.send({ status: "OK" });
+                var collection = req.attached.collection,
+                    image = req.attached.image;
+                if (_.contains(collection.images, image.id)) {
+                    collection.images = _.without(collection.images, image.id);
+                    collection.save(function (err, collection) {
+                        if (err) {
+                            next(err);
+                        } else {
+                            res.send({ status: "OK" });
+                        }
+                    });
+                } else {
+                    res.send({ status: "OK" });
+                }
             }
         }
     });
 };
+
+/**
+ * Url Params
+ */
+
+exports.params = {};
 
 exports.params.id = function (req, res, next, inId) {
     index.params.id(req, res, next, Collection, inId);

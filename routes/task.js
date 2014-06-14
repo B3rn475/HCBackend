@@ -4,8 +4,11 @@
 var Task = require("../models/task.js").model,
     index = require("./index.js");
 
+/**
+ * Routes
+ */
+
 exports.routes = {};
-exports.params = {};
 
 exports.routes.index = function (req, res, next) {
     res.format({
@@ -28,6 +31,12 @@ exports.routes.get = function (req, res, next) {
         }
     });
 };
+
+/**
+ * Url Params
+ */
+
+exports.params = {};
 
 exports.params.id = function (req, res, next, inId) {
     index.params.id(req, res, next, Task, inId);

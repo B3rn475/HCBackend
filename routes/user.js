@@ -4,9 +4,11 @@
 var User = require("../models/user.js").model,
     index = require("./index.js");
 
+/**
+ * Routes
+ */
+
 exports.routes = {};
-exports.params = {};
-exports.body = {};
 
 exports.routes.index = function (req, res, next) {
     res.format({
@@ -42,18 +44,46 @@ exports.routes.get = function (req, res, next) {
     });
 };
 
+/**
+ * Url Params
+ */
+
+exports.params = {};
+
 exports.params.id = function (req, res, next, inId) {
     index.params.id(req, res, next, User, inId);
 };
 
-exports.body.id = function (req, res, next) {
-    index.body.id(req, res, next, User);
+/**
+ * Body Params
+ */
+
+exports.body = {
+    mandatory: {},
+    optional: {},
+    route: {}
 };
 
-exports.body.app_id = function (req, res, next) {
-    index.body.number_min_max_value(req, res, next, "app_id", 0);
+exports.body.mandatory.id = function (req, res, next) {
+    index.body.mandatory.id(req, res, next, User);
 };
 
-exports.body.app_user_id = function (req, res, next) {
-    index.body.number_min_max_value(req, res, next, "app_user_id", 0);
+exports.body.optional.id = function (req, res, next) {
+    index.body.optional.id(req, res, next, User);
+};
+
+exports.body.mandatory.app_id = function (req, res, next) {
+    index.body.mandatory.integer(req, res, next, "app_id", 0);
+};
+
+exports.body.optional.app_id = function (req, res, next) {
+    index.body.optional.integer(req, res, next, "app_id", 0);
+};
+
+exports.body.mandatory.app_user_id = function (req, res, next) {
+    index.body.mandatory.integer(req, res, next, "app_user_id", 0);
+};
+
+exports.body.optional.app_user_id = function (req, res, next) {
+    index.body.optional.integer(req, res, next, "app_user_id", 0);
 };
