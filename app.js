@@ -21,7 +21,7 @@ var env = process.env.NODE_ENV || 'development';
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-app.use(bodyParser());
+app.use(bodyParser({ limit: '1MB'}));
 app.use(methodOverride());
 
 /**
