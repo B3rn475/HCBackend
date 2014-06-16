@@ -223,7 +223,7 @@ exports.params.id = function (req, res, next, Model, id) {
             id = undefined;
         }
     }
-    if (id && Math.floor(id) !== id) {
+    if (id && Math.floor(id) === id) {
         if (id < 0) {
             error = true;
             req.errors.push({location: "url", name: "id", message: "Invalid " + Model.modelName + " 'id', must be greater than 0"});
@@ -360,7 +360,7 @@ exports.query.unchecked.integer = function (req, res, next, property, min, max) 
             value = undefined;
         }
     }
-    if (value && Math.floor(value) !== value) {
+    if (value && Math.floor(value) === value) {
         if ((min && value < min) || (max && value > max)) {
             error = true;
             req.errors.push({location: "query", name: property, message: "Invalid '" + property + "' parameter, out of bound"});
@@ -452,7 +452,7 @@ exports.body.unchecked.integer = function (req, res, next, property, min, max) {
             value = undefined;
         }
     }
-    if (value && Math.floor(value) !== value) {
+    if (value && Math.floor(value) === value) {
         if ((min && value < min) || (max && value > max)) {
             error = true;
             req.errors.push({location: "body", name: property, message: "invalid Body Parameter '" + property + "' field, out of bound"});
