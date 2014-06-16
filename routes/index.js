@@ -137,10 +137,10 @@ exports.algorithms.json.list = function (req, res, next, Model, conditions, fiel
                         search_metadata = {
                             count: req.attached.count,
                         };
-                    if (req.max_id !== undefined) {
+                    if (req.attached.max_id !== undefined) {
                         search_metadata.max_id = req.attached.max_id;
                     }
-                    if (req.since_id !== undefined) {
+                    if (req.attached.since_id !== undefined) {
                         search_metadata.since_id = req.attached.since_id;
                     }
                     if (objects.length > 0) {
@@ -149,7 +149,7 @@ exports.algorithms.json.list = function (req, res, next, Model, conditions, fiel
                             min_id = objects[objects.length - 1].id;
                             if (min_id > 0) {
                                 search_metadata.next_results = "?max_id=" + (min_id - 1);
-                                if (req.since_id !== undefined) {
+                                if (req.attached.since_id !== undefined) {
                                     search_metadata.next_results += "&since_id=" + req.attached.since_id;
                                 }
                                 search_metadata.next_results += "&count=" + req.attached.count;
