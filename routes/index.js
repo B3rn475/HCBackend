@@ -215,7 +215,7 @@ exports.params = {};
 
 exports.params.id = function (req, res, next, Model, id) {
     var error;
-    if (isNaN(id)) {
+    if (typeof id !== 'number') {
         id = id.toString();
         if (int.test(id)) {
             id = parseInt(id, 10);
@@ -352,7 +352,7 @@ exports.query.optional.integer = function (req, res, next, property, min, max, d
 exports.query.unchecked.integer = function (req, res, next, property, min, max) {
     var error,
         value = req.query[property];
-    if (isNaN(value)) {
+    if (typeof value !== 'number') {
         value = value.toString();
         if (int.test(value)) {
             value = parseInt(value, 10);
@@ -444,7 +444,7 @@ exports.body.optional.integer = function (req, res, next, property, min, max, dv
 exports.body.unchecked.integer = function (req, res, next, property, min, max) {
     var error,
         value = req.body[property];
-    if (isNaN(value)) {
+    if (typeof value !== 'number') {
         value = value.toString();
         if (int.test(value)) {
             value = parseInt(value, 10);
@@ -490,7 +490,7 @@ exports.body.optional.float = function (req, res, next, property, min, max, dval
 exports.body.unchecked.float = function (req, res, next, property, min, max) {
     var error,
         value = req.body[property];
-    if (isNaN(value)) {
+    if (typeof value !== 'number') {
         value = value.toString();
         if (float.test(value)) {
             value = parseFloat(value, 10);
