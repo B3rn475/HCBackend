@@ -403,7 +403,7 @@ exports.body.optional.id = function (req, res, next, Model) {
 };
 
 exports.body.unchecked.id = function (req, res, next, Model) {
-    exports.body.uncheked.integer(req, res, function () {
+    exports.body.unchecked.integer(req, res, function () {
         Model.findOne({_id : req.attached[Model.pname]}, function (err, obj) {
             if (err) {
                 next(err);

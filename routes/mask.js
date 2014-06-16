@@ -60,7 +60,7 @@ exports.routes.update = function (req, res, next) {
         },
         json: function () {
             if (req.errors.length) {
-                exports.algorithms.json.error(req, res);
+                index.algorithms.json.error(req, res);
             } else {
                 mask.quality = req.attached.quality;
                 mask.segmentations = req.attached.segmentations;
