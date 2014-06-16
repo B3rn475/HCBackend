@@ -23,10 +23,12 @@ exports.routes.index = function (req, res, next) {
 };
 
 exports.routes.add = function (req, res, next) {
-    var obj = {image: req.attached.image.id, tag: req.attached.tag.id, quality: req.attached.quality, segmentations: req.attached.segmentations},
+    var obj = {quality: req.attached.quality, segmentations: req.attached.segmentations},
         cb = function (mask, next) {
             fs.writeFile("./storage/mask/" + mask.id.toString() + ".png", new Buffer(req.body.payload, "base64"), next);
         };
+    if (req.attached.image !== undefined) { obj.image = req.attached.image.id; }
+    if (req.attached.tag !== undefined) { obj.tag = req.attached.tag.id; }
     res.format({
         html: function () {
             index.algorithms.html.add(req, res, next, Mask, obj, cb);

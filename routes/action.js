@@ -30,10 +30,9 @@ exports.routes.index = function (req, res, next) {
 };
 
 exports.routes.add = function (req, res, next) {
-    var obj = {};
+    var obj = {type : req.attached.type};
     if (req.attached.image) { obj.image = req.attached.image.id; }
     if (req.attached.user) { obj.user = req.attached.user.id; }
-    if (req.attached.type) { obj.type = req.attached.type; }
     if (req.attached.tag) { obj.tag = req.attached.tag.id; }
     res.format({
         html: function () {
