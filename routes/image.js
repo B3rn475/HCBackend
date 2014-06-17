@@ -3,6 +3,8 @@
 
 var fs = require("fs"),
     Image = require("../models/image.js").model,
+    Action = require("../models/action.js").model,
+    Tag = require("../models/tag.js").model,
     index = require("./index.js");
 
 /**
@@ -46,6 +48,31 @@ exports.routes.get = function (req, res, next) {
             index.algorithms.json.get(req, res, next, Image);
         }
     });
+};
+
+exports.routes.tag = function (req, res, next) {
+    var match = { type: "tagging" },
+        group = {$group: {_id: "$tag"}},
+        grouping = {$group: {_id: null, result: {$addToSet: "$_id"}}},
+        cbNext = function (err, objects) {
+            console.log(objects);
+            var query = {};
+            if (objects.length > 0) {
+                query._id = { $in: objects[0].result};
+            } else {
+                query._id = { $in: []};
+            }
+            res.format({
+                html: function () {
+                    index.algorithms.html.list(req, res, next, Tag, query);
+                },
+                json: function () {
+                    index.algorithms.json.list(req, res, next, Tag, query);
+                }
+            });
+        };
+    if (req.attached.image) { match.image = req.attached.image.id; }
+    index.algorithms.aggregate(req, res, cbNext, Action, [{$match: match}, group], grouping);
 };
 
 /**

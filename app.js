@@ -114,6 +114,12 @@ app.route("/image")
 app.route("/image/:imageId")
     .get(index.query.optional.populate,
         image.routes.get);
+app.route("/image/:imageId/tag")
+    .get(index.query.optional.populate,
+         index.query.optional.count,
+         index.query.optional.since_id,
+         index.query.optional.max_id,
+         image.routes.tag);
 
 /**
  * Collection Routes

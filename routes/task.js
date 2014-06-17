@@ -41,6 +41,18 @@ exports.routes.add = function (req, res, next) {
 };
 
 exports.routes.complete = function (req, res, next) {
+    var query = {},
+        update = {completed_at: new Date()},
+        options = {};
+    if (req.attached.task) { query._id = req.attached.collection.id; }
+    res.format({
+        html: function () {
+            index.algorithms.html.update(req, res, next, Collection, query, update, options);
+        },
+        json: function () {
+            index.algorithms.json.update(req, res, next, Collection, query, update, options);
+        }
+    });
     res.format({
         html: function () {
             res.send(501, "not implemented");
@@ -88,29 +100,17 @@ exports.routes.get = function (req, res, next) {
 };
 
 exports.routes.addUser = function (req, res, next) {
+    var query = {},
+        update = {},
+        options = {};
+    if (req.attached.task) { query._id = req.attached.task.id; }
+    if (req.attached.user) { update = {$addToSet: {users: req.attached.user.id }}; }
     res.format({
         html: function () {
-            res.send(501, "not implemented");
+            index.algorithms.html.update(req, res, next, Task, query, update, options);
         },
         json: function () {
-            if (req.errors.length) {
-                index.algorithms.json.error(req, res);
-            } else {
-                var task = req.attached.task,
-                    user = req.attached.user;
-                if (_.contains(task.users, user.id)) {
-                    res.send({ status: "OK" });
-                } else {
-                    task.users.push(user.id);
-                    task.save(function (err, task) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.send({ status: "OK" });
-                        }
-                    });
-                }
-            }
+            index.algorithms.json.update(req, res, next, Task, query, update, options);
         }
     });
 };

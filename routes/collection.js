@@ -49,57 +49,33 @@ exports.routes.get = function (req, res, next) {
 };
 
 exports.routes.addImage = function (req, res, next) {
+    var query = {},
+        update = {},
+        options = {};
+    if (req.attached.collection) { query._id = req.attached.collection.id; }
+    if (req.attached.image) { update = {$addToSet: {images: req.attached.image.id }}; }
     res.format({
         html: function () {
-            res.send(501, "not implemented");
+            index.algorithms.html.update(req, res, next, Collection, query, update, options);
         },
         json: function () {
-            if (req.errors.length) {
-                index.algorithms.json.error(req, res);
-            } else {
-                var collection = req.attached.collection,
-                    image = req.attached.image;
-                if (_.contains(collection.images, image.id)) {
-                    res.send({ status: "OK" });
-                } else {
-                    collection.images.push(image.id);
-                    collection.save(function (err, collection) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.send({ status: "OK" });
-                        }
-                    });
-                }
-            }
+            index.algorithms.json.update(req, res, next, Collection, query, update, options);
         }
     });
 };
 
 exports.routes.removeImage = function (req, res, next) {
+    var query = {},
+        update = {},
+        options = {};
+    if (req.attached.collection) { query._id = req.attached.collection.id; }
+    if (req.attached.image) { update = {pull: {images: req.attached.image.id }}; }
     res.format({
         html: function () {
-            res.send(501, "not implemented");
+            index.algorithms.html.update(req, res, next, Collection, query, update, options);
         },
         json: function () {
-            if (req.errors.length) {
-                index.algorithms.json.error(req, res);
-            } else {
-                var collection = req.attached.collection,
-                    image = req.attached.image;
-                if (_.contains(collection.images, image.id)) {
-                    collection.images = _.without(collection.images, image.id);
-                    collection.save(function (err, collection) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.send({ status: "OK" });
-                        }
-                    });
-                } else {
-                    res.send({ status: "OK" });
-                }
-            }
+            index.algorithms.json.update(req, res, next, Collection, query, update, options);
         }
     });
 };

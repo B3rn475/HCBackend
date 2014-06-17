@@ -100,71 +100,109 @@ exports.algorithms.html.get = function (req, res, next, Model) {
     res.send(501, "not implemented");
 };
 
+exports.algorithms.aggregate = function (req, res, next, Model, pipeline, grouping) {
+    var match = {};
+    if (req.attached.since_id !== undefined || req.attached.max_id !== undefined) {
+        match._id = {};
+        if (req.attached.since_id !== undefined) {
+            match._id.$gt = req.attached.since_id;
+        }
+        if (req.attached.max_id !== undefined) {
+            match._id.$lte = req.attached.max_id;
+        }
+    }
+    pipeline.push({$match : match});
+    pipeline.push({$sort : {_id: -1}});
+    pipeline.push({$limit : req.attached.count });
+    if (grouping !== undefined) {
+        pipeline.push(grouping);
+    }
+    Model.aggregate(pipeline,
+        function (err, objects) {
+            if (err) {
+                next(err);
+            } else {
+                next(undefined, objects);
+            }
+        });
+};
+
+exports.algorithms.filter = function (req, res, next, Model, conditions, fields, options) {
+    if (conditions === undefined) {
+        conditions = {};
+    }
+    if (fields === undefined) {
+        fields = {};
+    }
+    if (options === undefined) {
+        options = {};
+    }
+    if (req.attached.since_id !== undefined || req.attached.max_id !== undefined) {
+        if (conditions._id === undefined) { conditions._id = { }; }
+        if (req.attached.since_id !== undefined) {
+            conditions._id.$gt = req.attached.since_id;
+        }
+        if (req.attached.max_id !== undefined) {
+            conditions._id.$lte = req.attached.max_id;
+        }
+    }
+
+    options.sort = {_id: -1};
+    options.limit = req.attached.count;
+    
+    Model.find(conditions,
+        fields,
+        options,
+        function (err, objects) {
+            if (err) {
+                next(err);
+            } else {
+                next(undefined, objects);
+            }
+        });
+};
+
 exports.algorithms.json.list = function (req, res, next, Model, conditions, fields, options) {
     if (req.errors.length) {
         exports.algorithms.json.error(req, res);
     } else {
-        if (conditions === undefined) {
-            conditions = {};
-        }
-        if (fields === undefined) {
-            fields = {};
-        }
-        if (options === undefined) {
-            options = {};
-        }
-        if (req.attached.since_id !== undefined || req.attached.max_id !== undefined) {
-            conditions._id = {};
-            if (req.attached.since_id !== undefined) {
-                conditions._id.$gt = req.attached.since_id;
-            }
-            if (req.attached.max_id !== undefined) {
-                conditions._id.$lte = req.attached.max_id;
-            }
-        }
-
-        options.sort = {_id: -1};
-        options.limit = req.attached.count;
-
-        Model.find(conditions,
-            fields,
-            options,
-            function (err, objects) {
-                if (err) {
-                    next(err);
-                } else {
-                    var min_id,
-                        json = { status: "OK"},
-                        key,
-                        url_tail,
-                        search_metadata = req.search_metadata;
-                    if (req.attached.max_id !== undefined) {
-                        search_metadata.max_id = req.attached.max_id;
-                    }
-                    if (req.attached.since_id !== undefined) {
-                        search_metadata.since_id = req.attached.since_id;
-                    }
-                    if (objects.length > 0) {
-                        url_tail = _.reduce(_.pairs(req.search_metadata), function (memo, n) {
-                            return memo + "&" + encodeURIComponent(n[0]) + "=" + encodeURIComponent(n[1]);
-                        }, "");
-                        search_metadata.refresh_url = "?since_id=" + objects[0].id + url_tail;
-                        if (objects.length === req.attached.count) {
-                            min_id = objects[objects.length - 1].id;
-                            if (min_id > 0) {
-                                search_metadata.next_results = "?max_id=" + (min_id - 1);
-                                if (req.attached.since_id !== undefined) {
-                                    search_metadata.next_results += "&since_id=" + req.attached.since_id;
-                                }
-                                search_metadata.next_results += url_tail;
+        var cbNext = function (err, objects) {
+            if (err) {
+                next(err);
+            } else {
+                var min_id,
+                    json = { status: "OK"},
+                    key,
+                    url_tail,
+                    search_metadata = req.search_metadata;
+                if (req.attached.max_id !== undefined) {
+                    search_metadata.max_id = req.attached.max_id;
+                }
+                if (req.attached.since_id !== undefined) {
+                    search_metadata.since_id = req.attached.since_id;
+                }
+                if (objects.length > 0) {
+                    url_tail = _.reduce(_.pairs(req.search_metadata), function (memo, n) {
+                        return memo + "&" + encodeURIComponent(n[0]) + "=" + encodeURIComponent(n[1]);
+                    }, "");
+                    search_metadata.refresh_url = "?since_id=" + objects[0].id + url_tail;
+                    if (objects.length === req.attached.count) {
+                        min_id = objects[objects.length - 1].id;
+                        if (min_id > 0) {
+                            search_metadata.next_results = "?max_id=" + (min_id - 1);
+                            if (req.attached.since_id !== undefined) {
+                                search_metadata.next_results += "&since_id=" + req.attached.since_id;
                             }
+                            search_metadata.next_results += url_tail;
                         }
                     }
-                    json[Model.json_list_property] = objects;
-                    json.search_metadata = search_metadata;
-                    res.send(json);
                 }
-            });
+                json[Model.json_list_property] = objects;
+                json.search_metadata = search_metadata;
+                res.send(json);
+            }
+        };
+        exports.algorithms.filter(req, res, cbNext, Model, conditions, fields, options);
     }
 };
 
