@@ -585,7 +585,7 @@ exports.body.optional.array = function (req, res, next, property, check, map, dv
 
 exports.body.unchecked.array = function (req, res, next, property, check, map) {
     var error,
-        value = req.boby[property];
+        value = req.body[property];
     if (!_.isArray(value)) {
         try {
             value = JSON.parse(value.toString());
