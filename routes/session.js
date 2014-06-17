@@ -48,7 +48,7 @@ exports.routes.get = function (req, res, next) {
     });
 };
 
-exports.routes.close = function (req, res, next) {
+exports.routes.complete = function (req, res, next) {
     res.format({
         html: function () {
             res.send(501, "not implemented");

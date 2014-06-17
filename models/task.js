@@ -7,10 +7,20 @@ var mongooseAI = require("mongoose-auto-increment");
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                     image: {type: Number, min: 0, ref: "Image"},
                                     users : [{type: Number, min: 0, ref: "User"}],
-                                    microtasks : [{type: Number, min: 0, ref: "Microtask"}]
+                                    microtasks : [{type: Number, min: 0, ref: "Microtask"}],
+                                    created_at: {type: Date},
+                                    completed_at: {type: Date}
                                 }, { id: false});
 
 schema.virtual('id').get(function () { return this._id; });
+
+schema.pre('save', function (next) {
+    if (this.created_at === undefined) {
+        var now = new Date();
+        this.created_at = now;
+    }
+    next();
+});
 
 schema.options.toJSON = {
     transform: function (doc, ret, options) {

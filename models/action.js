@@ -12,7 +12,7 @@ var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: tru
                                     segmentation: {type: Number, min: 0, ref: "Segmentation"},
                                     started_at: {type: Date},
                                     ended_at: {type: Date},
-                                    valid: {type: Boolean, default: true}
+                                    validity: {type: Boolean, default: true}
                                 }, { id: false});
 
 schema.virtual('id').get(function () { return this._id; });

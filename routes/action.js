@@ -19,12 +19,17 @@ var type = /tagging|segmentation$/;
 exports.routes = {};
 
 exports.routes.index = function (req, res, next) {
+    var conditions = {};
+    if (req.attached.type) { conditions.type = req.attached.type; }
+    if (req.attached.validity) { conditions.validity = req.attached.validity; }
+    if (req.attached.image) { conditions.image = req.attached.image.id; }
+    if (req.attached.tag) { conditions.tag = req.attached.tag.id; }
     res.format({
         html: function () {
-            index.algorithms.html.list(req, res, next, Action);
+            index.algorithms.html.list(req, res, next, Action, conditions);
         },
         json: function () {
-            index.algorithms.json.list(req, res, next, Action);
+            index.algorithms.json.list(req, res, next, Action, conditions);
         }
     });
 };
@@ -44,7 +49,7 @@ exports.routes.add = function (req, res, next) {
     });
 };
 
-exports.routes.close = function (req, res, next) {
+exports.routes.complete = function (req, res, next) {
     res.format({
         html: function () {
             res.send(501, "not implemented");
@@ -83,7 +88,7 @@ exports.routes.validity = function (req, res, next) {
                 index.algorithms.json.error(req, res);
             } else {
                 var action = req.attached.action;
-                action.valid = false;
+                action.validity = false;
                 action.save(function (err, action) {
                     if (err) {
                         next(err);
@@ -92,6 +97,23 @@ exports.routes.validity = function (req, res, next) {
                     }
                 });
             }
+        }
+    });
+};
+
+exports.routes.bulkValidity = function (req, res, next) {
+    var query = {},
+        update = {$set: {validity: req.attached.validity}},
+        options = {multi: true};
+    if (req.attached.image) { query.image = req.attached.image.id; }
+    if (req.attached.tag) { query.tag = req.attached.tag.id; }
+    if (req.attached.type) { query.type = req.attached.type; }
+    res.format({
+        html: function () {
+            index.algorithms.html.update(req, res, next, Action, query, update, options);
+        },
+        json: function () {
+            index.algorithms.json.update(req, res, next, Action, query, update, options);
         }
     });
 };
@@ -122,6 +144,32 @@ exports.params.id = function (req, res, next, inId) {
 };
 
 /**
+ * Query Params
+ */
+
+exports.query = {
+    mandatory: {},
+    optional: {},
+    route: {}
+};
+
+exports.query.mandatory.type = function (req, res, next) {
+    index.query.mandatory.regexp(req, res, index.query.register(req, res, next, "type"), "type", type, "Action Type");
+};
+
+exports.query.optional.type = function (req, res, next) {
+    index.query.optional.regexp(req, res, index.query.register(req, res, next, "type"), "type", type, "Action Type");
+};
+
+exports.query.mandatory.validity = function (req, res, next) {
+    index.query.mandatory.boolean(req, res, index.query.register(req, res, next, "validity"), next, "validity");
+};
+
+exports.query.optional.validity = function (req, res, next) {
+    index.query.optional.boolean(req, res, index.query.register(req, res, next, "validity"), "validity");
+};
+
+/**
  * Body Params
  */
 
@@ -130,7 +178,7 @@ exports.body = {
     optional: {},
     route: {
         add : {},
-        close : {}
+        complete : {}
     }
 };
 
@@ -150,7 +198,7 @@ exports.body.route.add.tag = function (req, res, next) {
     }
 };
 
-exports.body.route.close.tag = function (req, res, next) {
+exports.body.route.complete.tag = function (req, res, next) {
     if (req.attached.action && req.attached.action.type === "tagging") {
         index.body.mandatory.id(req, res, next, Tag);
     } else {
@@ -158,7 +206,7 @@ exports.body.route.close.tag = function (req, res, next) {
     }
 };
 
-exports.body.route.close.segmentation = function (req, res, next) {
+exports.body.route.complete.segmentation = function (req, res, next) {
     if (req.attached.action
             && req.attached.action.type === "segmentation") {
         index.body.mandatory.id(req, res, next, Segmentation);
@@ -187,18 +235,27 @@ exports.body.optional.validity = function (req, res, next) {
  * Checkers
  */
 
-exports.checkers = {};
+exports.checkers = {
+    routes: {}
+};
 
 exports.checkers.open = function (req, res, next) {
     if (req.attached.action && req.attached.action.ended_at) {
-        req.errors.push({location: "status", message: "Action " + req.attached.action.id + " is already closed" });
+        req.errors.push({location: "status", message: "Action " + req.attached.action.id + " is already completed" });
     }
     next();
 };
 
-exports.checkers.closed = function (req, res, next) {
+exports.checkers.completed = function (req, res, next) {
     if (req.attached.action && !req.attached.action.ended_at) {
         req.errors.push({location: "status", message: "Action " + req.attached.action.id + " is still open" });
+    }
+    next();
+};
+
+exports.checkers.routes.bulkValidity = function (req, res, next) {
+    if (!(req.attached.image || req.attached.tag)) {
+        req.errors.push({location: "body", name: "image|tag", message: "Missing Image or Tag id. At least one is required as filter" });
     }
     next();
 };

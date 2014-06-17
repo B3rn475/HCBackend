@@ -25,6 +25,7 @@ exports.middlewares = {};
 exports.middlewares.init = function (req, res, next) {
     req.attached = {};
     req.errors = [];
+    req.search_metadata = {};
     next();
 };
 
@@ -134,9 +135,9 @@ exports.algorithms.json.list = function (req, res, next, Model, conditions, fiel
                 } else {
                     var min_id,
                         json = { status: "OK"},
-                        search_metadata = {
-                            count: req.attached.count,
-                        };
+                        key,
+                        url_tail,
+                        search_metadata = req.search_metadata;
                     if (req.attached.max_id !== undefined) {
                         search_metadata.max_id = req.attached.max_id;
                     }
@@ -144,7 +145,10 @@ exports.algorithms.json.list = function (req, res, next, Model, conditions, fiel
                         search_metadata.since_id = req.attached.since_id;
                     }
                     if (objects.length > 0) {
-                        search_metadata.refresh_url = "?since_id=" + objects[0].id + "&count=" + req.attached.count;
+                        url_tail = _.reduce(_.pairs(req.search_metadata), function (memo, n) {
+                            return memo + "&" + encodeURIComponent(n[0]) + "=" + encodeURIComponent(n[1]);
+                        }, "");
+                        search_metadata.refresh_url = "?since_id=" + objects[0].id + url_tail;
                         if (objects.length === req.attached.count) {
                             min_id = objects[objects.length - 1].id;
                             if (min_id > 0) {
@@ -152,7 +156,7 @@ exports.algorithms.json.list = function (req, res, next, Model, conditions, fiel
                                 if (req.attached.since_id !== undefined) {
                                     search_metadata.next_results += "&since_id=" + req.attached.since_id;
                                 }
-                                search_metadata.next_results += "&count=" + req.attached.count;
+                                search_metadata.next_results += url_tail;
                             }
                         }
                     }
@@ -192,6 +196,34 @@ exports.algorithms.json.add = function (req, res, next, Model, obj, savecb) {
     }
 };
 
+exports.algorithms.json.update = function (req, res, next, Model, query, update, options, updatecb) {
+    if (req.errors.length) {
+        exports.algorithms.json.error(req, res);
+    } else {
+        if (query === undefined) { query = {}; }
+        if (update === undefined) { update = {}; }
+        if (options === undefined) { options = {}; }
+        Model.update(query, update, options, function (err, numAffected) {
+            if (err) {
+                next(err);
+                return;
+            }
+            var cbNext = function (err) {
+                if (err) {
+                    next(err);
+                } else {
+                    res.send({ status: "OK", updated: numAffected});
+                }
+            };
+            if (updatecb !== undefined) {
+                updatecb(numAffected, cbNext);
+            } else {
+                cbNext();
+            }
+        });
+    }
+};
+
 exports.algorithms.json.error = function (req, res) {
     res.send({
         status: "KO",
@@ -204,7 +236,11 @@ exports.algorithms.html.list = function (req, res, next, Model, conditions, fiel
 };
 
 exports.algorithms.html.add = function (req, res, next, Model, obj, savecb) {
-    req.send(501, "not implemented");
+    res.send(501, "not implemented");
+};
+
+exports.algorithms.html.update = function (req, res, next, Model, query, update, options, updatecb) {
+    res.send(501, "not implemented");
 };
 
 /**
@@ -271,24 +307,38 @@ exports.query = {
     unchecked: {},
 };
 
+exports.query.register = function (req, res, next, property, path) {
+    return function (err) {
+        var value = req.attached[property];
+        if (value !== undefined) {
+            if (path === undefined) {
+                req.search_metadata[property] = value;
+            } else {
+                req.search_metadata[property] = value[path];
+            }
+        }
+        next(err);
+    };
+};
+
 exports.query.mandatory.populate = function (req, res, next) {
-    exports.query.mandatory.boolean(req, res, next, "populate");
+    exports.query.mandatory.boolean(req, res, exports.query.register(req, res, next, "populate"), "populate");
 };
 
 exports.query.optional.populate = function (req, res, next) {
-    exports.query.optional.boolean(req, res, next, "populate", false);
+    exports.query.optional.boolean(req, res, exports.query.register(req, res, next, "populate"), "populate", false);
 };
 
 exports.query.mandatory.count = function (req, res, next) {
-    exports.query.mandatory.integer(req, res, next, "count", 0);
+    exports.query.mandatory.integer(req, res, exports.query.register(req, res, next, "count"), "count", 0, 100);
 };
 
 exports.query.optional.count = function (req, res, next) {
-    exports.query.optional.integer(req, res, next, "count", 0, undefined, 100);
+    exports.query.optional.integer(req, res, exports.query.register(req, res, next, "count"), "count", 0, 100, 100);
 };
 
 exports.query.mandatory.max_id = function (req, res, next) {
-    exports.query.mandatory.integer(req, res, next, "max_id", 0);
+    exports.query.mandatory.integer(req, req, next, "max_id", 0);
 };
 
 exports.query.optional.max_id = function (req, res, next) {
@@ -325,7 +375,7 @@ exports.query.optional.boolean = function (req, res, next, property, dvalue) {
 
 exports.query.unchecked.boolean = function (req, res, next, property) {
     var value = req.query[property];
-    req.attached[property] = (value === "false" || value === "0") ? false : true;
+    req.attached[property] = (value === false || value === "false" || value === "0") ? false : true;
     next();
 };
 
@@ -375,6 +425,76 @@ exports.query.unchecked.integer = function (req, res, next, property, min, max) 
     next();
 };
 
+exports.query.mandatory.id = function (req, res, next, Model) {
+    if (req.query[Model.pname] === undefined) {
+        req.errors.push({location: "query", name: Model.pname, message: "Missing Query Parameter '" + Model.pname + "'" });
+        next();
+    } else {
+        exports.body.unchecked.id(req, res, next, Model);
+    }
+};
+
+exports.query.optional.id = function (req, res, next, Model) {
+    if (req.query[Model.pname] === undefined) {
+        next();
+    } else {
+        exports.query.unchecked.id(req, res, next, Model);
+    }
+};
+
+exports.query.unchecked.id = function (req, res, next, Model) {
+    exports.query.unchecked.integer(req, res, function () {
+        if (req.attached[Model.pname] === undefined) {
+            next();
+        } else {
+            Model.findOne({_id : req.attached[Model.pname]}, function (err, obj) {
+                if (err) {
+                    next(err);
+                } else if (obj) {
+                    req.attached[Model.pname] = obj;
+                    next();
+                } else {
+                    req.errors.push({location: "query", name: Model.pname, message: "Unable to find " + Model.modelName
+                                     + " " + req.attached[Model.pname]
+                                     + " in Query Parameter '"
+                                     + Model.pname + "'"});
+                    next();
+                }
+            });
+        }
+    }, Model.pname, 0);
+};
+
+exports.query.mandatory.regexp = function (req, res, next, property, exp, type) {
+    if (req.query[property] === undefined) {
+        req.errors.push({location: "query", name: property, message: "Missing Query Parameter '" + property + "'" });
+        next();
+    } else {
+        exports.query.unchecked.regexp(req, res, next, property, exp, type);
+    }
+};
+
+exports.query.optional.regexp = function (req, res, next, property, exp, type, dvalue) {
+    if (req.query[property] === undefined) {
+        if (dvalue) {
+            req.attached[property] = dvalue;
+        }
+        next();
+    } else {
+        exports.query.unchecked.regexp(req, res, next, property, exp, type);
+    }
+};
+
+exports.query.unchecked.regexp = function (req, res, next, property, exp, type) {
+    var value = req.query[property];
+    if (exp.test(value)) {
+        req.attached[property] = value;
+    } else {
+        req.errors.push({location: "query", name: property, message: "Invalid Query Parameter '" + property + "'" + (type ? ", it is not a valid " + type : "")});
+    }
+    next();
+};
+
 /**
  * Body Params
  */
@@ -404,21 +524,51 @@ exports.body.optional.id = function (req, res, next, Model) {
 
 exports.body.unchecked.id = function (req, res, next, Model) {
     exports.body.unchecked.integer(req, res, function () {
-        Model.findOne({_id : req.attached[Model.pname]}, function (err, obj) {
-            if (err) {
-                next(err);
-            } else if (obj) {
-                req.attached[Model.pname] = obj;
-                next();
-            } else {
-                req.errors.push({location: "body", name: Model.pname, message: "Unable to find " + Model.modelName
-                                 + " " + req.attached[Model.pname]
-                                 + " in Body Parameter '"
-                                 + Model.pname + "'"});
-                next();
-            }
-        });
+        if (req.attached[Model.pname] === undefined) {
+            next();
+        } else {
+            Model.findOne({_id : req.attached[Model.pname]}, function (err, obj) {
+                if (err) {
+                    next(err);
+                } else if (obj) {
+                    req.attached[Model.pname] = obj;
+                    next();
+                } else {
+                    req.errors.push({location: "body", name: Model.pname, message: "Unable to find " + Model.modelName
+                                     + " " + req.attached[Model.pname]
+                                     + " in Body Parameter '"
+                                     + Model.pname + "'"});
+                    next();
+                }
+            });
+        }
     }, Model.pname, 0);
+};
+
+exports.body.mandatory.boolean = function (req, res, next, property) {
+    if (req.body[property] === undefined) {
+        req.errors.push({location: "body", name: property, message: "Missing Body Parameter '" + property + "'" });
+        next();
+    } else {
+        exports.body.unchecked.boolean(req, res, next, property);
+    }
+};
+
+exports.body.optional.boolean = function (req, res, next, property, dvalue) {
+    if (req.body[property] === undefined) {
+        if (dvalue) {
+            req.attached[property] = dvalue;
+        }
+        next();
+    } else {
+        exports.body.unchecked.boolean(req, res, next, property);
+    }
+};
+
+exports.body.unchecked.boolean = function (req, res, next, property) {
+    var value = req.body[property];
+    req.attached[property] = (value === false || value === "false" || value === "0") ? false : true;
+    next();
 };
 
 exports.body.mandatory.integer = function (req, res, next, property, min, max) {

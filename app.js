@@ -62,181 +62,242 @@ process.on('SIGINT', function () {
 
 var index = require("./routes");
 
+app.route("/")
+    .get(index.routes.index);
+
 app.use(index.middlewares.init);
 
 var image = require("./routes/image.js");
-var task = require("./routes/task.js");
-var microtask = require("./routes/microtask.js");
-var session = require("./routes/session.js");
-var mask = require("./routes/mask.js");
-var tag = require("./routes/tag.js");
-var action = require("./routes/action.js");
-var segmentation = require("./routes/segmentation.js");
-var user = require("./routes/user.js");
-var collection = require("./routes/collection");
-
-/**
- * Routes Params
- */
-
 app.param("imageId", image.params.id);
-app.param("userId", user.params.id);
-app.param("tagId", tag.params.id);
-app.param("taskId", task.params.id);
-app.param("microtaskId", microtask.params.id);
-app.param("sessionId", session.params.id);
-app.param("maskId", mask.params.id);
-app.param("actionId", action.params.id);
-app.param("segmentationId", segmentation.params.id);
+
+var collection = require("./routes/collection");
 app.param("collectionId", collection.params.id);
+
+var user = require("./routes/user.js");
+app.param("userId", user.params.id);
+
+var tag = require("./routes/tag.js");
+app.param("tagId", tag.params.id);
 app.param("language", tag.params.language);
 
+var mask = require("./routes/mask.js");
+app.param("maskId", mask.params.id);
+
+var task = require("./routes/task.js");
+app.param("taskId", task.params.id);
+
+var segmentation = require("./routes/segmentation.js");
+app.param("segmentationId", segmentation.params.id);
+
+var session = require("./routes/session.js");
+app.param("sessionId", session.params.id);
+
+var action = require("./routes/action.js");
+app.param("actionId", action.params.id);
+
+var microtask = require("./routes/microtask.js");
+app.param("microtaskId", microtask.params.id);
+
 
 /**
- * Get Routes
+ * Image Routes
  */
-
-app.get("/image/:imageId", index.query.optional.populate,
+app.route("/image")
+    .post(image.body.mandatory.width,
+        image.body.mandatory.height,
+        image.body.mandatory.payload,
+        image.routes.add)
+    .get(index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        image.routes.index);
+app.route("/image/:imageId")
+    .get(index.query.optional.populate,
         image.routes.get);
-app.get("/user/:userId", user.routes.get);
-app.get("/tag/:tagId", tag.routes.get);
-app.get("/task/:taskId", index.query.optional.populate,
-        task.routes.get);
-app.get("/microtask/:microtaskId", index.query.optional.populate,
-        microtask.routes.get);
-app.get("/session/:sessionId", index.query.optional.populate,
-        session.routes.get);
-app.get("/mask/:maskId", index.query.optional.populate,
-        mask.routes.get);
-app.get("/action/:actionId", index.query.optional.populate,
-        action.routes.get);
-app.get("/segmentation/:segmentationId", index.query.optional.populate,
-        segmentation.routes.get);
-app.get("/collection/:collectionId", index.query.optional.populate,
+
+/**
+ * Collection Routes
+ */
+app.route("/collection")
+    .get(index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        collection.routes.index)
+    .post(collection.routes.add);
+app.route("/collection/:collectionId")
+    .get(index.query.optional.populate,
         collection.routes.get);
+app.route("/collection/:collectionId/image")
+    .post(image.body.mandatory.id,
+         collection.routes.addImage)
+    .delete(image.body.mandatory.id,
+           collection.routes.removeImage);
+app.route("/collection/:collectionId/image/:imageId")
+    .delete(collection.routes.removeImage);
 
 /**
- * Update Routes
+ * User Routes
  */
-
-app.put("/session/:sessionId", session.checkers.open,
-        session.routes.close);
-app.put("/mask/:maskId", mask.body.mandatory.payload,
-        mask.body.mandatory.quality,
-        mask.body.mandatory.segmentations,
-        mask.routes.update);
-app.put("/action/:actionId/close", action.checkers.open,
-        action.body.route.close.tag,
-        action.body.route.close.segmentation,
-        action.routes.close);
-app.put("/action/:actionId/validity", action.checkers.closed,
-        action.body.mandatory.validity,
-        action.routes.validity);
-app.put("/microtask/:microtaskId", microtask.checkers.open,
-        action.body.mandatory.id,
-        microtask.routes.close);
-
-
-/**
- * Add Routes
- */
-
-app.post("/image", image.body.mandatory.width,
-         image.body.mandatory.height,
-         image.body.mandatory.payload,
-         image.routes.add);
-app.post("/user", user.body.mandatory.app_id,
+app.route("/user")
+    .post(user.body.mandatory.app_id,
          user.body.mandatory.app_user_id,
-         user.routes.add);
-app.post("/tag", tag.routes.add);
-app.post("/tag/:tagId/alias", tag.body.mandatory.language,
+         user.routes.add)
+    .get(index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        user.routes.index);
+app.route("/user/:userId")
+    .get(user.routes.get);
+
+/**
+ * Tag Routes
+ */
+
+app.route("/tag")
+    .get(index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        tag.routes.index)
+    .post(tag.routes.add);
+app.route("/tag/:tagId")
+    .get(tag.routes.get);
+app.route("/tag/:tagId/alias")
+    .post(tag.body.mandatory.language,
          tag.body.mandatory.name,
-         tag.routes.addAlias);
-app.post("/task", image.body.mandatory.id,
-         task.routes.add);
-app.post("/task/:taskId/user", user.body.mandatory.id,
-         task.routes.addUser);
-app.post("/task/:taskId/microtask", microtask.body.mandatory.id,
-         task.routes.addMicrotask);
-app.post("/microtask", microtask.body.mandatory.type,
-         microtask.body.mandatory.order,
-         microtask.routes.add);
-app.post("/session/:sessionId/action", session.checkers.open,
-         action.body.mandatory.id,
-         session.routes.addAction);
-app.post("/session", session.routes.add);
-app.post("/mask", image.body.mandatory.id,
+         tag.routes.addAlias)
+    .delete(tag.body.mandatory.language,
+           tag.routes.removeAlias);
+app.route("/tag/:tagId/alias/:language")
+    .delete(tag.routes.removeAlias);
+
+/**
+ * Mask Routes
+ */
+app.route("/mask")
+    .get(index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        mask.routes.index)
+    .post(image.body.mandatory.id,
          tag.body.mandatory.id,
          mask.body.mandatory.payload,
          mask.body.mandatory.quality,
          mask.body.mandatory.segmentations,
          mask.routes.add);
-app.post("/action", image.body.mandatory.id,
+app.route("/mask/:maskId")
+    .get(index.query.optional.populate,
+        mask.routes.get)
+    .put(mask.body.mandatory.payload,
+        mask.body.mandatory.quality,
+        mask.body.mandatory.segmentations,
+        mask.routes.update);
+
+/**
+ * Task Routes
+ */
+app.route("/task")
+    .get(index.query.optional.count,
+         index.query.optional.since_id,
+         index.query.optional.max_id,
+         image.query.optional.id,
+         task.query.optional.completed,
+         task.routes.index)
+    .post(image.body.mandatory.id,
+         task.routes.add);
+app.route("/task/:taskId")
+    .get(index.query.optional.populate,
+        task.routes.get)
+    .post(task.routes.complete);
+app.route("/task/:taskId/user")
+    .post(user.body.mandatory.id,
+         task.routes.addUser);
+app.route("/task/:taskId/microtask")
+    .post(microtask.body.mandatory.id,
+         task.routes.addMicrotask);
+
+/**
+ * Segmentation Routes
+ */
+app.route("/segmentation")
+    .get(index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        segmentation.routes.index)
+    .post(segmentation.body.mandatory.points,
+         segmentation.routes.add);
+app.route("/segmentation/:segmentationId")
+    .get(index.query.optional.populate,
+        segmentation.routes.get);
+
+/**
+ * Session Routes
+ */
+app.route("/session")
+    .get(index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        session.routes.index)
+    .post(session.routes.add);
+app.route("/session/:sessionId")
+    .get(index.query.optional.populate,
+        session.routes.get)
+    .post(session.checkers.open,
+        session.routes.complete);
+app.route("/session/:sessionId/action")
+    .post(session.checkers.open,
+         action.body.mandatory.id,
+         session.routes.addAction);
+
+/**
+ * Action Routes
+ */
+app.route("/action")
+    .get(index.query.optional.count,
+         index.query.optional.since_id,
+         index.query.optional.max_id,
+         action.query.optional.type,
+         action.query.optional.validity,
+         image.query.optional.id,
+         tag.query.optional.id,
+         action.routes.index)
+    .post(image.body.mandatory.id,
          user.body.mandatory.id,
          action.body.mandatory.type,
          action.body.route.add.tag,
-         action.routes.add);
-app.post("/segmentation", segmentation.body.mandatory.points,
-         segmentation.routes.add);
-app.post("/collection/:collectionId/image", image.body.mandatory.id,
-         collection.routes.addImage);
-app.post("/collection", collection.routes.add);
+         action.routes.add)
+    .put(image.body.optional.id,
+        tag.body.optional.id,
+        action.checkers.routes.bulkValidity,
+        action.body.optional.type,
+        action.body.mandatory.validity,
+        action.routes.bulkValidity);
+app.route("/action/:actionId")
+    .get(index.query.optional.populate,
+        action.routes.get)
+    .post(action.checkers.open,
+        action.body.route.complete.tag,
+        action.body.route.complete.segmentation,
+        action.routes.complete)
+    .put(action.body.mandatory.validity,
+        action.routes.validity);
 
 /**
- * Delete Routes
+ * Microtask Routes
  */
-app.delete("/collection/:collectionId/image/:imageId", collection.routes.removeImage);
-app.delete("/collection/:collectionId/image", image.body.mandatory.id,
-           collection.routes.removeImage);
-app.delete("/tag/:tagId/alias/:language", tag.routes.removeAlias);
-app.delete("/tag/:tagId/alias", tag.body.mandatory.language,
-           tag.routes.removeAlias);
-
-/**
- * Index Routes
- */
-
-app.get("/image", index.query.optional.count,
+app.route("/microtask")
+    .get(index.query.optional.count,
         index.query.optional.since_id,
         index.query.optional.max_id,
-        image.routes.index);
-app.get("/user", index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        user.routes.index);
-app.get("/tag", index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        tag.routes.index);
-app.get("/task", index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        task.routes.index);
-app.get("/microtask", index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        microtask.routes.index);
-app.get("/session", index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        session.routes.index);
-app.get("/mask", index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        mask.routes.index);
-app.get("/action", index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        action.routes.index);
-app.get("/segmentation", index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        segmentation.routes.index);
-app.get("/collection", index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        collection.routes.index);
-app.get("/", index.routes.index);
+        microtask.routes.index)
+    .post(microtask.body.mandatory.type,
+         microtask.body.mandatory.order,
+         microtask.routes.add);
+app.route("/microtask/:microtaskId")
+    .post(index.query.optional.populate,
+        microtask.routes.get)
+    .put(microtask.checkers.open,
+        action.body.mandatory.id,
+        microtask.routes.complete);
 
 /**
  * Static Files

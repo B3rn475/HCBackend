@@ -39,7 +39,7 @@ exports.routes.add = function (req, res, next) {
     });
 };
 
-exports.routes.close = function (req, res, next) {
+exports.routes.complete = function (req, res, next) {
     res.format({
         html: function () {
             res.send(501, "not implemented");
@@ -49,9 +49,9 @@ exports.routes.close = function (req, res, next) {
                 index.algorithms.json.error(req, res);
             } else {
                 var microtask = req.attached.microtask;
-                microtask.closed_at = new Date();
+                microtask.completed_at = new Date();
                 microtask.action = req.attached.action.id;
-                microtask.save(function (err, action) {
+                microtask.save(function (err, microtask) {
                     if (err) {
                         next(err);
                     } else {

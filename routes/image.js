@@ -59,6 +59,24 @@ exports.params.id = function (req, res, next, inId) {
 };
 
 /**
+ * Query Params
+ */
+
+exports.query = {
+    mandatory: {},
+    optional: {},
+    route: {}
+};
+
+exports.query.mandatory.id = function (req, res, next) {
+    index.query.mandatory.id(req, res, index.query.register(req, res, next, Image.pname, "id"), Image);
+};
+
+exports.query.optional.id = function (req, res, next) {
+    index.query.optional.id(req, res, index.query.register(req, res, next, Image.pname, "id"), Image);
+};
+
+/**
  * Body Params
  */
 
