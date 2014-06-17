@@ -66,6 +66,7 @@ app.use(index.middlewares.init);
 
 var image = require("./routes/image.js");
 var task = require("./routes/task.js");
+var microtask = require("./routes/microtask.js");
 var session = require("./routes/session.js");
 var mask = require("./routes/mask.js");
 var tag = require("./routes/tag.js");
@@ -82,6 +83,7 @@ app.param("imageId", image.params.id);
 app.param("userId", user.params.id);
 app.param("tagId", tag.params.id);
 app.param("taskId", task.params.id);
+app.param("microtaskId", microtask.params.id);
 app.param("sessionId", session.params.id);
 app.param("maskId", mask.params.id);
 app.param("actionId", action.params.id);
@@ -100,6 +102,8 @@ app.get("/user/:userId", user.routes.get);
 app.get("/tag/:tagId", tag.routes.get);
 app.get("/task/:taskId", index.query.optional.populate,
         task.routes.get);
+app.get("/microtask/:microtaskId", index.query.optional.populate,
+        microtask.routes.get);
 app.get("/session/:sessionId", index.query.optional.populate,
         session.routes.get);
 app.get("/mask/:maskId", index.query.optional.populate,
@@ -125,6 +129,9 @@ app.put("/action/:actionId", action.checkers.open,
         action.body.route.close.tag,
         action.body.route.close.segmentation,
         action.routes.close);
+app.put("/microtask/:microtaskId", microtask.checkers.open,
+        action.body.mandatory.id,
+        microtask.routes.close);
 
 
 /**
@@ -142,6 +149,15 @@ app.post("/tag", tag.routes.add);
 app.post("/tag/:tagId/alias", tag.body.mandatory.language,
          tag.body.mandatory.name,
          tag.routes.addAlias);
+app.post("/task", image.body.mandatory.id,
+         task.routes.add);
+app.post("/task/:taskId/user", user.body.mandatory.id,
+         task.routes.addUser);
+app.post("/task/:taskId/microtask", microtask.body.mandatory.id,
+         task.routes.addMicrotask);
+app.post("/microtask", microtask.body.mandatory.type,
+         microtask.body.mandatory.order,
+         microtask.routes.add);
 app.post("/session/:sessionId/action", session.checkers.open,
          action.body.mandatory.id,
          session.routes.addAction);
@@ -193,6 +209,10 @@ app.get("/task", index.query.optional.count,
         index.query.optional.since_id,
         index.query.optional.max_id,
         task.routes.index);
+app.get("/microtask", index.query.optional.count,
+        index.query.optional.since_id,
+        index.query.optional.max_id,
+        microtask.routes.index);
 app.get("/session", index.query.optional.count,
         index.query.optional.since_id,
         index.query.optional.max_id,

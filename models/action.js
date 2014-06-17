@@ -5,11 +5,11 @@ var mongoose = require("mongoose");
 var mongooseAI = require("mongoose-auto-increment");
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
-                                    image: {type: Number, ref: "Image"},
-                                    tag: {type: Number, ref: "Tag"},
-                                    user: {type: Number, ref: "User"},
+                                    image: {type: Number, min: 0, ref: "Image"},
+                                    tag: {type: Number, min: 0, ref: "Tag"},
+                                    user: {type: Number, min: 0, ref: "User"},
                                     type: {type: String, enum: ["tagging", "segmentation"]},
-                                    segmentation: {type: Number, ref: "Segmentation"},
+                                    segmentation: {type: Number, min: 0, ref: "Segmentation"},
                                     started_at: {type: Date},
                                     ended_at: {type: Date}
                                 }, { id: false});

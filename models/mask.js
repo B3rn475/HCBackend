@@ -9,8 +9,8 @@ var computeMediaLocator = function (id) {
 };
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
-                                    image: {type: Number, ref: "Image"},
-                                    tag: {type: Number, ref: "Tag"},
+                                    image: {type: Number, min: 0, ref: "Image"},
+                                    tag: {type: Number, min: 0, ref: "Tag"},
                                     quality: { type: Number},
                                     segmentations: { type: Number, min: 1},
                                     updated_at: {type: Date}

@@ -1,4 +1,135 @@
 /*jslint node: true, nomen: true, es5: true */
 "use strict";
 
-var index = require("./index.js");
+var Microtask = require("../models/microtask.js").model,
+    index = require("./index.js");
+
+/**
+ * RegExps
+ */
+
+var type = /tagging|segmentation$/;
+
+/**
+ * Routes
+ */
+
+exports.routes = {};
+
+exports.routes.index = function (req, res, next) {
+    res.format({
+        html: function () {
+            index.algorithms.html.list(req, res, next, Microtask);
+        },
+        json: function () {
+            index.algorithms.json.list(req, res, next, Microtask);
+        }
+    });
+};
+
+exports.routes.add = function (req, res, next) {
+    var obj = {type: req.attached.type, order: req.attached.order };
+    res.format({
+        html: function () {
+            index.algorithms.html.add(req, res, next, Microtask, obj);
+        },
+        json: function () {
+            index.algorithms.json.add(req, res, next, Microtask, obj);
+        }
+    });
+};
+
+exports.routes.close = function (req, res, next) {
+    res.format({
+        html: function () {
+            res.send(501, "not implemented");
+        },
+        json: function () {
+            if (req.errors.length) {
+                index.algorithms.json.error(req, res);
+            } else {
+                var microtask = req.attached.microtask;
+                microtask.closed_at = new Date();
+                microtask.action = req.attached.action.id;
+                microtask.save(function (err, action) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.send({status: "OK"});
+                    }
+                });
+            }
+        }
+    });
+};
+
+exports.routes.get = function (req, res, next) {
+    res.format({
+        html: function () {
+            index.algorithms.html.get(req, res, next, Microtask);
+        },
+        json: function () {
+            index.algorithms.json.get(req, res, next, Microtask);
+        }
+    });
+};
+
+/**
+ * Url Params
+ */
+
+exports.params = {};
+
+exports.params.id = function (req, res, next, inId) {
+    index.params.id(req, res, next, Microtask, inId);
+};
+
+/**
+ * Body Params
+ */
+
+exports.body = {
+    mandatory: {},
+    optional: {},
+    route: {
+        add : {},
+        close : {}
+    }
+};
+
+exports.body.mandatory.id = function (req, res, next) {
+    index.body.mandatory.id(req, res, next, Microtask);
+};
+
+exports.body.optional.id = function (req, res, next) {
+    index.body.optional.id(req, res, next, Microtask);
+};
+
+exports.body.mandatory.type = function (req, res, next) {
+    index.body.mandatory.regexp(req, res, next, "type", type, "Microtask Type");
+};
+
+exports.body.optional.type = function (req, res, next) {
+    index.body.optional.regexp(req, res, next, "type", type, "Microtask Type");
+};
+
+exports.body.mandatory.order = function (req, res, next) {
+    index.body.mandatory.integer(req, res, next, "order", 0);
+};
+
+exports.body.optional.order = function (req, res, next) {
+    index.body.optional.integer(req, res, next, "order", 0);
+};
+
+/**
+ * Checkers
+ */
+
+exports.checkers = {};
+
+exports.checkers.open = function (req, res, next) {
+    if (req.attached.microtask && req.attached.microtask.ended_at) {
+        req.errors.push({location: "status", message: "Microtask " + req.attached.action.id + " is already closed" });
+    }
+    next();
+};
