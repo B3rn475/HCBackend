@@ -255,6 +255,7 @@ app.route("/session")
     .get(index.query.optional.count,
         index.query.optional.since_id,
         index.query.optional.max_id,
+        session.query.optional.completed,
         session.routes.index)
     .post(session.routes.add);
 app.route("/session/:sessionId")
@@ -263,9 +264,27 @@ app.route("/session/:sessionId")
     .post(session.checkers.open,
         session.routes.complete);
 app.route("/session/:sessionId/action")
+    .get(index.query.optional.count,
+         index.query.optional.since_id,
+         index.query.optional.max_id,
+         action.query.optional.type,
+         action.query.optional.validity,
+         action.query.optional.completed,
+         image.query.optional.id,
+         tag.query.optional.id,
+         action.routes.index)
     .post(session.checkers.open,
-         action.body.mandatory.id,
-         session.routes.addAction);
+          image.body.mandatory.id,
+          user.body.mandatory.id,
+          action.body.mandatory.type,
+          action.body.route.add.tag,
+          action.routes.add)
+    .put(image.body.optional.id,
+         tag.body.optional.id,
+         action.checkers.routes.bulkValidity,
+         action.body.optional.type,
+         action.body.mandatory.validity,
+         action.routes.bulkValidity);
 
 /**
  * Action Routes
@@ -276,14 +295,18 @@ app.route("/action")
          index.query.optional.max_id,
          action.query.optional.type,
          action.query.optional.validity,
+         action.query.optional.completed,
          image.query.optional.id,
          tag.query.optional.id,
+         session.query.optional.id,
          action.routes.index)
-    .post(image.body.mandatory.id,
-         user.body.mandatory.id,
-         action.body.mandatory.type,
-         action.body.route.add.tag,
-         action.routes.add)
+    .post(session.body.mandatory.id,
+          session.checkers.open,
+          image.body.mandatory.id,
+          user.body.mandatory.id,
+          action.body.mandatory.type,
+          action.body.route.add.tag,
+          action.routes.add)
     .put(image.body.optional.id,
         tag.body.optional.id,
         action.checkers.routes.bulkValidity,

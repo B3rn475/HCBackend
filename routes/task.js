@@ -13,16 +13,16 @@ var Task = require("../models/task.js").model,
 exports.routes = {};
 
 exports.routes.index = function (req, res, next) {
-    var conditions = {};
-    if (req.attached.image) { conditions.image = req.attached.image.id; }
-    if (req.attached.collection) { conditions.image = { $in: req.attached.collection.images}; }
-    if (req.attached.completed !== undefined) { conditions.image.completed = {$exists: req.attached.completed}; }
+    var query = {};
+    if (req.attached.image) { query.image = req.attached.image.id; }
+    if (req.attached.collection) { query.image = { $in: req.attached.collection.images}; }
+    if (req.attached.completed !== undefined) { query.completed_at = {$exists: req.attached.completed}; }
     res.format({
         html: function () {
-            index.algorithms.html.list(req, res, next, Task, conditions);
+            index.algorithms.html.list(req, res, next, Task, query);
         },
         json: function () {
-            index.algorithms.json.list(req, res, next, Task, conditions);
+            index.algorithms.json.list(req, res, next, Task, query);
         }
     });
 };
@@ -41,18 +41,6 @@ exports.routes.add = function (req, res, next) {
 };
 
 exports.routes.complete = function (req, res, next) {
-    var query = {},
-        update = {completed_at: new Date()},
-        options = {};
-    if (req.attached.task) { query._id = req.attached.collection.id; }
-    res.format({
-        html: function () {
-            index.algorithms.html.update(req, res, next, Collection, query, update, options);
-        },
-        json: function () {
-            index.algorithms.json.update(req, res, next, Collection, query, update, options);
-        }
-    });
     res.format({
         html: function () {
             res.send(501, "not implemented");

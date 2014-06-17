@@ -5,9 +5,8 @@ var mongoose = require("mongoose");
 var mongooseAI = require("mongoose-auto-increment");
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
-                                actions : [{type: Number, min: 0, ref: "Action"}],
                                 started_at: {type: Date},
-                                ended_at: {type: Date}
+                                completed_at: {type: Date}
                                 }, { id: false});
 
 schema.virtual('id').get(function () { return this._id; });

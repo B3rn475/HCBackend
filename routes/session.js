@@ -12,12 +12,14 @@ var Session = require("../models/session.js").model,
 exports.routes = {};
 
 exports.routes.index = function (req, res, next) {
+    var query = {};
+    if (req.attached.completed !== undefined) { query.completed_at = {$exists: req.attached.completed}; }
     res.format({
         html: function () {
-            index.algorithms.html.list(req, res, next, Session);
+            index.algorithms.html.list(req, res, next, Session, query);
         },
         json: function () {
-            index.algorithms.json.list(req, res, next, Session);
+            index.algorithms.json.list(req, res, next, Session, query);
         }
     });
 };
@@ -71,34 +73,6 @@ exports.routes.complete = function (req, res, next) {
     });
 };
 
-exports.routes.addAction = function (req, res, next) {
-    res.format({
-        html: function () {
-            res.send(501, "not implemented");
-        },
-        json: function () {
-            if (req.errors.length) {
-                index.algorithms.json.error(req, res);
-            } else {
-                var session = req.attached.session,
-                    action = req.attached.action;
-                if (_.contains(session.actions, action.id)) {
-                    res.send({ status: "OK" });
-                } else {
-                    session.actions.push(action.id);
-                    session.save(function (err, session) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.send({ status: "OK" });
-                        }
-                    });
-                }
-            }
-        }
-    });
-};
-
 /**
  * Url Params
  */
@@ -108,6 +82,51 @@ exports.params = {};
 exports.params.id = function (req, res, next, inId) {
     index.params.id(req, res, next, Session, inId);
 };
+
+/**
+ * Query Params
+ */
+
+exports.query = {
+    mandatory: {},
+    optional: {},
+    route: {}
+};
+
+exports.query.mandatory.id = function (req, res, next) {
+    index.query.mandatory.id(req, res, index.query.register(req, res, next, Session.pname, "id"), Session);
+};
+
+exports.query.optional.id = function (req, res, next) {
+    index.query.optional.id(req, res, index.query.register(req, res, next, Session.pname, "id"), Session);
+};
+
+exports.query.mandatory.completed = function (req, res, next) {
+    index.query.mandatory.boolean(req, res, index.query.register(req, res, next, "completed"), "completed");
+};
+
+exports.query.optional.completed = function (req, res, next) {
+    index.query.optional.boolean(req, res, index.query.register(req, res, next, "completed"), "completed");
+};
+
+/**
+ * Body Params
+ */
+
+exports.body = {
+    mandatory: {},
+    optional: {},
+    route: { }
+};
+
+exports.body.mandatory.id = function (req, res, next) {
+    index.body.mandatory.id(req, res, next, Session);
+};
+
+exports.body.optional.id = function (req, res, next) {
+    index.body.optional.id(req, res, next, Session);
+};
+
 
 /**
  * Checkers
@@ -121,7 +140,7 @@ exports.checkers.open = function (req, res, next) {
             res.send(501, "not implemented");
         },
         json: function () {
-            if (req.attached.session.ended_at) {
+            if (req.attached.session && req.attached.session.completed_at) {
                 res.send(400, { status: "KO", error: "Session " + req.attached.session.id + " is already closed" });
             } else {
                 next();

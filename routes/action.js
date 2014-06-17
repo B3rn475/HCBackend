@@ -21,9 +21,11 @@ exports.routes = {};
 exports.routes.index = function (req, res, next) {
     var conditions = {};
     if (req.attached.type) { conditions.type = req.attached.type; }
-    if (req.attached.validity) { conditions.validity = req.attached.validity; }
+    if (req.attached.validity !== undefined) { conditions.validity = req.attached.validity; }
+    if (req.attached.completed !== undefined) { conditions.completed_at = {$exists: req.attached.completed}; }
     if (req.attached.image) { conditions.image = req.attached.image.id; }
     if (req.attached.tag) { conditions.tag = req.attached.tag.id; }
+    if (req.attached.session) { conditions.session = req.attached.session.id; }
     res.format({
         html: function () {
             index.algorithms.html.list(req, res, next, Action, conditions);
@@ -36,6 +38,7 @@ exports.routes.index = function (req, res, next) {
 
 exports.routes.add = function (req, res, next) {
     var obj = {type : req.attached.type};
+    if (req.attached.session) { obj.session = req.attached.session.id; }
     if (req.attached.image) { obj.image = req.attached.image.id; }
     if (req.attached.user) { obj.user = req.attached.user.id; }
     if (req.attached.tag) { obj.tag = req.attached.tag.id; }
@@ -65,7 +68,7 @@ exports.routes.complete = function (req, res, next) {
                 if (action.type === "segmentation") {
                     action.segmentation = req.attached.segmentation.id;
                 }
-                action.ended_at = new Date();
+                action.completed_at = new Date();
                 action.save(function (err, action) {
                     if (err) {
                         next(err);
@@ -169,6 +172,14 @@ exports.query.optional.validity = function (req, res, next) {
     index.query.optional.boolean(req, res, index.query.register(req, res, next, "validity"), "validity");
 };
 
+exports.query.mandatory.completed = function (req, res, next) {
+    index.query.mandatory.boolean(req, res, index.query.register(req, res, next, "completed"), next, "completed");
+};
+
+exports.query.optional.completed = function (req, res, next) {
+    index.query.optional.boolean(req, res, index.query.register(req, res, next, "completed"), "completed");
+};
+
 /**
  * Body Params
  */
@@ -240,14 +251,14 @@ exports.checkers = {
 };
 
 exports.checkers.open = function (req, res, next) {
-    if (req.attached.action && req.attached.action.ended_at) {
+    if (req.attached.action && req.attached.action.completed_at) {
         req.errors.push({location: "status", message: "Action " + req.attached.action.id + " is already completed" });
     }
     next();
 };
 
 exports.checkers.completed = function (req, res, next) {
-    if (req.attached.action && !req.attached.action.ended_at) {
+    if (req.attached.action && !req.attached.action.completed_at) {
         req.errors.push({location: "status", message: "Action " + req.attached.action.id + " is still open" });
     }
     next();
