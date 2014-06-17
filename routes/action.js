@@ -138,7 +138,7 @@ exports.body.route.close.tag = function (req, res, next) {
 exports.body.route.close.segmentation = function (req, res, next) {
     if (req.attached.action
             && req.attached.action.type === "segmentation") {
-        index.body.id(req, res, next, Segmentation);
+        index.body.mandatory.id(req, res, next, Segmentation);
     } else {
         next();
     }
