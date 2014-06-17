@@ -125,10 +125,13 @@ app.put("/mask/:maskId", mask.body.mandatory.payload,
         mask.body.mandatory.quality,
         mask.body.mandatory.segmentations,
         mask.routes.update);
-app.put("/action/:actionId", action.checkers.open,
+app.put("/action/:actionId/close", action.checkers.open,
         action.body.route.close.tag,
         action.body.route.close.segmentation,
         action.routes.close);
+app.put("/action/:actionId/validity", action.checkers.closed,
+        action.body.mandatory.validity,
+        action.routes.validity);
 app.put("/microtask/:microtaskId", microtask.checkers.open,
         action.body.mandatory.id,
         microtask.routes.close);

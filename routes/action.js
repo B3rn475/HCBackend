@@ -73,6 +73,29 @@ exports.routes.close = function (req, res, next) {
     });
 };
 
+exports.routes.validity = function (req, res, next) {
+    res.format({
+        html: function () {
+            res.send(501, "not implemented");
+        },
+        json: function () {
+            if (req.errors.length) {
+                index.algorithms.json.error(req, res);
+            } else {
+                var action = req.attached.action;
+                action.valid = false;
+                action.save(function (err, action) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.send({status: "OK"});
+                    }
+                });
+            }
+        }
+    });
+};
+
 exports.routes.get = function (req, res, next) {
     res.format({
         html: function () {
@@ -152,6 +175,14 @@ exports.body.optional.type = function (req, res, next) {
     index.body.optional.regexp(req, res, next, "type", type, "Action Type");
 };
 
+exports.body.mandatory.validity = function (req, res, next) {
+    index.body.mandatory.boolean(req, res, next, "validity");
+};
+
+exports.body.optional.validity = function (req, res, next) {
+    index.body.optional.boolean(req, res, next, "validity", true);
+};
+
 /**
  * Checkers
  */
@@ -161,6 +192,13 @@ exports.checkers = {};
 exports.checkers.open = function (req, res, next) {
     if (req.attached.action && req.attached.action.ended_at) {
         req.errors.push({location: "status", message: "Action " + req.attached.action.id + " is already closed" });
+    }
+    next();
+};
+
+exports.checkers.closed = function (req, res, next) {
+    if (req.attached.action && !req.attached.action.ended_at) {
+        req.errors.push({location: "status", message: "Action " + req.attached.action.id + " is still open" });
     }
     next();
 };
