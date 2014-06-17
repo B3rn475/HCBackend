@@ -6,6 +6,7 @@ var mongooseAI = require("mongoose-auto-increment");
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                     type: {type: String, enum: ["tagging", "segmentation"]},
+                                    task: {type: Number, min: 0, ref: "Task"},
                                     action: {type: Number, min: 0, ref: "Action"},
                                     order: {type: Number, min: 0},
                                     created_at: {type: Date},

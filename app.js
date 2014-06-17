@@ -127,6 +127,9 @@ app.route("/collection")
 app.route("/collection/:collectionId")
     .get(index.query.optional.populate,
         collection.routes.get);
+app.route("/collection/:collectionId/task")
+    .get(index.query.optional.populate,
+        task.routes.index);
 app.route("/collection/:collectionId/image")
     .post(image.body.mandatory.id,
          collection.routes.addImage)
@@ -200,6 +203,8 @@ app.route("/task")
          index.query.optional.since_id,
          index.query.optional.max_id,
          image.query.optional.id,
+         collection.query.optional.id,
+         task.checkers.route.index,
          task.query.optional.completed,
          task.routes.index)
     .post(image.body.mandatory.id,
@@ -212,8 +217,15 @@ app.route("/task/:taskId/user")
     .post(user.body.mandatory.id,
          task.routes.addUser);
 app.route("/task/:taskId/microtask")
-    .post(microtask.body.mandatory.id,
-         task.routes.addMicrotask);
+    .get(index.query.optional.count,
+         index.query.optional.since_id,
+         index.query.optional.max_id,
+         microtask.query.optional.completed,
+         microtask.routes.index)
+    .post(microtask.body.mandatory.type,
+          microtask.body.mandatory.order,
+          task.checkers.open,
+         microtask.routes.add);
 
 /**
  * Segmentation Routes
@@ -286,18 +298,22 @@ app.route("/action/:actionId")
  */
 app.route("/microtask")
     .get(index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        microtask.routes.index)
+         index.query.optional.since_id,
+         index.query.optional.max_id,
+         task.query.optional.id,
+         microtask.query.optional.completed,
+         microtask.routes.index)
     .post(microtask.body.mandatory.type,
-         microtask.body.mandatory.order,
-         microtask.routes.add);
+          microtask.body.mandatory.order,
+          task.body.mandatory.id,
+          microtask.routes.add);
 app.route("/microtask/:microtaskId")
-    .post(index.query.optional.populate,
-        microtask.routes.get)
+    .get(index.query.optional.populate,
+          microtask.routes.get)
     .put(microtask.checkers.open,
-        action.body.mandatory.id,
-        microtask.routes.complete);
+         action.body.mandatory.id,
+         task.checkers.open,
+         microtask.routes.complete);
 
 /**
  * Static Files

@@ -7,7 +7,6 @@ var mongooseAI = require("mongoose-auto-increment");
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                     image: {type: Number, min: 0, ref: "Image"},
                                     users : [{type: Number, min: 0, ref: "User"}],
-                                    microtasks : [{type: Number, min: 0, ref: "Microtask"}],
                                     created_at: {type: Date},
                                     completed_at: {type: Date}
                                 }, { id: false});

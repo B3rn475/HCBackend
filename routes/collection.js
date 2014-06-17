@@ -113,3 +113,21 @@ exports.params = {};
 exports.params.id = function (req, res, next, inId) {
     index.params.id(req, res, next, Collection, inId);
 };
+
+/**
+ * Query Oarans
+ */
+
+exports.query = {
+    mandatory: {},
+    optional: {},
+    route: {}
+};
+
+exports.query.mandatory.id = function (req, res, next) {
+    index.query.mandatory.id(req, res, index.query.register(req, res, next, Collection.pname, "id"), Collection);
+};
+
+exports.query.optional.id = function (req, res, next) {
+    index.query.optional.id(req, res, index.query.register(req, res, next, Collection.pname, "id"), Collection);
+};

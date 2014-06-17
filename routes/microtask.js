@@ -17,18 +17,22 @@ var type = /tagging|segmentation$/;
 exports.routes = {};
 
 exports.routes.index = function (req, res, next) {
+    var query = {};
+    if (req.attached.task) { query.task = req.attached.task.id; }
+    if (req.attached.completed !== undefined) { query.completed_at = {$exists: req.attached.completed }; }
     res.format({
         html: function () {
-            index.algorithms.html.list(req, res, next, Microtask);
+            index.algorithms.html.list(req, res, next, Microtask, query);
         },
         json: function () {
-            index.algorithms.json.list(req, res, next, Microtask);
+            index.algorithms.json.list(req, res, next, Microtask, query);
         }
     });
 };
 
 exports.routes.add = function (req, res, next) {
     var obj = {type: req.attached.type, order: req.attached.order };
+    if (req.attached.task) { obj.task = req.attached.task.id; }
     res.format({
         html: function () {
             index.algorithms.html.add(req, res, next, Microtask, obj);
@@ -85,6 +89,24 @@ exports.params.id = function (req, res, next, inId) {
 };
 
 /**
+ * Query Params
+ */
+
+exports.query = {
+    mandatory: {},
+    optional: {},
+    route: {}
+};
+
+exports.query.mandatory.completed = function (req, res, next) {
+    index.query.mandatory.boolean(req, res, index.query.register(req, res, next, "completed"), "completed");
+};
+
+exports.query.optional.completed = function (req, res, next) {
+    index.query.optional.boolean(req, res, index.query.register(req, res, next, "completed"), "completed");
+};
+
+/**
  * Body Params
  */
 
@@ -128,7 +150,7 @@ exports.body.optional.order = function (req, res, next) {
 exports.checkers = {};
 
 exports.checkers.open = function (req, res, next) {
-    if (req.attached.microtask && req.attached.microtask.ended_at) {
+    if (req.attached.microtask && req.attached.microtask.completed_at) {
         req.errors.push({location: "status", message: "Microtask " + req.attached.action.id + " is already closed" });
     }
     next();
