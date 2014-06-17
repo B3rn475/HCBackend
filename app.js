@@ -317,7 +317,7 @@ app.route("/microtask")
 app.route("/microtask/:microtaskId")
     .get(index.query.optional.populate,
           microtask.routes.get)
-    .put(microtask.checkers.open,
+    .post(microtask.checkers.open,
          action.body.mandatory.id,
          task.checkers.open,
          microtask.routes.complete);
