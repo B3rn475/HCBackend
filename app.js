@@ -129,6 +129,7 @@ app.route("/collection/:collectionId")
         collection.routes.get);
 app.route("/collection/:collectionId/task")
     .get(index.query.optional.populate,
+        task.query.optional.completed,
         task.routes.index);
 app.route("/collection/:collectionId/image")
     .post(image.body.mandatory.id,
