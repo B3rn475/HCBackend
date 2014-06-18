@@ -296,6 +296,8 @@ return the list of masks
 * __query__ : count : __optional__ : max number of items to return (max: 100)
 * __query__ : max\_id : __optional__ : upper bound for the id to return (included)
 * __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : image : __optional__ : returns only mask related to that image
+* __query__ : tag : __optional__ : returns only mask related to that tag
 
 **POST** : /mask
 add a new mask

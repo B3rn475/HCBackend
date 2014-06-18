@@ -200,6 +200,8 @@ app.route("/mask")
     .get(index.query.optional.count,
         index.query.optional.since_id,
         index.query.optional.max_id,
+        image.query.optional.id,
+        tag.query.optional.id,
         mask.routes.index)
     .post(image.body.mandatory.id,
          tag.body.mandatory.id,

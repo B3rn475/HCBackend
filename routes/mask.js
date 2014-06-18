@@ -12,12 +12,15 @@ var fs = require("fs"),
 exports.routes = {};
 
 exports.routes.index = function (req, res, next) {
+    var conditions = {};
+    if (req.attached.image) { conditions.image = req.attached.image.id; }
+    if (req.attached.tag) { conditions.tag = req.attached.tag.id; }
     res.format({
         html: function () {
-            index.algorithms.html.list(req, res, next, Mask);
+            index.algorithms.html.list(req, res, next, Mask, conditions);
         },
         json: function () {
-            index.algorithms.json.list(req, res, next, Mask);
+            index.algorithms.json.list(req, res, next, Mask, conditions);
         }
     });
 };
