@@ -2,6 +2,7 @@
 "use strict";
 
 var Microtask = require("../models/microtask.js").model,
+    Task = require("../models/task.js").model,
     index = require("./index.js");
 
 /**
@@ -59,7 +60,21 @@ exports.routes.complete = function (req, res, next) {
                     if (err) {
                         next(err);
                     } else {
-                        res.send({status: "OK"});
+                        Microtask.count({task: microtask.task, completed_at : {$exists: false}}, function (err, count) {
+                            if (err) {
+                                next(err);
+                            } else {
+                                if (count === 0) {
+                                    Task.update({_id: microtask.task}, {$set: {completed_at: microtask.completed_at}}, function (err) {
+                                        if (err) {
+                                            next(err);
+                                        } else {
+                                            res.send({status: "OK"});
+                                        }
+                                    });
+                                }
+                            }
+                        });
                     }
                 });
             }
