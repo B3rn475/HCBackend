@@ -29,6 +29,46 @@ exports.middlewares.init = function (req, res, next) {
     next();
 };
 
+
+/**
+ * Error Handler
+ */
+
+exports.errorHandler = function (options) {
+    if (options === undefined || (options.dumpExceptions === false && options.showStack === false)) {
+        return function (err, req, res, next) {
+            res.format({
+                html: function () {
+                    res.send(500, "Internal Server Error");
+                },
+                json: function () {
+                    res.send(500, { status: "KO", errors: [{ location: "internal", message: "Internal Server Error" } ] });
+                }
+            });
+        };
+    } else {
+        return function (err, req, res, next) {
+            res.format({
+                html: function () {
+                    res.send(500, "Internal Server Error");
+                },
+                json: function () {
+                    var error = { location: "internal" };
+                    if (options.dumpExceptions) {
+                        error.message = err.message;
+                    } else {
+                        error.message = "Internal Server Error";
+                    }
+                    if (options.showStack) {
+                        error.stack = err.stack;
+                    }
+                    res.send(500, { status: "KO", errors: [error] });
+                }
+            });
+        };
+    }
+};
+
 /**
  * Routes
  */

@@ -364,9 +364,9 @@ app.use('/storage', express.static(__dirname + '/storage'));
 app.use(index.routes.invalidRoute);
 
 if ('development' === env) {
-    app.use(errorHandler({ dumpExceptions: true, showStack: true }));
+    app.use(index.errorHandler({ dumpExceptions: true, showStack: true }));
 } else if ('production' === env) {
-    app.use(errorHandler());
+    app.use(index.errorHandler());
 } else {
     console.error(clc.red("Unknown environment: ") + env);
     process.exit(1);
