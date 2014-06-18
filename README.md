@@ -82,18 +82,6 @@ fields:
 * updated_at: {type: Date}
 * midiaLocatior: {type: String} // virtual
 
-**Segmentation**
-
-fields:
-
-* id: { type: Number, min: 0, index: { unique: true }}
-* quality: { type: Number}
-* points: []
-    * x: { type: Number, min: 0}
-    * y: { type: Number, min: 0}
-    * color: {type: String, validate: /#([a-f]|[A-F]|[0-9]){3}(([a-f]|[A-F]|[0-9]){3})?\b/}
-    * removed: {type: Boolean}
-
 **Session**
 
 fields:
@@ -112,7 +100,13 @@ fields:
 * tag: **Tag**
 * user: **User**
 * type: {type: String, enum: ["tagging", "segmentation"]},
-* segmentation: **Segmentation**
+* segmentation: 
+    * quality: { type: Number}
+    * points: []
+        * x: { type: Number, min: 0}
+        * y: { type: Number, min: 0}
+        * color: {type: String, validate: /#([a-f]|[A-F]|[0-9]){3}(([a-f]|[A-F]|[0-9]){3})?\b/}
+        * removed: {type: Boolean}
 * started_at: {type: Date},
 * completed_at: {type: Date},
 * validity: {type: Boolean, default: true}
@@ -315,23 +309,6 @@ return the list of microtask related to this task
 
 **POST**  : /task/:taskId/microtask  
 add a new microtask (the same as /microtask, but with the task id explicit in the url)
-
-**Segmentation**
-________________
-**GET** : /segmentation  
-return the list of segmentations
-
-**POST** : /segmentation  
-add a new segmentation
-
-**GET** : /segmentation/count  
-return the number of segmentations
-
-**GET** : /segmentation/:segmentationId  
-return a segmentation
-
-**GET** : /segmentation/:segmentationId  
-update a segmentation
 
 **Session**
 ___________

@@ -86,9 +86,6 @@ app.param("maskId", mask.params.id);
 var task = require("./routes/task.js");
 app.param("taskId", task.params.id);
 
-var segmentation = require("./routes/segmentation.js");
-app.param("segmentationId", segmentation.params.id);
-
 var session = require("./routes/session.js");
 app.param("sessionId", session.params.id);
 
@@ -252,24 +249,6 @@ app.route("/task/:taskId/microtask")
          microtask.routes.add);
 
 /**
- * Segmentation Routes
- */
-app.route("/segmentation")
-    .get(index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        segmentation.routes.index)
-    .post(segmentation.body.mandatory.points,
-         segmentation.routes.add);
-app.route("/segmentation/count")
-    .get(segmentation.routes.count);
-app.route("/segmentation/:segmentationId")
-    .get(index.query.optional.populate,
-        segmentation.routes.get)
-    .put(segmentation.body.mandatory.quality,
-        segmentation.routes.update);
-
-/**
  * Session Routes
  */
 app.route("/session")
@@ -304,10 +283,10 @@ app.route("/session/:sessionId/action")
           action.routes.add)
     .put(image.body.optional.id,
          tag.body.optional.id,
-         action.checkers.routes.bulkValidity,
+         action.checkers.routes.validity,
          action.body.optional.type,
          action.body.mandatory.validity,
-         action.routes.bulkValidity);
+         action.routes.validity);
 
 /**
  * Action Routes
@@ -332,10 +311,10 @@ app.route("/action")
           action.routes.add)
     .put(image.body.optional.id,
         tag.body.optional.id,
-        action.checkers.routes.bulkValidity,
+        action.checkers.routes.validity,
         action.body.optional.type,
         action.body.mandatory.validity,
-        action.routes.bulkValidity);
+        action.routes.validity);
 app.route("/action/count")
     .get(action.routes.count);
 app.route("/action/:actionId")
@@ -343,10 +322,12 @@ app.route("/action/:actionId")
         action.routes.get)
     .post(action.checkers.open,
         action.body.route.complete.tag,
-        action.body.route.complete.segmentation,
+        action.body.route.complete.points,
         action.routes.complete)
-    .put(action.body.mandatory.validity,
-        action.routes.validity);
+    .put(action.body.route.update.validity,
+         action.body.route.update.quality,
+         action.checkers.routes.update,
+         action.routes.update);
 
 /**
  * Microtask Routes

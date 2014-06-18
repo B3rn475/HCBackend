@@ -2,9 +2,10 @@
 "use strict";
 
 var Action = require("../models/action.js").model,
-    Segmentation = require("../models/segmentation.js").model,
+    color = require("../models/action.js").regexp.color,
     Tag = require("../models/tag.js").model,
-    index = require("./index.js");
+    index = require("./index.js"),
+    _ = require("underscore-node");
 
 /**
  * RegExps
@@ -66,7 +67,7 @@ exports.routes.complete = function (req, res, next) {
                     action.tag = req.attached.tag.id;
                 }
                 if (action.type === "segmentation") {
-                    action.segmentation = req.attached.segmentation.id;
+                    action.segmentation = { points: req.attached.points };
                 }
                 action.completed_at = new Date();
                 action.save(function (err, action) {
@@ -81,7 +82,7 @@ exports.routes.complete = function (req, res, next) {
     });
 };
 
-exports.routes.validity = function (req, res, next) {
+exports.routes.update = function (req, res, next) {
     res.format({
         html: function () {
             res.send(501, "not implemented");
@@ -91,7 +92,8 @@ exports.routes.validity = function (req, res, next) {
                 index.algorithms.json.error(req, res);
             } else {
                 var action = req.attached.action;
-                action.validity = false;
+                if (req.attached.validity !== undefined) { action.validity = false; }
+                if (req.attached.quality !== undefined && action.segmentation !== null) { action.segmentation.quality = req.attached.quality; }
                 action.save(function (err, action) {
                     if (err) {
                         next(err);
@@ -104,7 +106,7 @@ exports.routes.validity = function (req, res, next) {
     });
 };
 
-exports.routes.bulkValidity = function (req, res, next) {
+exports.routes.validity = function (req, res, next) {
     var query = {},
         update = {$set: {validity: req.attached.validity}},
         options = {multi: true};
@@ -200,7 +202,8 @@ exports.body = {
     optional: {},
     route: {
         add : {},
-        complete : {}
+        complete : {},
+        update : {}
     }
 };
 
@@ -210,6 +213,43 @@ exports.body.mandatory.id = function (req, res, next) {
 
 exports.body.optional.id = function (req, res, next) {
     index.body.optional.id(req, res, next, Action);
+};
+
+exports.body.mandatory.type = function (req, res, next) {
+    index.body.mandatory.regexp(req, res, next, "type", type, "Action Type");
+};
+
+exports.body.optional.type = function (req, res, next) {
+    index.body.optional.regexp(req, res, next, "type", type, "Action Type");
+};
+
+exports.body.mandatory.validity = function (req, res, next) {
+    index.body.mandatory.boolean(req, res, next, "validity");
+};
+
+exports.body.optional.validity = function (req, res, next) {
+    index.body.optional.boolean(req, res, next, "validity");
+};
+
+exports.body.route.update.validity = function (req, res, next) {
+    if (req.attached.action) {
+        if (req.attached.action.type === "tagging"){
+            exports.body.mandatory.validity(req, res, next);
+        }
+        if (req.attached.action.type === "segmentation"){
+            exports.body.optional.validity(req, res, next);
+        }
+    } else {
+        next();
+    }
+};
+
+exports.body.route.update.quality = function (req, res, next) {
+    if (req.attached.action && req.attached.action.type === "segmentation") {
+        index.body.optional.float(req, res, next, "quality");
+    } else {
+        next();
+    }
 };
 
 exports.body.route.add.tag = function (req, res, next) {
@@ -228,29 +268,40 @@ exports.body.route.complete.tag = function (req, res, next) {
     }
 };
 
-exports.body.route.complete.segmentation = function (req, res, next) {
+var checkInteger = function (int, min, max) {
+    if (_.isUndefined(int)) { return false; }
+    if (!_.isNumber(int)) { return false; }
+    if (Math.floor(int) !== int) { return false; }
+    if (min && int < min) { return false; }
+    if (max && int > max) { return false; }
+    return true;
+};
+
+var checkPoint = function (item) {
+    if (!checkInteger(item.x, 0)) { return false; }
+    if (!checkInteger(item.y, 0)) { return false; }
+    if (typeof item.color !== "string") { return false; }
+    if (!color.test(item.color)) {return false; }
+    if (!_.isBoolean(item.removed)) { return false; }
+    return true;
+};
+
+var mapPoint = function (item) {
+    return {
+        x: item.x,
+        y: item.y,
+        color: {r: item.color.r, g: item.color.g, b: item.color.b},
+        removed: item.removed
+    };
+};
+
+exports.body.route.complete.points = function (req, res, next) {
     if (req.attached.action
             && req.attached.action.type === "segmentation") {
-        index.body.mandatory.id(req, res, next, Segmentation);
+        index.body.mandatory.array(req, res, next, "points", checkPoint, mapPoint);
     } else {
         next();
     }
-};
-
-exports.body.mandatory.type = function (req, res, next) {
-    index.body.mandatory.regexp(req, res, next, "type", type, "Action Type");
-};
-
-exports.body.optional.type = function (req, res, next) {
-    index.body.optional.regexp(req, res, next, "type", type, "Action Type");
-};
-
-exports.body.mandatory.validity = function (req, res, next) {
-    index.body.mandatory.boolean(req, res, next, "validity");
-};
-
-exports.body.optional.validity = function (req, res, next) {
-    index.body.optional.boolean(req, res, next, "validity", true);
 };
 
 /**
@@ -275,7 +326,18 @@ exports.checkers.completed = function (req, res, next) {
     next();
 };
 
-exports.checkers.routes.bulkValidity = function (req, res, next) {
+exports.checkers.routes.update = function (req, res, next) {
+    if (req.attached.action){
+        if (req.attached.action.type === "segmentation"){
+            if (req.attached.validity === undefined && req.attached.quality === undefined) {
+                req.errors.push({location: "body", name: "validity|quality", message: "Missing validity or quality Body paramaters. At least one is required" });
+            }
+        }
+    }
+    next();
+};
+
+exports.checkers.routes.validity = function (req, res, next) {
     if (!(req.attached.image || req.attached.tag)) {
         req.errors.push({location: "body", name: "image|tag", message: "Missing Image or Tag id. At least one is required as filter" });
     }
