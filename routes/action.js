@@ -21,20 +21,20 @@ exports.routes = {};
 
 exports.routes.index = function (req, res, next) {
     var conditions = {},
-        fields = {segmentation: { points : false}};
+        fields = "";
     if (req.attached.type) { conditions.type = req.attached.type; }
     if (req.attached.validity !== undefined) { conditions.validity = req.attached.validity; }
     if (req.attached.completed !== undefined) { conditions.completed_at = {$exists: req.attached.completed}; }
     if (req.attached.image) { conditions.image = req.attached.image.id; }
     if (req.attached.tag) { conditions.tag = req.attached.tag.id; }
     if (req.attached.session) { conditions.session = req.attached.session.id; }
-    if (req.attached.populate !== undefined) { fields.segmentation.points = req.attached.populate; }
+    if (req.attached.populate === undefined && !req.attached.populate) { fields = "-segmentation.points"; }
     res.format({
         html: function () {
-            index.algorithms.html.list(req, res, next, Action, conditions);
+            index.algorithms.html.list(req, res, next, Action, conditions, fields);
         },
         json: function () {
-            index.algorithms.json.list(req, res, next, Action, conditions);
+            index.algorithms.json.list(req, res, next, Action, conditions, fields);
         }
     });
 };
