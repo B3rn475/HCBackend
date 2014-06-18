@@ -32,7 +32,6 @@ exports.routes.add = function (req, res, next) {
             fs.writeFile("./storage/image/" + image.id.toString() + ".jpg", new Buffer(req.attached.payload, "base64"), next);
         };
     if (req.attached.pose) { obj.pose = req.attached.pose; }
-    console.log(obj);
     res.format({
         html: function () {
             index.algorithms.html.add(req, res, next, Image, obj, cb);
