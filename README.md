@@ -57,6 +57,7 @@ fields:
 fields:
 
 * id: { type: Number, min: 0, index: { unique: true }, select: false}
+* name: {type: String, validate: /[a-zA-Z ]+$/}
 * aliases: []
     * language: {type: String, validate: /[a-z]{2}\-[A-Z]{2}$/}
     * name: {type: String, validate: /[a-zA-Z ]+$/}
