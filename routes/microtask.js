@@ -115,7 +115,7 @@ exports.body = {
     optional: {},
     route: {
         add : {},
-        close : {}
+        complete : {}
     }
 };
 
@@ -151,7 +151,7 @@ exports.checkers = {};
 
 exports.checkers.open = function (req, res, next) {
     if (req.attached.microtask && req.attached.microtask.completed_at) {
-        req.errors.push({location: "status", message: "Microtask " + req.attached.action.id + " is already closed" });
+        req.errors.push({location: "status", message: "Microtask " + req.attached.action.id + " is already completed" });
     }
     next();
 };
