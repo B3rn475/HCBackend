@@ -267,6 +267,8 @@ adds a new user (if it is already there returns the id)
 **GET** : /user/count
 returns the number of users
 
+* __query__ : app_id : __optional__ : counts only users from a particular application
+
 **GET** : /user/:userId  
 returns a user
 
@@ -334,6 +336,9 @@ adds a new mask
 **GET** : /mask/count  
 returns the number of mask
 
+* __query__ : image : __optional__ : counts only mask related to that image
+* __query__ : tag : __optional__ : counts only mask related to that tag
+
 **GET** : /mask/:maskId  
 returns a mask
 
@@ -364,6 +369,10 @@ adds a new task
 
 **GET** : /task/count  
 returns the number of tasks
+
+* __query__ : image : __optional__ : counts only tasks related to that image (cannot be used with collection)
+* __query__ : collection : __optional__ : counts only tasks related to images in that collection (cannot be used with image)
+* __query__ : completed : __optional__ : counts only open or completed tasks
 
 **GET** : /task/:taskId  
 returns a task
@@ -405,6 +414,8 @@ adds a new session
 
 ***GET** : /session/count
 returns the number of sessions
+
+* __query__ : completed : __optional__ : counts only open or completed sessions
 
 **GET** : /session/:sessionId  
 returns a session
@@ -453,6 +464,7 @@ returns the list of actions
 * __query__ : tag : __optional__ : returns only the action related to that tag
 * __query__ : completed : __optional__ : returns only the completed or not completed actions
 * __query__ : validity : __optional__ : returns only the valid or not valid actions
+* __query__ : populate : __optional__ : returns even the segmentations points
 
 **POST** : /action  
 adds a new action
@@ -473,6 +485,12 @@ updates all the actions
 
 **GET** : /action/count  
 returns the number of actions
+
+* __query__ : type : __optional__ : counts only the action of that type
+* __query__ : image : __optional__ : counts only the action related to that image
+* __query__ : tag : __optional__ : counts only the action related to that tag
+* __query__ : completed : __optional__ : counts only the completed or not completed actions
+* __query__ : validity : __optional__ : counts only the valid or not valid actions
 
 **GET** : /action/:actionId  
 returns an action
@@ -495,6 +513,7 @@ returns the list of microtasks
 * __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
 * __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 * __query__ : task : __optional : returns only the microtasks related to that task
+* __query__ : completed : __optional : returns only the open or completed tasks
 
 **POST** : /microtask  
 adds a new microtask
@@ -505,6 +524,9 @@ adds a new microtask
 
 **GET** : /microtask/count  
 returns the number of microtasks
+
+* __query__ : task : __optional : counts only the microtasks related to that task
+* __query__ : completed : __optional : counts only the open or completed tasks
 
 **GET** : /microtask/:microtaskId  
 returns a microtask

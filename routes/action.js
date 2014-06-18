@@ -28,6 +28,7 @@ exports.routes.index = function (req, res, next) {
     if (req.attached.image) { conditions.image = req.attached.image.id; }
     if (req.attached.tag) { conditions.tag = req.attached.tag.id; }
     if (req.attached.session) { conditions.session = req.attached.session.id; }
+    if (req.attached.populate !== undefined) { fields.segmentation.points = req.attached.populate; }
     res.format({
         html: function () {
             index.algorithms.html.list(req, res, next, Action, conditions);
@@ -141,12 +142,19 @@ exports.routes.get = function (req, res, next) {
 };
 
 exports.routes.count = function (req, res, next) {
+    var conditions = {};
+    if (req.attached.type) { conditions.type = req.attached.type; }
+    if (req.attached.validity !== undefined) { conditions.validity = req.attached.validity; }
+    if (req.attached.completed !== undefined) { conditions.completed_at = {$exists: req.attached.completed}; }
+    if (req.attached.image) { conditions.image = req.attached.image.id; }
+    if (req.attached.tag) { conditions.tag = req.attached.tag.id; }
+    if (req.attached.session) { conditions.session = req.attached.session.id; }
     res.format({
         html: function () {
-            index.algorithms.html.count(req, res, next, Action);
+            index.algorithms.html.count(req, res, next, Action, conditions);
         },
         json: function () {
-            index.algorithms.json.count(req, res, next, Action);
+            index.algorithms.json.count(req, res, next, Action, conditions);
         }
     });
 };
@@ -235,10 +243,10 @@ exports.body.optional.validity = function (req, res, next) {
 
 exports.body.route.update.validity = function (req, res, next) {
     if (req.attached.action) {
-        if (req.attached.action.type === "tagging"){
+        if (req.attached.action.type === "tagging") {
             exports.body.mandatory.validity(req, res, next);
         }
-        if (req.attached.action.type === "segmentation"){
+        if (req.attached.action.type === "segmentation") {
             exports.body.optional.validity(req, res, next);
         }
     } else {
@@ -329,8 +337,8 @@ exports.checkers.completed = function (req, res, next) {
 };
 
 exports.checkers.routes.update = function (req, res, next) {
-    if (req.attached.action){
-        if (req.attached.action.type === "segmentation"){
+    if (req.attached.action) {
+        if (req.attached.action.type === "segmentation") {
             if (req.attached.validity === undefined && req.attached.quality === undefined) {
                 req.errors.push({location: "body", name: "validity|quality", message: "Missing validity or quality Body paramaters. At least one is required" });
             }

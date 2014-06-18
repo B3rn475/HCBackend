@@ -162,7 +162,8 @@ app.route("/user")
          user.query.optional.app_id,
          user.routes.index);
 app.route("/user/count")
-    .get(user.routes.count);
+    .get(user.query.optional.app_id,
+         user.routes.count);
 app.route("/user/:userId")
     .get(user.routes.get)
     .put(user.body.mandatory.quality,
@@ -210,7 +211,9 @@ app.route("/mask")
          mask.body.mandatory.segmentations,
          mask.routes.add);
 app.route("/mask/count")
-    .get(mask.routes.count);
+    .get(image.query.optional.id,
+         tag.query.optional.id,
+         mask.routes.count);
 app.route("/mask/:maskId")
     .get(index.query.optional.populate,
         mask.routes.get)
@@ -234,7 +237,11 @@ app.route("/task")
     .post(image.body.mandatory.id,
          task.routes.add);
 app.route("/task/count")
-    .get(task.routes.count);
+    .get(image.query.optional.id,
+         collection.query.optional.id,
+         task.checkers.route.index,
+         task.query.optional.completed,
+         task.routes.count);
 app.route("/task/:taskId")
     .get(index.query.optional.populate,
         task.routes.get)
@@ -264,7 +271,8 @@ app.route("/session")
         session.routes.index)
     .post(session.routes.add);
 app.route("/session/count")
-    .get(session.routes.count);
+    .get(session.query.optional.completed,
+         session.routes.count);
 app.route("/session/:sessionId")
     .get(index.query.optional.populate,
         session.routes.get)
@@ -296,7 +304,8 @@ app.route("/session/:sessionId/action")
  * Action Routes
  */
 app.route("/action")
-    .get(index.query.optional.count,
+    .get(index.query.optional.populate,
+         index.query.optional.count,
          index.query.optional.since_id,
          index.query.optional.max_id,
          action.query.optional.type,
@@ -321,7 +330,13 @@ app.route("/action")
         action.body.mandatory.validity,
         action.routes.validity);
 app.route("/action/count")
-    .get(action.routes.count);
+    .get(action.query.optional.type,
+         action.query.optional.validity,
+         action.query.optional.completed,
+         image.query.optional.id,
+         tag.query.optional.id,
+         session.query.optional.id,
+         action.routes.count);
 app.route("/action/:actionId")
     .get(index.query.optional.populate,
         action.routes.get)
@@ -349,7 +364,9 @@ app.route("/microtask")
           task.body.mandatory.id,
           microtask.routes.add);
 app.route("/microtask/count")
-    .get(microtask.routes.count);
+    .get(task.query.optional.id,
+         microtask.query.optional.completed,
+         microtask.routes.count);
 app.route("/microtask/:microtaskId")
     .get(index.query.optional.populate,
           microtask.routes.get)

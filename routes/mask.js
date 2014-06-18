@@ -58,12 +58,15 @@ exports.routes.get = function (req, res, next) {
 };
 
 exports.routes.count = function (req, res, next) {
+    var conditions = {};
+    if (req.attached.image) { conditions.image = req.attached.image.id; }
+    if (req.attached.tag) { conditions.tag = req.attached.tag.id; }
     res.format({
         html: function () {
-            index.algorithms.html.count(req, res, next, Mask);
+            index.algorithms.html.count(req, res, next, Mask, conditions);
         },
         json: function () {
-            index.algorithms.json.count(req, res, next, Mask);
+            index.algorithms.json.count(req, res, next, Mask, conditions);
         }
     });
 };

@@ -88,12 +88,16 @@ exports.routes.get = function (req, res, next) {
 };
 
 exports.routes.count = function (req, res, next) {
+    var query = {};
+    if (req.attached.image) { query.image = req.attached.image.id; }
+    if (req.attached.collection) { query.image = { $in: req.attached.collection.images}; }
+    if (req.attached.completed !== undefined) { query.completed_at = {$exists: req.attached.completed}; }
     res.format({
         html: function () {
-            index.algorithms.html.count(req, res, next, Task);
+            index.algorithms.html.count(req, res, next, Task, query);
         },
         json: function () {
-            index.algorithms.json.count(req, res, next, Task);
+            index.algorithms.json.count(req, res, next, Task, query);
         }
     });
 };
