@@ -167,11 +167,11 @@ exports.query = {
 };
 
 exports.query.mandatory.id = function (req, res, next) {
-    index.query.mandatory.id(req, res, index.query.register(req, res, next, Tag.pname), Tag);
+    index.query.mandatory.id(req, res, index.query.register(req, res, next, Tag.pname, "id"), Tag);
 };
 
 exports.query.optional.id = function (req, res, next) {
-    index.query.optional.id(req, res, index.query.register(req, res, next, Tag.pname), Tag);
+    index.query.optional.id(req, res, index.query.register(req, res, next, Tag.pname, "id"), Tag);
 };
 
 /**
