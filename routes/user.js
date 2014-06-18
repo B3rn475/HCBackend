@@ -138,7 +138,9 @@ exports.body.route.get.exist = function (req, res, next) {
             if (err) {
                 next(err);
             } else {
-                req.attached.user = user;
+                if (user) {
+                    req.attached.user = user;
+                }
                 next();
             }
         });
