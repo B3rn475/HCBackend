@@ -362,7 +362,7 @@ app.route("/microtask")
           microtask.body.mandatory.order,
           task.body.mandatory.id,
           microtask.routes.add);
-app.route("/microtask")
+app.route("/microtask/count")
     .get(microtask.routes.count);
 app.route("/microtask/:microtaskId")
     .get(index.query.optional.populate,
