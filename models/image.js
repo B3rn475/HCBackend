@@ -8,9 +8,20 @@ var computeMediaLocator = function (id) {
     return "/storage/image/" + id + ".jpg";
 };
 
+exports.regexp = {};
+exports.regexp.location = /head|torso|left_arm|right_arm|legs|feet/;
+
+var part = mongoose.Schema({location: {type: String, validate: exports.regexp.location},
+                            x0 : { type: Number, min: 0},
+                            y0 : { type: Number, min: 0},
+                            x1 : { type: Number, min: 0},
+                            y1 : { type: Number, min: 0}},
+                           {_id: false, id: false});
+
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                     width: { type: Number, min: 1},
-                                    height: { type: Number, min: 1}
+                                    height: { type: Number, min: 1},
+                                    pose: [part]
                                 }, { id: false});
 
 schema.virtual('id').get(function () { return this._id; });

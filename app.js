@@ -104,16 +104,19 @@ app.param("microtaskId", microtask.params.id);
  */
 app.route("/image")
     .post(image.body.mandatory.width,
-        image.body.mandatory.height,
-        image.body.mandatory.payload,
-        image.routes.add)
+          image.body.mandatory.height,
+          image.body.mandatory.payload,
+          image.body.optional.pose,
+          image.routes.add)
     .get(index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        image.routes.index);
+         index.query.optional.since_id,
+         index.query.optional.max_id,
+         image.routes.index);
 app.route("/image/:imageId")
     .get(index.query.optional.populate,
-        image.routes.get);
+         image.routes.get)
+    .put(image.body.mandatory.pose,
+         image.routes.update);
 app.route("/image/:imageId/tag")
     .get(index.query.optional.count,
          index.query.optional.since_id,
