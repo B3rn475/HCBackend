@@ -320,6 +320,9 @@ return the list of tasks
 * __query__ : count : __optional__ : max number of items to return (max: 100)
 * __query__ : max\_id : __optional__ : upper bound for the id to return (included)
 * __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : image : __optional__ : returns only tasks related to that image (cannot be used with collection)
+* __query__ : collection : __optional__ : returns only tasks related to images in that collection (cannot be used with image)
+* __query__ : completed : __optional__ : returns only open or completed tasks
 
 **POST** : /task
 add a new task
@@ -355,6 +358,7 @@ return the list of sessions
 * __query__ : count : __optional__ : max number of items to return (max: 100)
 * __query__ : max\_id : __optional__ : upper bound for the id to return (included)
 * __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : completed : __optional__ : returns only open or completed sessions
 
 **POST** : /session
 add a new session
@@ -374,6 +378,11 @@ return the actions related to this session (same as /action?session=:sessionId)
 * __query__ : count : __optional__ : max number of items to return (max: 100)
 * __query__ : max\_id : __optional__ : upper bound for the id to return (included)
 * __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : type : __optional__ : returns only the action of that type
+* __query__ : image : __optional__ : returns only the action related to that image
+* __query__ : tag : __optional__ : returns only the action related to that tag
+* __query__ : completed : __optional__ : returns only the completed or not completed actions
+* __query__ : validity : __optional__ : returns only the valid or not valid actions
 
 **POST** : /session/:sessionId/action
 add a new action to the session (the same as /action, but with the session id explicit in the url)
