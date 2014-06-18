@@ -45,6 +45,29 @@ exports.routes.get = function (req, res, next) {
     });
 };
 
+exports.routes.update = function (req, res, next) {
+    var segmentation = req.attached.segmentation;
+    res.format({
+        html: function () {
+            res.send(501, "not implemented");
+        },
+        json: function () {
+            if (req.errors.length) {
+                index.algorithms.json.error(req, res);
+            } else {
+                segmentation.quality = req.attached.quality;
+                segmentation.save(function (err, user) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.send({ status: "OK"});
+                    }
+                });
+            }
+        }
+    });
+};
+
 /**
  * Url Params
  */
@@ -101,4 +124,12 @@ exports.body.mandatory.points = function (req, res, next) {
 
 exports.body.optional.points = function (req, res, next) {
     index.body.optional.array(req, res, next, "points", checkPoint, mapPoint);
+};
+
+exports.body.mandatory.quality = function (req, res, next) {
+    index.body.mandatory.float(req, res, next, "quality");
+};
+
+exports.body.optional.quality = function (req, res, next) {
+    index.body.optional.float(req, res, next, "quality");
 };

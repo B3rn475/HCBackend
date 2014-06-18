@@ -23,14 +23,25 @@ exports.routes.index = function (req, res, next) {
 
 exports.routes.add = function (req, res, next) {
     var obj = {app_id: req.attached.app_id, app_user_id: req.attached.app_user_id};
-    res.format({
-        html: function () {
-            index.algorithms.html.add(req, res, next, User, obj);
-        },
-        json: function () {
-            index.algorithms.json.add(req, res, next, User, obj);
-        }
-    });
+    if (req.attached.user === undefined) {
+        res.format({
+            html: function () {
+                index.algorithms.html.add(req, res, next, User, obj);
+            },
+            json: function () {
+                index.algorithms.json.add(req, res, next, User, obj);
+            }
+        });
+    } else {
+        res.format({
+            html: function () {
+                res.send(501, "not implemented");
+            },
+            json: function () {
+                res.send({ status: "OK", id: req.attached.user.id});
+            }
+        });
+    }
 };
 
 exports.routes.get = function (req, res, next) {
@@ -40,6 +51,29 @@ exports.routes.get = function (req, res, next) {
         },
         json: function () {
             index.algorithms.json.get(req, res, next, User);
+        }
+    });
+};
+
+exports.routes.update = function (req, res, next) {
+    var user = req.attached.user;
+    res.format({
+        html: function () {
+            res.send(501, "not implemented");
+        },
+        json: function () {
+            if (req.errors.length) {
+                index.algorithms.json.error(req, res);
+            } else {
+                user.quality = req.attached.quality;
+                user.save(function (err, user) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.send({ status: "OK"});
+                    }
+                });
+            }
         }
     });
 };
@@ -61,7 +95,9 @@ exports.params.id = function (req, res, next, inId) {
 exports.body = {
     mandatory: {},
     optional: {},
-    route: {}
+    route: {
+        get: {}
+    }
 };
 
 exports.body.mandatory.id = function (req, res, next) {
@@ -86,4 +122,27 @@ exports.body.mandatory.app_user_id = function (req, res, next) {
 
 exports.body.optional.app_user_id = function (req, res, next) {
     index.body.optional.integer(req, res, next, "app_user_id", 0);
+};
+
+exports.body.mandatory.quality = function (req, res, next) {
+    index.body.mandatory.float(req, res, next, "quality");
+};
+
+exports.body.optional.quality = function (req, res, next) {
+    index.body.optional.float(req, res, next, "quality");
+};
+
+exports.body.route.get.exist = function (req, res, next) {
+    if (req.attached.app_id !== undefined && req.attached.app_user_id !== undefined) {
+        User.findOne({app_id: req.attached.app_id, app_user_id: req.attached.app_user_id }, function (err, user) {
+            if (err) {
+                next(err);
+            } else {
+                req.attached.user = user;
+                next();
+            }
+        });
+    } else {
+        next();
+    }
 };

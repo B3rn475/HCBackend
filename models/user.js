@@ -6,7 +6,8 @@ var mongooseAI = require("mongoose-auto-increment");
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                     app_id: { type: Number, min: 0},
-                                    app_user_id: { type: Number, min: 0}
+                                    app_user_id: { type: Number, min: 0},
+                                    quality: { type: Number}
                                 }, { id: false});
 
 schema.virtual('id').get(function () { return this._id; });

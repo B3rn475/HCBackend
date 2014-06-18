@@ -10,7 +10,8 @@ var point = mongoose.Schema({ x: { type: Number, min: 0},
                                         g: {type: Number, min: 0, max: 255},
                                         b: {type: Number, min: 0, max: 255}
                                 },
-                                removed: {type: Boolean}
+                                removed: {type: Boolean},
+                                quality: { type: Number}
                                 }, { id: false, _id: false});
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},

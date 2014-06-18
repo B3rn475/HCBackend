@@ -138,9 +138,9 @@ app.route("/collection/:collectionId/task")
         task.routes.index);
 app.route("/collection/:collectionId/image")
     .post(image.body.mandatory.id,
-         collection.routes.addImage)
+          collection.routes.addImage)
     .delete(image.body.mandatory.id,
-           collection.routes.removeImage);
+            collection.routes.removeImage);
 app.route("/collection/:collectionId/image/:imageId")
     .delete(collection.routes.removeImage);
 
@@ -149,14 +149,17 @@ app.route("/collection/:collectionId/image/:imageId")
  */
 app.route("/user")
     .post(user.body.mandatory.app_id,
-         user.body.mandatory.app_user_id,
-         user.routes.add)
+          user.body.mandatory.app_user_id,
+          user.body.route.get.exist,
+          user.routes.add)
     .get(index.query.optional.count,
-        index.query.optional.since_id,
-        index.query.optional.max_id,
-        user.routes.index);
+         index.query.optional.since_id,
+         index.query.optional.max_id,
+         user.routes.index);
 app.route("/user/:userId")
-    .get(user.routes.get);
+    .get(user.routes.get)
+    .put(user.body.mandatory.quality,
+         user.routes.update);
 
 /**
  * Tag Routes
@@ -245,7 +248,9 @@ app.route("/segmentation")
          segmentation.routes.add);
 app.route("/segmentation/:segmentationId")
     .get(index.query.optional.populate,
-        segmentation.routes.get);
+        segmentation.routes.get)
+    .put(segmentation.body.mandatory.quality,
+        segmentation.routes.update);
 
 /**
  * Session Routes
