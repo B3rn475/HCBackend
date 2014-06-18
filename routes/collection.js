@@ -48,6 +48,17 @@ exports.routes.get = function (req, res, next) {
     });
 };
 
+exports.routes.count = function (req, res, next) {
+    res.format({
+        html: function () {
+            index.algorithms.html.count(req, res, next, Collection);
+        },
+        json: function () {
+            index.algorithms.json.count(req, res, next, Collection);
+        }
+    });
+};
+
 exports.routes.addImage = function (req, res, next) {
     var query = {},
         update = {},

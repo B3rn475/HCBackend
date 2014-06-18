@@ -112,6 +112,8 @@ app.route("/image")
          index.query.optional.since_id,
          index.query.optional.max_id,
          image.routes.index);
+app.route("/image/count")
+    .get(image.routes.count);
 app.route("/image/:imageId")
     .get(index.query.optional.populate,
          image.routes.get)
@@ -132,6 +134,8 @@ app.route("/collection")
         index.query.optional.max_id,
         collection.routes.index)
     .post(collection.routes.add);
+app.route("/collection/count")
+    .get(collection.routes.count);
 app.route("/collection/:collectionId")
     .get(index.query.optional.populate,
         collection.routes.get);
@@ -159,6 +163,8 @@ app.route("/user")
          index.query.optional.since_id,
          index.query.optional.max_id,
          user.routes.index);
+app.route("/user/count")
+    .get(user.routes.count);
 app.route("/user/:userId")
     .get(user.routes.get)
     .put(user.body.mandatory.quality,
@@ -174,6 +180,8 @@ app.route("/tag")
         index.query.optional.max_id,
         tag.routes.index)
     .post(tag.routes.add);
+app.route("/tag/count")
+    .get(tag.routes.count);
 app.route("/tag/:tagId")
     .get(tag.routes.get);
 app.route("/tag/:tagId/alias")
@@ -199,6 +207,8 @@ app.route("/mask")
          mask.body.mandatory.quality,
          mask.body.mandatory.segmentations,
          mask.routes.add);
+app.route("/mask/count")
+    .get(mask.routes.count);
 app.route("/mask/:maskId")
     .get(index.query.optional.populate,
         mask.routes.get)
@@ -221,6 +231,8 @@ app.route("/task")
          task.routes.index)
     .post(image.body.mandatory.id,
          task.routes.add);
+app.route("/task/count")
+    .get(task.routes.count);
 app.route("/task/:taskId")
     .get(index.query.optional.populate,
         task.routes.get)
@@ -249,6 +261,8 @@ app.route("/segmentation")
         segmentation.routes.index)
     .post(segmentation.body.mandatory.points,
          segmentation.routes.add);
+app.route("/segmentation/count")
+    .get(segmentation.routes.count);
 app.route("/segmentation/:segmentationId")
     .get(index.query.optional.populate,
         segmentation.routes.get)
@@ -265,6 +279,8 @@ app.route("/session")
         session.query.optional.completed,
         session.routes.index)
     .post(session.routes.add);
+app.route("/session")
+    .get(session.routes.count);
 app.route("/session/:sessionId")
     .get(index.query.optional.populate,
         session.routes.get)
@@ -320,6 +336,8 @@ app.route("/action")
         action.body.optional.type,
         action.body.mandatory.validity,
         action.routes.bulkValidity);
+app.route("/action/count")
+    .get(action.routes.count);
 app.route("/action/:actionId")
     .get(index.query.optional.populate,
         action.routes.get)
@@ -344,6 +362,8 @@ app.route("/microtask")
           microtask.body.mandatory.order,
           task.body.mandatory.id,
           microtask.routes.add);
+app.route("/microtask")
+    .get(microtask.routes.count);
 app.route("/microtask/:microtaskId")
     .get(index.query.optional.populate,
           microtask.routes.get)

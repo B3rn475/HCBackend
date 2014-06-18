@@ -54,6 +54,17 @@ exports.routes.get = function (req, res, next) {
     });
 };
 
+exports.routes.count = function (req, res, next) {
+    res.format({
+        html: function () {
+            index.algorithms.html.count(req, res, next, Mask);
+        },
+        json: function () {
+            index.algorithms.json.count(req, res, next, Mask);
+        }
+    });
+};
+
 exports.routes.update = function (req, res, next) {
     var mask = req.attached.mask;
     res.format({

@@ -2,15 +2,10 @@
 "use strict";
 
 var Tag = require("../models/tag.js").model,
+    language = require("../models/tag.js").regexp.language,
+    name = require("../models/tag.js").regexp.name,
     index = require("./index.js"),
     _ = require("underscore-node");
-
-/**
- * RegExps
- */
-
-var language = /[a-z]{2}\-[A-Z]{2}$/,
-    name = /[a-zA-Z ]+$/;
 
 /**
  * Routes
@@ -47,6 +42,17 @@ exports.routes.get = function (req, res, next) {
         },
         json: function () {
             index.algorithms.json.get(req, res, next, Tag);
+        }
+    });
+};
+
+exports.routes.count = function (req, res, next) {
+    res.format({
+        html: function () {
+            index.algorithms.html.count(req, res, next, Tag);
+        },
+        json: function () {
+            index.algorithms.json.count(req, res, next, Tag);
         }
     });
 };

@@ -50,6 +50,17 @@ exports.routes.get = function (req, res, next) {
     });
 };
 
+exports.routes.count = function (req, res, next) {
+    res.format({
+        html: function () {
+            index.algorithms.html.count(req, res, next, Session);
+        },
+        json: function () {
+            index.algorithms.json.count(req, res, next, Session);
+        }
+    });
+};
+
 exports.routes.complete = function (req, res, next) {
     res.format({
         html: function () {

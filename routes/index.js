@@ -302,6 +302,21 @@ exports.algorithms.json.update = function (req, res, next, Model, query, update,
     }
 };
 
+exports.algorithms.json.count = function (req, res, next, Model, query) {
+    if (req.errors.length) {
+        exports.algorithms.json.error(req, res);
+    } else {
+        if (query === undefined) { query = {}; }
+        Model.count(query, function (err, count) {
+            if (err) {
+                next(err);
+            } else {
+                res.send({ status: "OK", count: count});
+            }
+        });
+    }
+};
+
 exports.algorithms.json.error = function (req, res) {
     res.send({
         status: "KO",
@@ -318,6 +333,10 @@ exports.algorithms.html.add = function (req, res, next, Model, obj, savecb) {
 };
 
 exports.algorithms.html.update = function (req, res, next, Model, query, update, options, updatecb) {
+    res.send(501, "not implemented");
+};
+
+exports.algorithms.html.count = function (req, res, next, Model, query) {
     res.send(501, "not implemented");
 };
 
