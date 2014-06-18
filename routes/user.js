@@ -11,12 +11,14 @@ var User = require("../models/user.js").model,
 exports.routes = {};
 
 exports.routes.index = function (req, res, next) {
+    var conditions = {};
+    if (req.attached.app_id !== undefined) { conditions.app_id = req.attached.app_id; }
     res.format({
         html: function () {
-            index.algorithms.html.list(req, res, next, User);
+            index.algorithms.html.list(req, res, next, User, conditions);
         },
         json: function () {
-            index.algorithms.json.list(req, res, next, User);
+            index.algorithms.json.list(req, res, next, User, conditions);
         }
     });
 };
@@ -97,6 +99,24 @@ exports.params = {};
 
 exports.params.id = function (req, res, next, inId) {
     index.params.id(req, res, next, User, inId);
+};
+
+/**
+ * Query Params
+ */
+
+exports.query = {
+    mandatory: {},
+    optional: {},
+    route: {}
+};
+
+exports.query.mandatory.app_id = function (req, res, next) {
+    index.query.mandatory.integer(req, res, index.query.register(req, res, next, "type"), "app_id", 0);
+};
+
+exports.query.optional.app_id = function (req, res, next) {
+    index.query.optional.integer(req, res, index.query.register(req, res, next, "type"), "app_id", 0);
 };
 
 /**

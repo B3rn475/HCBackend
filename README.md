@@ -172,6 +172,10 @@ Routes
 Format:
 
 **METHOD** : **PATH** 
+description:
+
+* __location__ : name : __optional__|__mandatory__ : description
+* ...
 
 The following routes are corrently available:
 
@@ -183,6 +187,10 @@ ________________
 
 **GET** : /image  
 return the list of the images
+
+* __query__ : count : __optional__ : max number of items to return (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
 
 **POST** : /image  
 add a new image
@@ -203,6 +211,10 @@ return the list of tags related to this image
 ______________
 **GET** : /collection  
 return the list of collections
+
+* __query__ : count : __optional__ : max number of items to return (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
 
 **POST** : /collection  
 add a new collection
@@ -230,6 +242,11 @@ ________
 **GET** : /user  
 return the list of users
 
+* __query__ : count : __optional__ : max number of items to return (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : app_id : __optional__ : returns only users from a particular application
+
 **POST** : /user  
 add a new user (if it is already there returns the id)
 
@@ -247,6 +264,10 @@ _______
 
 **GET** : /tag  
 return the list of tags
+
+* __query__ : count : __optional__ : max number of items to return (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
 
 **POST** : /tag  
 add a new tag
@@ -272,6 +293,10 @@ ________
 **GET** : /mask  
 return the list of masks
 
+* __query__ : count : __optional__ : max number of items to return (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+
 **POST** : /mask
 add a new mask
 
@@ -290,6 +315,10 @@ ________
 **GET** : /task  
 return the list of tasks
 
+* __query__ : count : __optional__ : max number of items to return (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+
 **POST** : /task
 add a new task
 
@@ -306,7 +335,11 @@ complete a task (and all the related microtasks)
 return the list of users related to the task
 
 **GET** : /task/:taskId/microtask  
-return the list of microtask related to this task
+return the list of microtask related to this task (same as /microtask=:taskId)
+
+* __query__ : count : __optional__ : max number of items to return (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
 
 **POST**  : /task/:taskId/microtask  
 add a new microtask (the same as /microtask, but with the task id explicit in the url)
@@ -316,6 +349,10 @@ ___________
 
 **GET** : /session  
 return the list of sessions
+
+* __query__ : count : __optional__ : max number of items to return (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
 
 **POST** : /session
 add a new session
@@ -332,6 +369,10 @@ complete a session
 **GET** : /session/:sessionId/action  
 return the actions related to this session (same as /action?session=:sessionId)
 
+* __query__ : count : __optional__ : max number of items to return (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+
 **POST** : /session/:sessionId/action
 add a new action to the session (the same as /action, but with the session id explicit in the url)
 
@@ -343,6 +384,15 @@ __________
 
 **GET** : /action  
 return the list of actions
+
+* __query__ : count : __optional__ : max number of items to return (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : type : __optional__ : returns only the action of that type
+* __query__ : image : __optional__ : returns only the action related to that image
+* __query__ : tag : __optional__ : returns only the action related to that tag
+* __query__ : completed : __optional__ : returns only the completed or not completed actions
+* __query__ : validity : __optional__ : returns only the valid or not valid actions
 
 **POST** : /action  
 add a new action
@@ -367,6 +417,11 @@ _____________
 
 **GET** : /microtask  
 return the list of microtasks
+
+* __query__ : count : __optional__ : max number of items to return (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : task : __optional : returns only the microtasks related to that task
 
 **POST** : /microtask  
 add a new microtask

@@ -159,6 +159,7 @@ app.route("/user")
     .get(index.query.optional.count,
          index.query.optional.since_id,
          index.query.optional.max_id,
+         user.query.optional.app_id,
          user.routes.index);
 app.route("/user/count")
     .get(user.routes.count);

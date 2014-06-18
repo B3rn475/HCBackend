@@ -714,6 +714,45 @@ exports.body.unchecked.integer = function (req, res, next, property, min, max) {
     next();
 };
 
+exports.body.mandatory.string = function (req, res, next, property, empty) {
+    if (req.body[property] === undefined) {
+        req.errors.push({location: "body", name: property, message: "Missing Body Parameter '" + property + "'" });
+        next();
+    } else {
+        exports.body.unchecked.integer(req, res, next, property, empty);
+    }
+};
+
+exports.body.optional.string = function (req, res, next, property, empty, dvalue) {
+    if (req.body[property] === undefined) {
+        if (dvalue) {
+            req.attached[property] = dvalue;
+        }
+        next();
+    } else {
+        exports.body.unchecked.integer(req, res, next, property, empty);
+    }
+};
+
+exports.body.unchecked.string = function (req, res, next, property, empty) {
+    var error,
+        value = req.body[property];
+    if (empty === undefined) { empty = false; }
+    if (value !== undefined) {
+        if (!empty && value === "") {
+            error = true;
+            req.errors.push({location: "body", name: property, message: "invalid Body Parameter '" + property + "' field, it cannot be empty"});
+        }
+    } else {
+        error = true;
+        req.errors.push({location: "body", name: property, message: "Invalid Body Parameter '" + property + "', it is not a string"});
+    }
+    if (!error) {
+        req.attached[property] = value;
+    }
+    next();
+};
+
 exports.body.mandatory.float = function (req, res, next, property, min, max) {
     if (req.body[property] === undefined) {
         req.errors.push({location: "body", name: property, message: "Missing Body Parameter '" + property + "'" });
