@@ -4,8 +4,6 @@
 var User = require("../models/user.js").model,
     index = require("./index.js");
 
-exports.regexp.app_user_id = /[]
-
 /**
  * Routes
  */
