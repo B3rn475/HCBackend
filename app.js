@@ -350,7 +350,6 @@ app.route("/microtask/:microtaskId")
           microtask.routes.get)
     .post(microtask.checkers.open,
          action.body.mandatory.id,
-         task.checkers.open,
          microtask.routes.complete);
 
 /**

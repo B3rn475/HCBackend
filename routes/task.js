@@ -178,7 +178,7 @@ exports.checkers = {
 
 exports.checkers.open = function (req, res, next) {
     if (req.attached.task && req.attached.task.completed_at) {
-        req.errors.push({location: "status", message: "Microtask " + req.attached.action.id + " is already closed" });
+        req.errors.push({location: "status", message: "Task " + req.attached.action.id + " is already closed" });
     }
     next();
 };
