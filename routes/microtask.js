@@ -72,6 +72,8 @@ exports.routes.complete = function (req, res, next) {
                                             res.send({status: "OK"});
                                         }
                                     });
+                                } else {
+                                    next();
                                 }
                             }
                         });
