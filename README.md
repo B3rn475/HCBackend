@@ -250,6 +250,9 @@ return the list of users
 **POST** : /user  
 add a new user (if it is already there returns the id)
 
+* __body__ : app_id : __mandatory__ : id of the application
+* __body__ : app_user_id : __mandatory__ : id of the user of the application
+
 **GET** : /user/count
 return the number of users
 
@@ -258,6 +261,8 @@ return a user
 
 **PUT** : /user/:userId
 update the user information
+
+* __body__ : quality : __mandatory__ : quality of the user
 
 **Tag**
 _______
@@ -272,6 +277,8 @@ return the list of tags
 **POST** : /tag  
 add a new tag
 
+* __body__ : name : __mandatory__ : name of the tag
+
 **GET** : /tag/count  
 return the number of tags
 
@@ -281,8 +288,13 @@ return a tag
 **POST** : /tag/:tagId/alias  
 add a new alias to the tag
 
+* __body__ : language : __mandatory__ : language of the alias (ex: en-US)
+* __body__ : name : __mandatory__ : name of the alias
+
 **DELETE** : /tag/:tagId/alias
 remove an alias from the tag
+
+* __body__ : language : __mandatory__ : language of the alias (ex: end-US)
 
 **DELETE** : /tag/:tagId/alias/:language
 remove an alias from the tag (same as the previous one, but with the language explicit in the url)
