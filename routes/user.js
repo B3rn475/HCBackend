@@ -4,6 +4,8 @@
 var User = require("../models/user.js").model,
     index = require("./index.js");
 
+exports.regexp.app_user_id = /[]
+
 /**
  * Routes
  */
@@ -128,11 +130,11 @@ exports.body.optional.app_id = function (req, res, next) {
 };
 
 exports.body.mandatory.app_user_id = function (req, res, next) {
-    index.body.mandatory.integer(req, res, next, "app_user_id", 0);
+    index.body.mandatory.string(req, res, next, "app_user_id");
 };
 
 exports.body.optional.app_user_id = function (req, res, next) {
-    index.body.optional.integer(req, res, next, "app_user_id", 0);
+    index.body.optional.string(req, res, next, "app_user_id");
 };
 
 exports.body.mandatory.quality = function (req, res, next) {
