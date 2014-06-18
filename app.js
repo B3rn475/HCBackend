@@ -176,7 +176,9 @@ app.route("/tag")
         index.query.optional.since_id,
         index.query.optional.max_id,
         tag.routes.index)
-    .post(tag.routes.add);
+    .post(tag.body.route.add.name,
+          tag.body.route.add.exist,
+          tag.routes.add);
 app.route("/tag/count")
     .get(tag.routes.count);
 app.route("/tag/:tagId")

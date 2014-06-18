@@ -25,14 +25,26 @@ exports.routes.index = function (req, res, next) {
 };
 
 exports.routes.add = function (req, res, next) {
-    res.format({
-        html: function () {
-            index.algorithms.html.add(req, res, next, Tag);
-        },
-        json: function () {
-            index.algorithms.json.add(req, res, next, Tag);
-        }
-    });
+    var obj = {name: req.attached.name};
+    if (req.attached.tag === undefined) {
+        res.format({
+            html: function () {
+                index.algorithms.html.add(req, res, next, Tag, obj);
+            },
+            json: function () {
+                index.algorithms.json.add(req, res, next, Tag, obj);
+            }
+        });
+    } else {
+        res.format({
+            html: function () {
+                res.send(501, "not implemented");
+            },
+            json: function () {
+                res.send({ status: "OK", id: req.attached.tag.id});
+            }
+        });
+    }
 };
 
 exports.routes.get = function (req, res, next) {
@@ -169,7 +181,9 @@ exports.query.optional.id = function (req, res, next) {
 exports.body = {
     mandatory: {},
     optional: {},
-    route: {}
+    route: {
+        add: {}
+    }
 };
 
 exports.body.mandatory.id = function (req, res, next) {
@@ -194,4 +208,25 @@ exports.body.mandatory.name = function (req, res, next) {
 
 exports.body.optional.name = function (req, res, next) {
     index.body.optional.regexp(req, res, next, "name", name, "Alias Name");
+};
+
+exports.body.route.add.name = function (req, res, next) {
+    index.body.optional.regexp(req, res, next, "name", name, "Tag Name");
+};
+
+exports.body.route.add.exist = function (req, res, next) {
+    if (req.attached.name) {
+        Tag.findOne({name: req.attached.name }, function (err, tag) {
+            if (err) {
+                next(err);
+            } else {
+                if (tag) {
+                    req.attached.tag = tag;
+                }
+                next();
+            }
+        });
+    } else {
+        next();
+    }
 };
