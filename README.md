@@ -138,3 +138,35 @@ fields:
 * order: {type: Number, min: 0}
 * created_at: {type: Date}
 * completed_at: {type: Date}
+
+Error Handling
+--------------
+**JSON**
+
+If there is an error during the process, due to a **Bad** **Route**, a **Missing** or **Wrong** **Parameter** or to an **Internal** **Server** **Error** an error message will be returned.
+
+Format:
+
+```json
+{
+    status: "KO"
+    errors: [{location: "url|body|query|status|internal", 
+        name: "parameter that has generate the error",
+        message: "description of the error"
+        }]
+}
+```
+
+Good Request
+------------
+
+**JSON**
+
+If there are not errors during the operation the following object will be sent:
+
+```json
+{
+    status: "OK"
+    ... //Other data related to the api
+}
+```

@@ -279,7 +279,7 @@ app.route("/session")
         session.query.optional.completed,
         session.routes.index)
     .post(session.routes.add);
-app.route("/session")
+app.route("/session/count")
     .get(session.routes.count);
 app.route("/session/:sessionId")
     .get(index.query.optional.populate,
