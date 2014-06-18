@@ -11,7 +11,7 @@ var computeMediaLocator = function (id) {
 exports.regexp = {};
 exports.regexp.location = /head|torso|left_arm|right_arm|legs|feet/;
 
-var part = mongoose.Schema({location: {type: String, validate: exports.regexp.location},
+var part = mongoose.Schema({location: {type: String, enum: ["head", "torso", "left_arm", "right_arm", "legs", "feet"]},
                             x0 : { type: Number, min: 0},
                             y0 : { type: Number, min: 0},
                             x1 : { type: Number, min: 0},
