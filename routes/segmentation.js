@@ -2,6 +2,7 @@
 "use strict";
 
 var Segmentation = require("../models/segmentation.js").model,
+    color = require("../models/segmentation.js").regexp.color,
     index = require("./index.js"),
     _ = require("underscore-node");
 
@@ -101,10 +102,8 @@ var checkInteger = function (int, min, max) {
 var checkPoint = function (item) {
     if (!checkInteger(item.x, 0)) { return false; }
     if (!checkInteger(item.y, 0)) { return false; }
-    if (_.isUndefined(item.color)) { return false; }
-    if (!checkInteger(item.color.r, 0, 255)) { return false; }
-    if (!checkInteger(item.color.g, 0, 255)) { return false; }
-    if (!checkInteger(item.color.b, 0, 255)) { return false; }
+    if (typeof item.color !== "string") { return false; }
+    if (!color.test(item.color)) {return false; }
     if (!_.isBoolean(item.removed)) { return false; }
     return true;
 };

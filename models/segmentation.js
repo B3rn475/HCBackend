@@ -4,12 +4,12 @@
 var mongoose = require("mongoose");
 var mongooseAI = require("mongoose-auto-increment");
 
+exports.regexp = {};
+exports.regexp.color = /#([a-f]|[A-F]|[0-9]){3}(([a-f]|[A-F]|[0-9]){3})?\b/;
+
 var point = mongoose.Schema({ x: { type: Number, min: 0},
                                 y: { type: Number, min: 0},
-                                color: { r: {type: Number, min: 0, max: 255},
-                                        g: {type: Number, min: 0, max: 255},
-                                        b: {type: Number, min: 0, max: 255}
-                                },
+                                color: {type: String, validate: exports.regexp.color},
                                 removed: {type: Boolean},
                                 quality: { type: Number}
                                 }, { id: false, _id: false});
