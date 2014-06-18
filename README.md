@@ -24,8 +24,8 @@ HTTP Methods
 The main idea is to use the right **HTTP Method** for the operation.
 
 * **GET** to obtain data
-* **POST** to add new data or to do one time operations
-* **PUT** to update elements
+* **POST** to adds new data or to do one time operations
+* **PUT** to updates elements
 * **DELETE** to remove items
 
 Stored Objects
@@ -186,53 +186,64 @@ The following routes are corrently available:
 ________________
 
 **GET** : /image  
-return the list of the images
+returns the list of the images
 
-* __query__ : count : __optional__ : max number of items to return (max: 100)
-* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
-* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : count : __optional__ : max number of items to returns (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 
 **POST** : /image  
-add a new image
+adds a new image
+
+* __body__ : width : __mandatory__ : the width of the image
+* __body__ : height : __mandatory__ : the height of the image
+* __body__ : payload : __mandatory__ : the content of the image encoded in Base64 (jpeg format)
+* __body__ : pose : __optional__ : pose of the image (see definition)
 
 **GET** : /image/count  
-return the number of images
+returns the number of images
 
 **GET** : /image/:imageId  
-return an image
+returns an image
 
 **PUT** : /image/:imageId  
-update the image information
+updates the image information
+
+* __body__ : pose : __mandatory__ : pose of the image (see definition)
 
 **GET** : /image/:imageId/tag  
-return the list of tags related to this image
+returns the list of tags related to this image
 
 **Collection**
 ______________
 **GET** : /collection  
-return the list of collections
+returns the list of collections
 
-* __query__ : count : __optional__ : max number of items to return (max: 100)
-* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
-* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : count : __optional__ : max number of items to returns (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 
 **POST** : /collection  
-add a new collection
+adds a new collection
 
 **GET** :/collection/count  
-return the number of collections
+returns the number of collections
 
 **GET** : /collection/:collectionId  
-return a collection
+returns a collection
 
 **GET** : /collection/:collectionId/task  
-return the list of task related to images in the collection
+returns the list of task related to images in the collection
 
 **POST** : /collection/:collectionId/image
-add an image to the collection
+adds an image to the collection
+
+* __body__ : image : __mandatory__ : the image to add to the collection
 
 **DELETE** : /collection/:collectionId/image  
 remove an image from the collection
+
+* __body__ : image : __mandatory__ : the image to remove from the collection
 
 **DELETE** : /collection/:collectionId/image/:imageId
 remove an image from the collection (same as the previous one, but with the id explicit in the url)
@@ -240,27 +251,27 @@ remove an image from the collection (same as the previous one, but with the id e
 **User**
 ________
 **GET** : /user  
-return the list of users
+returns the list of users
 
-* __query__ : count : __optional__ : max number of items to return (max: 100)
-* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
-* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : count : __optional__ : max number of items to returns (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 * __query__ : app_id : __optional__ : returns only users from a particular application
 
 **POST** : /user  
-add a new user (if it is already there returns the id)
+adds a new user (if it is already there returns the id)
 
 * __body__ : app_id : __mandatory__ : id of the application
 * __body__ : app_user_id : __mandatory__ : id of the user of the application
 
 **GET** : /user/count
-return the number of users
+returns the number of users
 
 **GET** : /user/:userId  
-return a user
+returns a user
 
 **PUT** : /user/:userId
-update the user information
+updates the user information
 
 * __body__ : quality : __mandatory__ : quality of the user
 
@@ -268,25 +279,25 @@ update the user information
 _______
 
 **GET** : /tag  
-return the list of tags
+returns the list of tags
 
-* __query__ : count : __optional__ : max number of items to return (max: 100)
-* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
-* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : count : __optional__ : max number of items to returns (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 
 **POST** : /tag  
-add a new tag
+adds a new tag
 
 * __body__ : name : __mandatory__ : name of the tag
 
 **GET** : /tag/count  
-return the number of tags
+returns the number of tags
 
 **GET** : /tag/:tagId  
-return a tag
+returns a tag
 
 **POST** : /tag/:tagId/alias  
-add a new alias to the tag
+adds a new alias to the tag
 
 * __body__ : language : __mandatory__ : language of the alias (ex: en-US)
 * __body__ : name : __mandatory__ : name of the alias
@@ -303,93 +314,110 @@ remove an alias from the tag (same as the previous one, but with the language ex
 ________
 
 **GET** : /mask  
-return the list of masks
+returns the list of masks
 
-* __query__ : count : __optional__ : max number of items to return (max: 100)
-* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
-* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : count : __optional__ : max number of items to returns (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 * __query__ : image : __optional__ : returns only mask related to that image
 * __query__ : tag : __optional__ : returns only mask related to that tag
 
 **POST** : /mask
-add a new mask
+adds a new mask
+
+* __body__ : image : __mandatory__ : the image related to the mask
+* __body__ : tag : __mandatory__ : the tag related to the mask
+* __body__ : payload : __mandatory__ : the content of the mask (png format)
+* __body__ : segmentations : __mandatory__ : the number of segmentations that has generated the mask
+* __body__ : quality : __mandatory__ : the quality of the mask
 
 **GET** : /mask/count  
-return the number of mask
+returns the number of mask
 
 **GET** : /mask/:maskId  
-return a mask
+returns a mask
 
 **PUT** : /mask/:maskId
-update a mask
+updates a mask
+
+* __body__ : payload : __mandatory__ : the content of the mask (png format)
+* __body__ : segmentations : __mandatory__ : the number of segmentations that has generated the mask
+* __body__ : quality : __mandatory__ : the quality of the mask
 
 **Task**
 ________
 
 **GET** : /task  
-return the list of tasks
+returns the list of tasks
 
-* __query__ : count : __optional__ : max number of items to return (max: 100)
-* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
-* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : count : __optional__ : max number of items to returns (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 * __query__ : image : __optional__ : returns only tasks related to that image (cannot be used with collection)
 * __query__ : collection : __optional__ : returns only tasks related to images in that collection (cannot be used with image)
 * __query__ : completed : __optional__ : returns only open or completed tasks
 
 **POST** : /task
-add a new task
+adds a new task
+
+* __body__ : image : __mandatory__ : image related to the task
 
 **GET** : /task/count  
-return the number of tasks
+returns the number of tasks
 
 **GET** : /task/:taskId  
-return a task
+returns a task
 
 **POST** : /task/:taskId  
 complete a task (and all the related microtasks)
 
 **POST** : /task/:taskId/user
-return the list of users related to the task
+adds a new users related to the task
+
+* __body__ : user : __mandatory__ : the user to add
 
 **GET** : /task/:taskId/microtask  
-return the list of microtask related to this task (same as /microtask=:taskId)
+returns the list of microtask related to this task (same as /microtask=:taskId)
 
-* __query__ : count : __optional__ : max number of items to return (max: 100)
-* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
-* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : count : __optional__ : max number of items to returns (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 
 **POST**  : /task/:taskId/microtask  
-add a new microtask (the same as /microtask, but with the task id explicit in the url)
+adds a new microtask (the same as /microtask, but with the task id explicit in the url)
+
+* __body__ : type : __mandatory__ : the type of the microtask
+* __body__ : order : __mandatory__ : the order of the microtask
 
 **Session**
 ___________
 
 **GET** : /session  
-return the list of sessions
+returns the list of sessions
 
-* __query__ : count : __optional__ : max number of items to return (max: 100)
-* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
-* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : count : __optional__ : max number of items to returns (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 * __query__ : completed : __optional__ : returns only open or completed sessions
 
 **POST** : /session
-add a new session
+adds a new session
 
 ***GET** : /session/count
-return the number of sessions
+returns the number of sessions
 
 **GET** : /session/:sessionId  
-return a session
+returns a session
 
 **POST** : /session/:sessionId  
 complete a session
 
 **GET** : /session/:sessionId/action  
-return the actions related to this session (same as /action?session=:sessionId)
+returns the actions related to this session (same as /action?session=:sessionId)
 
-* __query__ : count : __optional__ : max number of items to return (max: 100)
-* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
-* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : count : __optional__ : max number of items to returns (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 * __query__ : type : __optional__ : returns only the action of that type
 * __query__ : image : __optional__ : returns only the action related to that image
 * __query__ : tag : __optional__ : returns only the action related to that tag
@@ -397,20 +425,29 @@ return the actions related to this session (same as /action?session=:sessionId)
 * __query__ : validity : __optional__ : returns only the valid or not valid actions
 
 **POST** : /session/:sessionId/action
-add a new action to the session (the same as /action, but with the session id explicit in the url)
+adds a new action to the session (the same as /action, but with the session id explicit in the url)
+
+* __body__ : type : __mandatory__ : the type of the action
+* __body__ : user : __mandatory__ : the user related to the action
+* __body__ : tag : __mandatory__ : the tag of the action (only for "segmentation")
 
 **PUT** : /session/:sessionId/action
-update all the session (same as /action)
+updates all the session (same as /action)
+
+* __query__ : image : __optional__ : filter on the image
+* __query__ : tag : __optional__ : filter on the tag
+* __query__ : type : __optional__ : filter on the type
+* __body__ : validity : __mandatory__ : the new validity for the actions
 
 **Action**
 __________
 
 **GET** : /action  
-return the list of actions
+returns the list of actions
 
-* __query__ : count : __optional__ : max number of items to return (max: 100)
-* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
-* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : count : __optional__ : max number of items to returns (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 * __query__ : type : __optional__ : returns only the action of that type
 * __query__ : image : __optional__ : returns only the action related to that image
 * __query__ : tag : __optional__ : returns only the action related to that tag
@@ -418,42 +455,61 @@ return the list of actions
 * __query__ : validity : __optional__ : returns only the valid or not valid actions
 
 **POST** : /action  
-add a new action
+adds a new action
+
+* __body__ : session : __mandatory__ : session of the action
+* __body__ : type : __mandatory__ : the type of the action
+* __body__ : user : __mandatory__ : the user related to the action
+* __body__ : tag : __mandatory__ : the tag of the action (only for "segmentation")
 
 **PUT** : /action
-update all the actions
+updates all the actions
+
+* __query__ : session : __optional__ : filter on the session (it is required if image and tag are not present)
+* __query__ : image : __optional__ : filter on the image (it is required if session and tag are not present)
+* __query__ : tag : __optional__ : filter on the tag (it is required if session and image are not present)
+* __query__ : type : __optional__ : filter on the type
+* __body__ : validity : __mandatory__ : the new validity for the actions
 
 **GET** : /action/count  
-return the number of actions
+returns the number of actions
 
 **GET** : /action/:actionId  
-return an action
+returns an action
 
 **POST** : /action/:actionId
 complete an action
 
 **PUT** : /action/:actionId  
-update an action
+updates an action
+
+* __body__ : validity : __mandatory__ : the new validity of the action
 
 **Microtask**
 _____________
 
 **GET** : /microtask  
-return the list of microtasks
+returns the list of microtasks
 
-* __query__ : count : __optional__ : max number of items to return (max: 100)
-* __query__ : max\_id : __optional__ : upper bound for the id to return (included)
-* __query__ : since\_id : __optional__ : lower bound for the id to return (not included)
+* __query__ : count : __optional__ : max number of items to returns (max: 100)
+* __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
+* __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 * __query__ : task : __optional : returns only the microtasks related to that task
 
 **POST** : /microtask  
-add a new microtask
+adds a new microtask
+
+* __body__ : task : __mandatory__ : the task of the microtask
+* __body__ : type : __mandatory__ : the type of the microtask
+* __body__ : order : __mandatory__ : the order of the microtask
 
 **GET** : /microtask/count  
-return the number of microtasks
+returns the number of microtasks
 
 **GET** : /microtask/:microtaskId  
-return a microtask
+returns a microtask
 
 **POST** : /microtask/:microtaskId  
 complete a microtask
+
+* __body__ : action : __mandatory__ : the action that executes the task

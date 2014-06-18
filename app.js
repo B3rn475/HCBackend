@@ -286,10 +286,9 @@ app.route("/session/:sessionId/action")
           action.body.mandatory.type,
           action.body.route.add.tag,
           action.routes.add)
-    .put(image.body.optional.id,
-         tag.body.optional.id,
-         action.checkers.routes.validity,
-         action.body.optional.type,
+    .put(image.query.optional.id,
+         tag.query.optional.id,
+         action.query.optional.type,
          action.body.mandatory.validity,
          action.routes.validity);
 
@@ -314,10 +313,11 @@ app.route("/action")
           action.body.mandatory.type,
           action.body.route.add.tag,
           action.routes.add)
-    .put(image.body.optional.id,
-        tag.body.optional.id,
+    .put(image.query.optional.id,
+        tag.query.optional.id,
+        session.query.optional.id,
         action.checkers.routes.validity,
-        action.body.optional.type,
+        action.query.optional.type,
         action.body.mandatory.validity,
         action.routes.validity);
 app.route("/action/count")

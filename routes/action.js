@@ -114,6 +114,7 @@ exports.routes.validity = function (req, res, next) {
     if (req.attached.image) { query.image = req.attached.image.id; }
     if (req.attached.tag) { query.tag = req.attached.tag.id; }
     if (req.attached.type) { query.type = req.attached.type; }
+    if (req.attached.session) { query.session = req.attached.session; }
     res.format({
         html: function () {
             index.algorithms.html.update(req, res, next, Action, query, update, options);
@@ -339,8 +340,8 @@ exports.checkers.routes.update = function (req, res, next) {
 };
 
 exports.checkers.routes.validity = function (req, res, next) {
-    if (!(req.attached.image || req.attached.tag)) {
-        req.errors.push({location: "body", name: "image|tag", message: "Missing Image or Tag id. At least one is required as filter" });
+    if (!(req.attached.image || req.attached.tag || req.attached.session)) {
+        req.errors.push({location: "query", name: "image|tag|session", message: "Missing Image or Tag or Session id. At least one is required as filter" });
     }
     next();
 };
