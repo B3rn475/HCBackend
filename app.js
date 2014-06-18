@@ -154,7 +154,7 @@ app.route("/collection/:collectionId/image/:imageId")
 app.route("/user")
     .post(user.body.mandatory.app_id,
           user.body.mandatory.app_user_id,
-          user.body.route.get.exist,
+          user.body.route.add.exist,
           user.routes.add)
     .get(index.query.optional.count,
          index.query.optional.since_id,

@@ -143,7 +143,7 @@ exports.body.optional.quality = function (req, res, next) {
     index.body.optional.float(req, res, next, "quality");
 };
 
-exports.body.route.get.exist = function (req, res, next) {
+exports.body.route.add.exist = function (req, res, next) {
     if (req.attached.app_id !== undefined && req.attached.app_user_id !== undefined) {
         User.findOne({app_id: req.attached.app_id, app_user_id: req.attached.app_user_id }, function (err, user) {
             if (err) {

@@ -20,7 +20,8 @@ var type = /tagging|segmentation$/;
 exports.routes = {};
 
 exports.routes.index = function (req, res, next) {
-    var conditions = {};
+    var conditions = {},
+        fields = {segmentation: { points : false}};
     if (req.attached.type) { conditions.type = req.attached.type; }
     if (req.attached.validity !== undefined) { conditions.validity = req.attached.validity; }
     if (req.attached.completed !== undefined) { conditions.completed_at = {$exists: req.attached.completed}; }
