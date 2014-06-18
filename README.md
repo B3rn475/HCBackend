@@ -170,3 +170,234 @@ If there are not errors during the operation the following object will be sent:
     ... //Other data related to the api
 }
 ```
+
+Routes
+------
+
+Format:
+
+**METHOD** : **PATH** 
+
+The following routes are corrently available:
+
+**GET** : /  
+    get the status of the server
+
+**Image**
+________________
+
+**GET** : /image  
+return the list of the images
+
+**POST** : /image  
+add a new image
+
+**GET** : /image/count  
+return the number of images
+
+**GET** : /image/:imageId  
+return an image
+
+**PUT** : /image/:imageId  
+update the image information
+
+**GET** : /image/:imageId/tag  
+return the list of tags related to this image
+
+**Collection**
+______________
+**GET** : /collection  
+return the list of collections
+
+**POST** : /collection  
+add a new collection
+
+**GET** :/collection/count  
+return the number of collections
+
+**GET** : /collection/:collectionId  
+return a collection
+
+**GET** : /collection/:collectionId/task  
+return the list of task related to images in the collection
+
+**POST** : /collection/:collectionId/image
+add an image to the collection
+
+**DELETE** : /collection/:collectionId/image  
+remove an image from the collection
+
+**DELETE** : /collection/:collectionId/image/:imageId
+remove an image from the collection (same as the previous one, but with the id explicit in the url)
+
+**User**
+________
+**GET** : /user  
+return the list of users
+
+**POST** : /user  
+add a new user (if it is already there returns the id)
+
+**GET** : /user/count
+return the number of users
+
+**GET** : /user/:userId  
+return a user
+
+**PUT** : /user/:userId
+update the user information
+
+**Tag**
+_______
+
+**GET** : /tag  
+return the list of tags
+
+**POST** : /tag  
+add a new tag
+
+**GET** : /tag/count  
+return the number of tags
+
+**GET** : /tag/:tagId  
+return a tag
+
+**POST** : /tag/:tagId/alias  
+add a new alias to the tag
+
+**DELETE** : /tag/:tagId/alias
+remove an alias from the tag
+
+**DELETE** : /tag/:tagId/alias/:language
+remove an alias from the tag (same as the previous one, but with the language explicit in the url)
+
+**Mask**
+________
+
+**GET** : /mask  
+return the list of masks
+
+**POST** : /mask
+add a new mask
+
+**GET** : /mask/count  
+return the number of mask
+
+**GET** : /mask/:maskId  
+return a mask
+
+**PUT** : /mask/:maskId
+update a mask
+
+**Task**
+________
+
+**GET** : /task  
+return the list of tasks
+
+**POST** : /task
+add a new task
+
+**GET** : /task/count  
+return the number of tasks
+
+**GET** : /task/:taskId  
+return a task
+
+**POST** : /task/:taskId  
+complete a task (and all the related microtasks)
+
+**POST** : /task/:taskId/user
+return the list of users related to the task
+
+**GET** : /task/:taskId/microtask  
+return the list of microtask related to this task
+
+**POST**  : /task/:taskId/microtask  
+add a new microtask (the same as /microtask, but with the task id explicit in the url)
+
+**Segmentation**
+________________
+**GET** : /segmentation  
+return the list of segmentations
+
+**POST** : /segmentation  
+add a new segmentation
+
+**GET** : /segmentation/count  
+return the number of segmentations
+
+**GET** : /segmentation/:segmentationId  
+return a segmentation
+
+**GET** : /segmentation/:segmentationId  
+update a segmentation
+
+**Session**
+___________
+
+**GET** : /session  
+return the list of sessions
+
+**POST** : /session
+add a new session
+
+***GET** : /session/count
+return the number of sessions
+
+**GET** : /session/:sessionId  
+return a session
+
+**POST** : /session/:sessionId  
+complete a session
+
+**GET** : /session/:sessionId/action  
+return the actions related to this session (same as /action?session=:sessionId)
+
+**POST** : /session/:sessionId/action
+add a new action to the session (the same as /action, but with the session id explicit in the url)
+
+**PUT** : /session/:sessionId/action
+update all the session (same as /action)
+
+**Action**
+__________
+
+**GET** : /action  
+return the list of actions
+
+**POST** : /action  
+add a new action
+
+**PUT** : /action
+update all the actions
+
+**GET** : /action/count  
+return the number of actions
+
+**GET** : /action/:actionId  
+return an action
+
+**POST** : /action/:actionId
+complete an action
+
+**PUT** : /action/:actionId  
+update an action
+
+**Microtask**
+_____________
+
+**GET** : /microtask  
+return the list of microtasks
+
+**POST** : /microtask  
+add a new microtask
+
+**GET** : /microtask/count  
+return the number of microtasks
+
+**GET** : /microtask/:microtaskId  
+return a microtask
+
+**POST** : /microtask/:microtaskId  
+complete a microtask
