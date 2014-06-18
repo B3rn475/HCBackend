@@ -107,7 +107,7 @@ exports.body = {
     mandatory: {},
     optional: {},
     route: {
-        get: {}
+        add: {}
     }
 };
 
