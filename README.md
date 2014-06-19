@@ -477,7 +477,12 @@ adds a new action
 * __body__ : session : __mandatory__ : session of the action
 * __body__ : type : __mandatory__ : the type of the action
 * __body__ : user : __mandatory__ : the user related to the action
-* __body__ : tag : __mandatory__ : the tag of the action (only for "segmentation")
+* __body__ : tag : __optional__ (for tagging) | __mandatory__ (for segmentation) : the tag of the action
+* __body__ : points : __optional__ (only for tagging) : the points of the segmentation
+
+If it is a __tagging__ action the tag is optional. If it is present the action is completed correctly otherwise it is skipped.  
+If it is a __segmentation__ action the tag is mandatory.  
+If it is a __segmentation__ action the points are optional. If they are present the action is completed correctly otherwise it is skipped.
 
 **PUT** : /action
 updates all the actions
