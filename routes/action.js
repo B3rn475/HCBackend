@@ -45,41 +45,13 @@ exports.routes.add = function (req, res, next) {
     if (req.attached.image) { obj.image = req.attached.image.id; }
     if (req.attached.user) { obj.user = req.attached.user.id; }
     if (req.attached.tag) { obj.tag = req.attached.tag.id; }
+    if (req.attached.points !== undefined) { obj.segmentation = { points : req.attached.points}; }
     res.format({
         html: function () {
             index.algorithms.html.add(req, res, next, Action, obj);
         },
         json: function () {
             index.algorithms.json.add(req, res, next, Action, obj);
-        }
-    });
-};
-
-exports.routes.complete = function (req, res, next) {
-    res.format({
-        html: function () {
-            res.send(501, "not implemented");
-        },
-        json: function () {
-            if (req.errors.length) {
-                index.algorithms.json.error(req, res);
-            } else {
-                var action = req.attached.action;
-                if (action.type === "tagging") {
-                    action.tag = req.attached.tag.id;
-                }
-                if (action.type === "segmentation") {
-                    action.segmentation = { points: req.attached.points };
-                }
-                action.completed_at = new Date();
-                action.save(function (err, action) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        res.send({status: "OK"});
-                    }
-                });
-            }
         }
     });
 };
@@ -266,15 +238,7 @@ exports.body.route.add.tag = function (req, res, next) {
     if (req.attached.type === "segmentation") {
         index.body.mandatory.id(req, res, next, Tag);
     } else {
-        next();
-    }
-};
-
-exports.body.route.complete.tag = function (req, res, next) {
-    if (req.attached.action && req.attached.action.type === "tagging") {
-        index.body.mandatory.id(req, res, next, Tag);
-    } else {
-        next();
+        index.body.optional.id(req, res, next, Tag);
     }
 };
 
@@ -305,10 +269,9 @@ var mapPoint = function (item) {
     };
 };
 
-exports.body.route.complete.points = function (req, res, next) {
-    if (req.attached.action
-            && req.attached.action.type === "segmentation") {
-        index.body.mandatory.array(req, res, next, "points", checkPoint, mapPoint);
+exports.body.route.add.points = function (req, res, next) {
+    if (req.attached.type === "segmentation") {
+        index.body.optional.array(req, res, next, "points", checkPoint, mapPoint);
     } else {
         next();
     }

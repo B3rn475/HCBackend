@@ -293,6 +293,7 @@ app.route("/session/:sessionId/action")
           user.body.mandatory.id,
           action.body.mandatory.type,
           action.body.route.add.tag,
+          action.body.route.add.points,
           action.routes.add)
     .put(image.query.optional.id,
          tag.query.optional.id,
@@ -321,6 +322,7 @@ app.route("/action")
           user.body.mandatory.id,
           action.body.mandatory.type,
           action.body.route.add.tag,
+          action.body.route.add.points,
           action.routes.add)
     .put(image.query.optional.id,
         tag.query.optional.id,
@@ -340,10 +342,6 @@ app.route("/action/count")
 app.route("/action/:actionId")
     .get(index.query.optional.populate,
         action.routes.get)
-    .post(action.checkers.open,
-        action.body.route.complete.tag,
-        action.body.route.complete.points,
-        action.routes.complete)
     .put(action.body.route.update.validity,
          action.body.route.update.quality,
          action.checkers.routes.update,
