@@ -383,10 +383,12 @@ app.route("/microtask/:microtaskId")
 app.route("/choose")
     .get(choose.routes.list);
 app.route("/choose/random")
-    .get(choose.query.optional.limit,
+    .get(collection.query.optional.id,
+         choose.query.optional.limit,
          choose.routes.random);
 app.route("/choose/leastused")
-    .get(choose.query.optional.limit,
+    .get(collection.query.optional.id,
+         choose.query.optional.limit,
          choose.routes.leastused);
 
 /**

@@ -570,9 +570,11 @@ returns the list of available aglorithsm
 **GET** : /choose/random
 choose a random combination of __image__ and __tag__ that has already been tagged by a user
 
-* __query__ : limit : __optiona__ : number of elements to return (default: 1, max: 100)
+* __query__ : limit : __optional__ : number of elements to return (default: 1, max: 100)
+* __query__ : collection : __optional__ : collection from which take the images
 
 **GET** : /choose/leastused
 choose the least used combination of __image__ and __tag__ that has already been tagged by a user
 
-* __query__ : limit : __optiona__ : number of elements to return (default: 1, max: 100)
+* __query__ : limit : __optional__ : number of elements to return (default: 1, max: 100)
+* __query__ : collection : __optional__ : collection from which take the images

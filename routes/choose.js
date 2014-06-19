@@ -3,7 +3,8 @@
 
 var index = require("./index.js"),
     Action = require("../models/action.js").model,
-    async = require("async");
+    async = require("async"),
+    _ = require("underscore-node");
 
 /**
  * Routes
@@ -28,42 +29,54 @@ exports.routes.random = function (req, res, next) {
             res.send(501, "not Implemented");
         },
         json: function () {
-            var inputs = [],
-                i;
-            for (i = 0; i < req.attached.limit; i = i + 1) {
-                inputs.push(i);
+            var aggregate = [
+                {$match: {type: "tagging", tag: {$exists: true}, validity: true}},
+                {$group: {_id: {image: "$image", tag: "$tag"}}},
+                {$group: {_id: null, count: {$sum: 1}}}
+            ];
+            if (req.attached.collection) {
+                if (req.attached.collection.images.length !== 0) {
+                    aggregate = _.union([{$match: {image: {$in: req.attached.collection.images}}}], aggregate);
+                } else {
+                    res.send({ status: "OK", results: []});
+                    return;
+                }
             }
-            async.mapLimit(inputs, 10,
-                function (item, next) {
-                    Action.aggregate([
-                        {$match: {type: "tagging", tag: {$exists: true}, validity: true}},
-                        {$group: {_id: {image: "$image", tag: "$tag"}}},
-                        {$group: {_id: null, count: {$sum: 1}}}
-                    ], function (err, result) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            Action.aggregate([
+            Action.aggregate(aggregate,
+                function (err, result) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        var inputs = [],
+                            i,
+                            aggregate = [
                                 {$match: {type: "tagging", tag: {$exists: true}, validity: true}},
                                 {$group: {_id: {image: "$image", tag: "$tag"}}},
                                 {$project: {_id: false, image: "$_id.image", tag: "$_id.tag"}},
                                 {$skip: Math.floor(result[0].count * Math.random())},
-                                {$lismit: 1}
-                            ], function (err, results) {
+                                {$limit: 1}
+                            ],
+                            map = function (item, next) {
+                                Action.aggregate(aggregate, function (err, results) {
+                                    if (err) {
+                                        next(err);
+                                    } else {
+                                        next(undefined, results[0]);
+                                    }
+                                });
+                            };
+                        for (i = 0; i < req.attached.limit; i = i + 1) {
+                            inputs.push(i);
+                        }
+                        async.mapLimit(inputs, 10,
+                            map,
+                            function (err, results) {
                                 if (err) {
                                     next(err);
                                 } else {
-                                    next(undefined, results[0]);
+                                    res.send({ status: "OK", results: results});
                                 }
                             });
-                        }
-                    });
-                },
-                function (err, results) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        res.send({ status: "OK", results: results});
                     }
                 });
         }
@@ -76,7 +89,7 @@ exports.routes.leastused = function (req, res, next) {
             res.send(501, "not Implemented");
         },
         json: function () {
-            Action.aggregate([
+            var aggregate = [
                 {$match: {$and: [
                     {validity: true},
                     {$or: [
@@ -89,13 +102,23 @@ exports.routes.leastused = function (req, res, next) {
                 {$sort: {count: 1}},
                 {$project: {_id: false, image: "$_id.image", tag: "$_id.tag"}},
                 {$limit: req.attached.limit},
-            ], function (err, results) {
-                if (err) {
-                    next(err);
+            ];
+            if (req.attached.collection) {
+                if (req.attached.collection.images.length !== 0) {
+                    aggregate = _.union([{$match: {image: {$in: req.attached.collection.images}}}], aggregate);
                 } else {
-                    res.send({ status: "OK", results: results});
+                    res.send({ status: "OK", results: []});
+                    return;
                 }
-            });
+            }
+            Action.aggregate(aggregate,
+                function (err, results) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.send({ status: "OK", results: results});
+                    }
+                });
         }
     });
 };
