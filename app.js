@@ -95,6 +95,7 @@ app.param("actionId", action.params.id);
 var microtask = require("./routes/microtask.js");
 app.param("microtaskId", microtask.params.id);
 
+var choose = require("./routes/choose.js");
 
 /**
  * Image Routes
@@ -375,6 +376,16 @@ app.route("/microtask/:microtaskId")
     .post(microtask.checkers.open,
          action.body.mandatory.id,
          microtask.routes.complete);
+
+/**
+ * Choose Routes
+ */
+app.route("/choose")
+    .get(choose.routes.list);
+app.route("/choose/random")
+    .get(choose.routes.random);
+app.route("/choose/leastused")
+    .get(choose.routes.leastused);
 
 /**
  * Static Files

@@ -559,3 +559,16 @@ returns a microtask
 complete a microtask
 
 * __body__ : action : __mandatory__ : the action that executes the task
+
+/**
+ * Choose Routes
+ */
+ 
+**GET** : /choose
+returns the list of available aglorithsm
+
+**GET** : /choose/random
+choose a random combination of __image__ and __tag__ that has already been tagged by a user
+
+**GET** : /choose/leastused
+choose the least used combination of __image__ and __tag__ that has already been tagged by a user
