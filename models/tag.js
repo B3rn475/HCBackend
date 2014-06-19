@@ -16,7 +16,7 @@ exports.regexp.name = /[a-zA-Z ]+$/;
 var alias = mongoose.Schema({language: {type: String, validate: exports.regexp.language}, name: {type: String, validate: exports.regexp.language}}, { id: false, _id: false});
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
-                                name: { type: String, index: { unique: true }, validate: exports.regexp.language },
+                                name: { type: String, index: { unique: true }, validate: exports.regexp.name },
                                 aliases : [alias]
                                 }, { id: false});
 
