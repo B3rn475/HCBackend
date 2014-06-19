@@ -71,7 +71,7 @@ fields:
 * app_user_id: { type: Number, min: 0}
 * quality: { type: Number}
 * statistics : {
-        session: {type: Number}
+        sessions: {type: Number}
         actions: {type: Number}
     }
 
