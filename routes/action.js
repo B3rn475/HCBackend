@@ -28,7 +28,7 @@ exports.routes.index = function (req, res, next) {
     if (req.attached.image) { conditions.image = req.attached.image.id; }
     if (req.attached.tag) { conditions.tag = req.attached.tag.id; }
     if (req.attached.session) { conditions.session = req.attached.session.id; }
-    if (req.attached.populate === undefined && !req.attached.populate) { fields = "-segmentation.points"; }
+    if (req.attached.populate === undefined || !req.attached.populate) { fields = "-segmentation.points"; }
     res.format({
         html: function () {
             index.algorithms.html.list(req, res, next, Action, conditions, fields);
