@@ -211,7 +211,7 @@ exports.body.optional.name = function (req, res, next) {
 };
 
 exports.body.route.add.name = function (req, res, next) {
-    index.body.optional.regexp(req, res, next, "name", name, "Tag Name");
+    index.body.mandatory.regexp(req, res, next, "name", name, "Tag Name");
 };
 
 exports.body.route.add.exist = function (req, res, next) {
