@@ -383,9 +383,11 @@ app.route("/microtask/:microtaskId")
 app.route("/choose")
     .get(choose.routes.list);
 app.route("/choose/random")
-    .get(choose.routes.random);
+    .get(choose.query.optional.limit,
+         choose.routes.random);
 app.route("/choose/leastused")
-    .get(choose.routes.leastused);
+    .get(choose.query.optional.limit,
+         choose.routes.leastused);
 
 /**
  * Static Files
