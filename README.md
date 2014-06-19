@@ -37,7 +37,7 @@ fields:
 * id: { type: Number, min: 0, index: { unique: true }}
 * width: { type: Number, min: 1}
 * height: { type: Number, min: 1}
-* midiaLocator: {type: String} // virtual
+* mediaLocator: {type: String} // virtual
 * pose: []
     * location: {type: String, enum: ["head", "torso", "left_arm", "right_arm", "legs", "feet"]},
     * x0 : { type: Number, min: 0, max: width - 1},
@@ -85,7 +85,7 @@ fields:
 * quality: { type: Number}
 * segmentations: { type: Number, min: 1}
 * updated_at: {type: Date}
-* midiaLocatior: {type: String} // virtual
+* mediaLocator: {type: String} // virtual
 
 **Session**
 
