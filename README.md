@@ -101,7 +101,7 @@ fields:
 * tag: **Tag**
 * user: **User**
 * type: {type: String, enum: ["tagging", "segmentation"]},
-* segmentation: 
+* segmentation:
     * quality: { type: Number}
     * points: []
         * x: { type: Number, min: 0}
@@ -111,6 +111,14 @@ fields:
 * started_at: {type: Date},
 * completed_at: {type: Date},
 * validity: {type: Boolean, default: true}
+
+for tagging:  
+__tag__ can be present or not. If it is present the action is completed otherwise skipped  
+__segmentation__ is not present
+
+for segmentation:  
+__tag__ is always present.
+__segmentation__ can be present or not. If it is present the action is completed otherwise skipped  
 
 **Task**
 
@@ -453,6 +461,7 @@ updates all the session (same as /action)
 * __query__ : image : __optional__ : filter on the image
 * __query__ : tag : __optional__ : filter on the tag
 * __query__ : type : __optional__ : filter on the type
+* __query__ : completed : __optional__ : filters completed or not completed actions
 * __body__ : validity : __mandatory__ : the new validity for the actions
 
 **Action**
@@ -491,6 +500,7 @@ updates all the actions
 * __query__ : image : __optional__ : filter on the image (it is required if session and tag are not present)
 * __query__ : tag : __optional__ : filter on the tag (it is required if session and image are not present)
 * __query__ : type : __optional__ : filter on the type
+* __query__ : completed : __optional__ : filters completed or not completed actions
 * __body__ : validity : __mandatory__ : the new validity for the actions
 
 **GET** : /action/count  
@@ -504,9 +514,6 @@ returns the number of actions
 
 **GET** : /action/:actionId  
 returns an action
-
-**POST** : /action/:actionId
-complete an action
 
 **PUT** : /action/:actionId  
 updates an action

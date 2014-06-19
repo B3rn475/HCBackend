@@ -88,7 +88,7 @@ exports.routes.count = function (req, res, next) {
 };
 
 exports.routes.tag = function (req, res, next) {
-    var match = { type: "tagging", validity: true },
+    var match = { type: "tagging", validity: true, tag: {$ne : null} },
         group = {$group: {_id: "$tag"}},
         grouping = {$group: {_id: null, result: {$addToSet: "$_id"}}},
         cbNext = function (err, objects) {

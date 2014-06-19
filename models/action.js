@@ -20,7 +20,7 @@ var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: tru
                                     tag: {type: Number, min: 0, ref: "Tag"},
                                     user: {type: Number, min: 0, ref: "User"},
                                     type: {type: String, enum: ["tagging", "segmentation"]},
-                                    segmentation: { points: [point],
+                                    segmentation: { points: {type: [point], default: undefined},
                                         quality: { type: Number} },
                                     completed_at: {type: Date},
                                     validity: {type: Boolean, default: true}
@@ -28,12 +28,18 @@ var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: tru
 
 schema.virtual('id').get(function () { return this._id; });
 
+schema.post('init', function (doc) {
+    if (doc.segmentation !== undefined && doc.segmentation.points !== undefined && doc.segmentation.quality === undefined) {
+        doc.segmentation = undefined;
+    }
+});
+
 schema.pre('save', function (next) {
     if (this.completed_at === undefined) {
         var now = new Date();
         this.completed_at = now;
     }
-    if (this.type === "tagging") {
+    if (this.type === "tagging" || (this.segmentation !== undefined && (this.segmentation.points === undefined || this.segmentation.points.length === 0))) {
         this.segmentation = undefined;
     }
     next();

@@ -20,21 +20,26 @@ var type = /tagging|segmentation$/;
 exports.routes = {};
 
 exports.routes.index = function (req, res, next) {
-    var conditions = {},
+    var query = { },
         fields = "";
-    if (req.attached.type) { conditions.type = req.attached.type; }
-    if (req.attached.validity !== undefined) { conditions.validity = req.attached.validity; }
-    if (req.attached.completed !== undefined) { conditions.completed_at = {$exists: req.attached.completed}; }
-    if (req.attached.image) { conditions.image = req.attached.image.id; }
-    if (req.attached.tag) { conditions.tag = req.attached.tag.id; }
-    if (req.attached.session) { conditions.session = req.attached.session.id; }
+    if (req.attached.type) { query.type = req.attached.type; }
+    if (req.attached.validity !== undefined) { query.validity = req.attached.validity; }
+    if (req.attached.completed !== undefined) {
+        query.$or = [
+            {type: "tagging", tag : {$exists: req.attached.completed}},
+            {type: "segmentation", segmentation : {$exists: req.attached.completed}},
+        ];
+    }
+    if (req.attached.image) { query.image = req.attached.image.id; }
+    if (req.attached.tag) { query.tag = req.attached.tag.id; }
+    if (req.attached.session) { query.session = req.attached.session.id; }
     if (req.attached.populate === undefined || !req.attached.populate) { fields = "-segmentation.points"; }
     res.format({
         html: function () {
-            index.algorithms.html.list(req, res, next, Action, conditions, fields);
+            index.algorithms.html.list(req, res, next, Action, query, fields);
         },
         json: function () {
-            index.algorithms.json.list(req, res, next, Action, conditions, fields);
+            index.algorithms.json.list(req, res, next, Action, query, fields);
         }
     });
 };
@@ -44,8 +49,14 @@ exports.routes.add = function (req, res, next) {
     if (req.attached.session) { obj.session = req.attached.session.id; }
     if (req.attached.image) { obj.image = req.attached.image.id; }
     if (req.attached.user) { obj.user = req.attached.user.id; }
-    if (req.attached.tag) { obj.tag = req.attached.tag.id; }
-    if (req.attached.points !== undefined) { obj.segmentation = { points : req.attached.points}; }
+    if (req.attached.tag) {
+        obj.tag = req.attached.tag.id;
+    }
+    if (req.attached.points === undefined) {
+        obj.segmentation = undefined;
+    } else {
+        obj.segmentation = { points: req.attached.points, quality: null };
+    }
     res.format({
         html: function () {
             index.algorithms.html.add(req, res, next, Action, obj);
@@ -88,6 +99,12 @@ exports.routes.validity = function (req, res, next) {
     if (req.attached.tag) { query.tag = req.attached.tag.id; }
     if (req.attached.type) { query.type = req.attached.type; }
     if (req.attached.session) { query.session = req.attached.session; }
+    if (req.attached.completed !== undefined) {
+        query.$or = [
+            {type: "tagging", tag : {$exists: req.attached.completed}},
+            {type: "segmentation", segmentation : {$exists: req.attached.completed}},
+        ];
+    }
     res.format({
         html: function () {
             index.algorithms.html.update(req, res, next, Action, query, update, options);
@@ -114,19 +131,24 @@ exports.routes.get = function (req, res, next) {
 };
 
 exports.routes.count = function (req, res, next) {
-    var conditions = {};
-    if (req.attached.type) { conditions.type = req.attached.type; }
-    if (req.attached.validity !== undefined) { conditions.validity = req.attached.validity; }
-    if (req.attached.completed !== undefined) { conditions.completed_at = {$exists: req.attached.completed}; }
-    if (req.attached.image) { conditions.image = req.attached.image.id; }
-    if (req.attached.tag) { conditions.tag = req.attached.tag.id; }
-    if (req.attached.session) { conditions.session = req.attached.session.id; }
+    var query = {};
+    if (req.attached.type) { query.type = req.attached.type; }
+    if (req.attached.validity !== undefined) { query.validity = req.attached.validity; }
+    if (req.attached.completed !== undefined) {
+        query.$or = [
+            {type: "tagging", tag : {$exists: req.attached.completed}},
+            {type: "segmentation", segmentation : {$exists: req.attached.completed}},
+        ];
+    }
+    if (req.attached.image) { query.image = req.attached.image.id; }
+    if (req.attached.tag) { query.tag = req.attached.tag.id; }
+    if (req.attached.session) { query.session = req.attached.session.id; }
     res.format({
         html: function () {
-            index.algorithms.html.count(req, res, next, Action, conditions);
+            index.algorithms.html.count(req, res, next, Action, query);
         },
         json: function () {
-            index.algorithms.json.count(req, res, next, Action, conditions);
+            index.algorithms.json.count(req, res, next, Action, query);
         }
     });
 };
@@ -214,11 +236,12 @@ exports.body.optional.validity = function (req, res, next) {
 };
 
 exports.body.route.update.validity = function (req, res, next) {
+    console.log(req.attached.action);
     if (req.attached.action) {
-        if (req.attached.action.type === "tagging") {
+        console.log(req.attached.action.segmentation);
+        if (req.attached.action.type === "tagging" || req.attached.action.segmentation === undefined) {
             exports.body.mandatory.validity(req, res, next);
-        }
-        if (req.attached.action.type === "segmentation") {
+        } else {
             exports.body.optional.validity(req, res, next);
         }
     } else {
@@ -227,7 +250,7 @@ exports.body.route.update.validity = function (req, res, next) {
 };
 
 exports.body.route.update.quality = function (req, res, next) {
-    if (req.attached.action && req.attached.action.type === "segmentation") {
+    if (req.attached.action && req.attached.action.type === "segmentation" && req.attached.action.segmentation !== undefined) {
         index.body.optional.float(req, res, next, "quality");
     } else {
         next();
@@ -285,23 +308,9 @@ exports.checkers = {
     routes: {}
 };
 
-exports.checkers.open = function (req, res, next) {
-    if (req.attached.action && req.attached.action.completed_at) {
-        req.errors.push({location: "status", message: "Action " + req.attached.action.id + " is already completed" });
-    }
-    next();
-};
-
-exports.checkers.completed = function (req, res, next) {
-    if (req.attached.action && !req.attached.action.completed_at) {
-        req.errors.push({location: "status", message: "Action " + req.attached.action.id + " is still open" });
-    }
-    next();
-};
-
 exports.checkers.routes.update = function (req, res, next) {
     if (req.attached.action) {
-        if (req.attached.action.type === "segmentation") {
+        if (req.attached.action.type === "segmentation" && req.attached.action.segmentation !== undefined) {
             if (req.attached.validity === undefined && req.attached.quality === undefined) {
                 req.errors.push({location: "body", name: "validity|quality", message: "Missing validity or quality Body paramaters. At least one is required" });
             }
