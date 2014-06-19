@@ -167,9 +167,9 @@ exports.algorithms.aggregate = function (req, res, next, Model, pipeline, groupi
         });
 };
 
-exports.algorithms.filter = function (req, res, next, Model, conditions, fields, options) {
-    if (conditions === undefined) {
-        conditions = {};
+exports.algorithms.filter = function (req, res, next, Model, query, fields, options) {
+    if (query === undefined) {
+        query = {};
     }
     if (fields === undefined) {
         fields = {};
@@ -178,19 +178,19 @@ exports.algorithms.filter = function (req, res, next, Model, conditions, fields,
         options = {};
     }
     if (req.attached.since_id !== undefined || req.attached.max_id !== undefined) {
-        if (conditions._id === undefined) { conditions._id = { }; }
+        if (query._id === undefined) { query._id = { }; }
         if (req.attached.since_id !== undefined) {
-            conditions._id.$gt = req.attached.since_id;
+            query._id.$gt = req.attached.since_id;
         }
         if (req.attached.max_id !== undefined) {
-            conditions._id.$lte = req.attached.max_id;
+            query._id.$lte = req.attached.max_id;
         }
     }
 
     options.sort = {_id: -1};
     options.limit = req.attached.count;
     
-    Model.find(conditions,
+    Model.find(query,
         fields,
         options,
         function (err, objects) {
@@ -202,7 +202,7 @@ exports.algorithms.filter = function (req, res, next, Model, conditions, fields,
         });
 };
 
-exports.algorithms.json.list = function (req, res, next, Model, conditions, fields, options) {
+exports.algorithms.json.list = function (req, res, next, Model, query, fields, options, cbPrepare) {
     if (req.errors.length) {
         exports.algorithms.json.error(req, res);
     } else {
@@ -237,12 +237,23 @@ exports.algorithms.json.list = function (req, res, next, Model, conditions, fiel
                         }
                     }
                 }
-                json[Model.json_list_property] = objects;
                 json.search_metadata = search_metadata;
-                res.send(json);
+                if (cbPrepare === undefined) {
+                    json[Model.json_list_property] = objects;
+                    res.send(json);
+                } else {
+                    cbPrepare(objects, function (err, objects) {
+                        if (err) {
+                            next(err);
+                        } else {
+                            json[Model.json_list_property] = objects;
+                            res.send(json);
+                        }
+                    });
+                }
             }
         };
-        exports.algorithms.filter(req, res, cbNext, Model, conditions, fields, options);
+        exports.algorithms.filter(req, res, cbNext, Model, query, fields, options);
     }
 };
 

@@ -20,5 +20,6 @@
     , "mongoose-auto-increment": "*"
     , "cli-color" : "*"
     , "underscore-node" : "*"
+    , "async" : "*"
   }
 }

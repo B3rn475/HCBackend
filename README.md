@@ -70,6 +70,10 @@ fields:
 * app_id: { type: Number, min: 0}
 * app_user_id: { type: Number, min: 0}
 * quality: { type: Number}
+* statistics : {
+        session: {type: Number}
+        actions: {type: Number}
+    }
 
 **Mask**
 
@@ -265,6 +269,7 @@ returns the list of users
 * __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
 * __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 * __query__ : app_id : __optional__ : returns only users from a particular application
+* __query__ : populate : __optional__ : shows the user statistics
 
 **POST** : /user  
 adds a new user (if it is already there returns the id)
@@ -279,6 +284,8 @@ returns the number of users
 
 **GET** : /user/:userId  
 returns a user
+
+* __query__ : populate : __optional__ : shows the user statistics
 
 **PUT** : /user/:userId
 updates the user information

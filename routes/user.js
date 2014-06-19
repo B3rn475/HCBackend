@@ -2,7 +2,8 @@
 "use strict";
 
 var User = require("../models/user.js").model,
-    index = require("./index.js");
+    index = require("./index.js"),
+    async = require("async");
 
 /**
  * Routes
@@ -18,7 +19,18 @@ exports.routes.index = function (req, res, next) {
             index.algorithms.html.list(req, res, next, User, conditions);
         },
         json: function () {
-            index.algorithms.json.list(req, res, next, User, conditions);
+            var prepare;
+            if (req.attached.populate) {
+                prepare = function (users, next) {
+                    var error;
+                    async.map(users,
+                        function (user, next) {
+                            user.computeFields(next);
+                        },
+                        next);
+                };
+            }
+            index.algorithms.json.list(req, res, next, User, conditions, undefined, undefined, prepare);
         }
     });
 };
@@ -47,14 +59,28 @@ exports.routes.add = function (req, res, next) {
 };
 
 exports.routes.get = function (req, res, next) {
-    res.format({
-        html: function () {
-            index.algorithms.html.get(req, res, next, User);
-        },
-        json: function () {
-            index.algorithms.json.get(req, res, next, User);
-        }
-    });
+    var count,
+        total,
+        end,
+        cbNext = function (err) {
+            if (err) {
+                next(err);
+            } else {
+                res.format({
+                    html: function () {
+                        index.algorithms.html.get(req, res, next, User);
+                    },
+                    json: function () {
+                        index.algorithms.json.get(req, res, next, User);
+                    }
+                });
+            }
+        };
+    if (req.attached.user && req.attached.populate !== undefined && req.attached.populate) {
+        req.attached.user.computeFields(cbNext);
+    } else {
+        cbNext();
+    }
 };
 
 exports.routes.update = function (req, res, next) {

@@ -159,13 +159,15 @@ app.route("/user")
     .get(index.query.optional.count,
          index.query.optional.since_id,
          index.query.optional.max_id,
+         index.query.optional.populate,
          user.query.optional.app_id,
          user.routes.index);
 app.route("/user/count")
     .get(user.query.optional.app_id,
          user.routes.count);
 app.route("/user/:userId")
-    .get(user.routes.get)
+    .get(index.query.optional.populate,
+         user.routes.get)
     .put(user.body.mandatory.quality,
          user.routes.update);
 
