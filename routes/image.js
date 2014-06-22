@@ -129,13 +129,9 @@ exports.query = {
     route: {}
 };
 
-exports.query.mandatory.id = function (req, res, next) {
-    index.query.mandatory.id(req, res, index.query.register(req, res, next, Image.pname, "id"), Image);
-};
+exports.query.mandatory.id = index.query.register(Image.pname, index.query.mandatory.id(Image), "id");
 
-exports.query.optional.id = function (req, res, next) {
-    index.query.optional.id(req, res, index.query.register(req, res, next, Image.pname, "id"), Image);
-};
+exports.query.optional.id = index.query.register(Image.pname, index.query.optional.id(Image), "id");
 
 /**
  * Body Params

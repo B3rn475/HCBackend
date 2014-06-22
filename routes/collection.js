@@ -109,10 +109,6 @@ exports.query = {
     route: {}
 };
 
-exports.query.mandatory.id = function (req, res, next) {
-    index.query.mandatory.id(req, res, index.query.register(req, res, next, Collection.pname, "id"), Collection);
-};
+exports.query.mandatory.id = index.query.register(Collection.pname, index.query.mandatory.id(Collection), "id");
 
-exports.query.optional.id = function (req, res, next) {
-    index.query.optional.id(req, res, index.query.register(req, res, next, Collection.pname, "id"), Collection);
-};
+exports.query.optional.id = index.query.register(Collection.pname, index.query.optional.id(Collection), "id");

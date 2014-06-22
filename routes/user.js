@@ -137,13 +137,9 @@ exports.query = {
     route: {}
 };
 
-exports.query.mandatory.app_id = function (req, res, next) {
-    index.query.mandatory.integer(req, res, index.query.register(req, res, next, "type"), "app_id", 0);
-};
+exports.query.mandatory.app_id = index.query.register("app_id", index.query.mandatory.integer("app_id", 0));
 
-exports.query.optional.app_id = function (req, res, next) {
-    index.query.optional.integer(req, res, index.query.register(req, res, next, "type"), "app_id", 0);
-};
+exports.query.optional.app_id = index.query.register("app_id", index.query.optional.integer("app_id", 0));
 
 /**
  * Body Params

@@ -136,21 +136,13 @@ exports.query = {
     route: {}
 };
 
-exports.query.mandatory.id = function (req, res, next) {
-    index.query.mandatory.id(req, res, index.query.register(req, res, next, Task.pname, "id"), Task);
-};
+exports.query.mandatory.id = index.query.register(Task.pname, index.query.mandatory.id(Task), "id");
 
-exports.query.optional.id = function (req, res, next) {
-    index.query.optional.id(req, res, index.query.register(req, res, next, Task.pname, "id"), Task);
-};
+exports.query.optional.id = index.query.register(Task.pname, index.query.optional.id(Task), "id");
 
-exports.query.mandatory.completed = function (req, res, next) {
-    index.query.mandatory.boolean(req, res, index.query.register(req, res, next, "completed"), "completed");
-};
+exports.query.mandatory.completed = index.query.register("completed", index.query.mandatory.boolean("completed"));
 
-exports.query.optional.completed = function (req, res, next) {
-    index.query.optional.boolean(req, res, index.query.register(req, res, next, "completed"), "completed");
-};
+exports.query.optional.completed = index.query.register("completed", index.query.optional.boolean("completed"));
 
 /**
  * Body Params

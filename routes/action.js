@@ -171,29 +171,17 @@ exports.query = {
     route: {}
 };
 
-exports.query.mandatory.type = function (req, res, next) {
-    index.query.mandatory.regexp(req, res, index.query.register(req, res, next, "type"), "type", type, "Action Type");
-};
+exports.query.mandatory.type = index.query.register("type", index.query.mandatory.regexp("type", type, "Action Type"));
 
-exports.query.optional.type = function (req, res, next) {
-    index.query.optional.regexp(req, res, index.query.register(req, res, next, "type"), "type", type, "Action Type");
-};
+exports.query.optional.type = index.query.register("type", index.query.optional.regexp("type", type, "Action Type"));
 
-exports.query.mandatory.validity = function (req, res, next) {
-    index.query.mandatory.boolean(req, res, index.query.register(req, res, next, "validity"), next, "validity");
-};
+exports.query.mandatory.validity = index.query.register("validity", index.query.mandatory.boolean("validity"));
 
-exports.query.optional.validity = function (req, res, next) {
-    index.query.optional.boolean(req, res, index.query.register(req, res, next, "validity"), "validity");
-};
+exports.query.optional.validity = index.query.register("validity", index.query.optional.boolean("validity"));
 
-exports.query.mandatory.completed = function (req, res, next) {
-    index.query.mandatory.boolean(req, res, index.query.register(req, res, next, "completed"), next, "completed");
-};
+exports.query.mandatory.completed = index.query.register("completed", index.query.mandatory.boolean("completed"));
 
-exports.query.optional.completed = function (req, res, next) {
-    index.query.optional.boolean(req, res, index.query.register(req, res, next, "completed"), "completed");
-};
+exports.query.optional.completed = index.query.register("completed", index.query.optional.boolean("completed"));
 
 /**
  * Body Params

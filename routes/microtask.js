@@ -127,13 +127,9 @@ exports.query = {
     route: {}
 };
 
-exports.query.mandatory.completed = function (req, res, next) {
-    index.query.mandatory.boolean(req, res, index.query.register(req, res, next, "completed"), "completed");
-};
+exports.query.mandatory.completed = index.query.register("completed", index.query.mandatory.boolean("completed"));
 
-exports.query.optional.completed = function (req, res, next) {
-    index.query.optional.boolean(req, res, index.query.register(req, res, next, "completed"), "completed");
-};
+exports.query.optional.completed = index.query.register("completed", index.query.optional.boolean("completed"));
 
 /**
  * Body Params

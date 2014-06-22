@@ -422,101 +422,76 @@ exports.query = {
     unchecked: {},
 };
 
-exports.query.register = function (req, res, next, property, path) {
-    return function (err) {
-        var value = req.attached[property];
-        if (value !== undefined) {
-            if (path === undefined) {
-                req.search_metadata[property] = value;
-            } else {
+exports.query.register = function (property, middleware, path) {
+    var set;
+    if (path === undefined) {
+        set = function (req) {
+            req.search_metadata[property] = req.attached[property];
+        };
+    } else {
+        set = function (req) {
+            var value = req.attached[property];
+            if (value !== undefined) {
                 req.search_metadata[property] = value[path];
             }
-        }
-        next(err);
+        };
+    }
+    return function (req, res, next) {
+        middleware(req, res, function (err) {
+            if (err) {
+                next(err);
+            } else {
+                set(req);
+                next();
+            }
+        });
     };
 };
 
-exports.query.mandatory.populate = function (req, res, next) {
-    exports.query.mandatory.boolean(req, res, exports.query.register(req, res, next, "populate"), "populate");
-};
-
-exports.query.optional.populate = function (req, res, next) {
-    exports.query.optional.boolean(req, res, exports.query.register(req, res, next, "populate"), "populate", false);
-};
-
-exports.query.mandatory.count = function (req, res, next) {
-    exports.query.mandatory.integer(req, res, exports.query.register(req, res, next, "count"), "count", 0, 100);
-};
-
-exports.query.optional.count = function (req, res, next) {
-    exports.query.optional.integer(req, res, exports.query.register(req, res, next, "count"), "count", 0, 100, 100);
-};
-
-exports.query.mandatory.max_id = function (req, res, next) {
-    exports.query.mandatory.integer(req, req, next, "max_id", 0);
-};
-
-exports.query.optional.max_id = function (req, res, next) {
-    exports.query.optional.integer(req, res, next, "max_id", 0);
-};
-
-exports.query.mandatory.since_id = function (req, res, next) {
-    exports.query.mandatory.integer(req, res, next, "since_id", 0);
-};
-
-exports.query.optional.since_id = function (req, res, next) {
-    exports.query.optional.integer(req, res, next, "since_id", 0);
-};
-
-exports.query.mandatory.boolean = function (req, res, next, property) {
-    if (req.query[property] === undefined) {
-        req.errors.push({location: "query", name: property, message: "Missing Query Parameter '" + property + "'" });
+exports.query.unchecked.boolean = function (property) {
+    return function (req, res, next) {
+        var value = req.query[property];
+        req.attached[property] = (value === false || value === "false" || value === "0") ? false : true;
         next();
-    } else {
-        exports.query.unchecked.boolean(req, res, next, property);
-    }
+    };
 };
 
-exports.query.optional.boolean = function (req, res, next, property, dvalue) {
-    if (req.query[property] === undefined) {
-        if (dvalue) {
-            req.attached[property] = dvalue;
+exports.query.mandatory.boolean = function (property) {
+    var eMissing = {location: "query", name: property, message: "Missing Query Parameter '" + property + "'" },
+        uBoolean = exports.query.unchecked.boolean(property);
+    return function (req, res, next) {
+        if (req.query[property] === undefined) {
+            req.errors.push(eMissing);
+            next();
+        } else {
+            uBoolean(req, res, next);
         }
-        next();
+    };
+};
+
+exports.query.optional.boolean = function (property, dvalue) {
+    var uBoolean = exports.query.unchecked.boolean(property);
+    if (dvalue === undefined) {
+        return function (req, res, next) {
+            if (req.query[property] === undefined) {
+                next();
+            } else {
+                uBoolean(req, res, next);
+            }
+        };
     } else {
-        exports.query.unchecked.boolean(req, res, next, property);
+        return function (req, res, next) {
+            if (req.query[property] === undefined) {
+                req.attached[property] = dvalue;
+                next();
+            } else {
+                uBoolean(req, res, next);
+            }
+        };
     }
 };
 
-exports.query.unchecked.boolean = function (req, res, next, property) {
-    var value = req.query[property];
-    req.attached[property] = (value === false || value === "false" || value === "0") ? false : true;
-    next();
-};
-
-exports.query.mandatory.integer = function (req, res, next, property, min, max) {
-    if (req.query[property] === undefined) {
-        req.errors.push({location: "query", name: property, message: "Missing Query Parameter '" + property + "'" });
-        next();
-    } else {
-        exports.query.unchecked.integer(req, res, next, property, min, max);
-    }
-};
-
-exports.query.optional.integer = function (req, res, next, property, min, max, dvalue) {
-    if (req.query[property] === undefined) {
-        if (dvalue) {
-            req.attached[property] = dvalue;
-        }
-        next();
-    } else {
-        exports.query.unchecked.integer(req, res, next, property, min, max);
-    }
-};
-
-exports.query.unchecked.integer = function (req, res, next, property, min, max) {
-    var error,
-        value = req.query[property];
+var partialToInt = function (value) {
     if (typeof value !== 'number') {
         value = value.toString();
         if (int.test(value)) {
@@ -525,89 +500,230 @@ exports.query.unchecked.integer = function (req, res, next, property, min, max) 
             value = undefined;
         }
     }
-    if (value !== undefined && Math.floor(value) === value) {
-        if ((min && value < min) || (max && value > max)) {
-            error = true;
-            req.errors.push({location: "query", name: property, message: "Invalid '" + property + "' parameter, out of bound"});
+    return value;
+};
+
+exports.query.unchecked.integer = function (property, min, max) {
+    var eOutOfBound = {location: "query", name: property, message: "Invalid '" + property + "' parameter, out of bound"},
+        eNotNumber = {location: "query", name: property, message: "Invalid '" + property + "' parameter, it is not a number"},
+        checkValue;
+    if (min === undefined) {
+        if (max === undefined) {
+            checkValue = function (value, req) {
+                if (value === undefined || Math.floor(value) !== value) {
+                    req.errors.push(eNotNumber);
+                    return false;
+                }
+                return true;
+            };
+        } else {
+            checkValue = function (value, req) {
+                if (value !== undefined && Math.floor(value) === value) {
+                    if (value > max) {
+                        req.errors.push(eOutOfBound);
+                        return false;
+                    }
+                } else {
+                    req.errors.push(eNotNumber);
+                    return false;
+                }
+                return true;
+            };
         }
     } else {
-        error = true;
-        req.errors.push({location: "query", name: property, message: "Invalid '" + property + "' parameter, it is not a number"});
+        if (max === undefined) {
+            checkValue = function (value, req) {
+                if (value !== undefined && Math.floor(value) === value) {
+                    if (value < min) {
+                        req.errors.push(eOutOfBound);
+                        return false;
+                    }
+                } else {
+                    req.errors.push(eNotNumber);
+                    return false;
+                }
+                return true;
+            };
+        } else {
+            checkValue = function (value, req) {
+                if (value !== undefined && Math.floor(value) === value) {
+                    if (value < min || value > max) {
+                        req.errors.push(eOutOfBound);
+                        return false;
+                    }
+                } else {
+                    req.errors.push(eNotNumber);
+                    return false;
+                }
+                return true;
+            };
+        }
     }
-    if (!error) {
-        req.attached[property] = value;
-    }
-    next();
-};
-
-exports.query.mandatory.id = function (req, res, next, Model) {
-    if (req.query[Model.pname] === undefined) {
-        req.errors.push({location: "query", name: Model.pname, message: "Missing Query Parameter '" + Model.pname + "'" });
+    return function (req, res, next) {
+        var value = partialToInt(req.query[property]);
+        if (checkValue(value, req)) {
+            req.attached[property] = value;
+        }
         next();
-    } else {
-        exports.body.unchecked.id(req, res, next, Model);
-    }
+    };
 };
 
-exports.query.optional.id = function (req, res, next, Model) {
-    if (req.query[Model.pname] === undefined) {
-        next();
-    } else {
-        exports.query.unchecked.id(req, res, next, Model);
-    }
-};
-
-exports.query.unchecked.id = function (req, res, next, Model) {
-    exports.query.unchecked.integer(req, res, function () {
-        if (req.attached[Model.pname] === undefined) {
+exports.query.mandatory.integer = function (property, min, max) {
+    var eMissing = {location: "query", name: property, message: "Missing Query Parameter '" + property + "'" },
+        uInteger = exports.query.unchecked.integer(property, min, max);
+    return function (req, res, next) {
+        if (req.query[property] === undefined) {
+            req.errors.push(eMissing);
             next();
         } else {
-            Model.findOne({_id : req.attached[Model.pname]}, function (err, obj) {
-                if (err) {
-                    next(err);
-                } else if (obj) {
-                    req.attached[Model.pname] = obj;
-                    next();
-                } else {
-                    req.errors.push({location: "query", name: Model.pname, message: "Unable to find " + Model.modelName
-                                     + " " + req.attached[Model.pname]
-                                     + " in Query Parameter '"
-                                     + Model.pname + "'"});
-                    next();
-                }
-            });
+            uInteger(req, res, next);
         }
-    }, Model.pname, 0);
+    };
 };
 
-exports.query.mandatory.regexp = function (req, res, next, property, exp, type) {
-    if (req.query[property] === undefined) {
-        req.errors.push({location: "query", name: property, message: "Missing Query Parameter '" + property + "'" });
-        next();
+exports.query.optional.integer = function (property, min, max, dvalue) {
+    var uInteger = exports.query.unchecked.integer(property, min, max);
+    if (dvalue === undefined) {
+        return function (req, res, next) {
+            if (req.query[property] === undefined) {
+                next();
+            } else {
+                uInteger(req, res, next);
+            }
+        };
     } else {
-        exports.query.unchecked.regexp(req, res, next, property, exp, type);
+        return function (req, res, next) {
+            if (req.query[property] === undefined) {
+                req.attached[property] = dvalue;
+                next();
+            } else {
+                uInteger(req, res, next);
+            }
+        };
     }
 };
 
-exports.query.optional.regexp = function (req, res, next, property, exp, type, dvalue) {
-    if (req.query[property] === undefined) {
-        if (dvalue) {
-            req.attached[property] = dvalue;
+exports.query.mandatory.populate = exports.query.register("populate", exports.query.mandatory.boolean("populate"));
+
+exports.query.optional.populate = exports.query.register("populate", exports.query.optional.boolean("populate", false));
+
+exports.query.mandatory.count = exports.query.register("count", exports.query.mandatory.integer("count", 0, 100));
+
+exports.query.optional.count = exports.query.register("count", exports.query.optional.integer("count", 0, 100, 100));
+
+exports.query.mandatory.max_id = exports.query.mandatory.integer("max_id", 0);
+
+exports.query.optional.max_id = exports.query.optional.integer("max_id", 0);
+
+exports.query.mandatory.since_id = exports.query.mandatory.integer("since_id", 0);
+
+exports.query.optional.since_id = exports.query.optional.integer("since_id", 0);
+
+exports.query.unchecked.id = function (Model) {
+    var property = Model.pname,
+        modelName = Model.modelName,
+        uInteger = exports.query.unchecked.integer(property, 0),
+        getId = function (req, res, next) {
+            if (req.attached[property] === undefined) {
+                next();
+            } else {
+                Model.findOne({_id : req.attached[property]}, function (err, obj) {
+                    if (err) {
+                        next(err);
+                    } else if (obj) {
+                        req.attached[property] = obj;
+                        next();
+                    } else {
+                        req.errors.push({location: "query", name: property, message: "Unable to find " + modelName
+                                         + " " + req.attached[property]
+                                         + " in Query Parameter '"
+                                         + property + "'"});
+                        next();
+                    }
+                });
+            }
+        };
+    return function (req, res, next) {
+        uInteger(req, res, function (err) {
+            if (err) {
+                next(err);
+            } else {
+                getId(req, res, next);
+            }
+        });
+    };
+};
+
+exports.query.mandatory.id = function (Model) {
+    var eMissing = {location: "query", name: Model.pname, message: "Missing Query Parameter '" + Model.pname + "'" },
+        uId = exports.query.unchecked.id(Model);
+    return function (req, res, next) {
+        if (req.query[Model.pname] === undefined) {
+            req.errors.push(eMissing);
+            next();
+        } else {
+            uId(req, res, next);
+        }
+    };
+};
+
+exports.query.optional.id = function (Model) {
+    var uId = exports.query.unchecked.id(Model);
+    return function (req, res, next) {
+        if (req.query[Model.pname] === undefined) {
+            next();
+        } else {
+            uId(req, res, next);
+        }
+    };
+};
+
+exports.query.unchecked.regexp = function (property, regexp, type) {
+    var eNotPassed = {location: "query", name: property, message: "Invalid Query Parameter '" + property + "'" + (type ? ", it is not a valid " + type : "")};
+    return function (req, res, next) {
+        var value = req.query[property];
+        if (regexp.test(value)) {
+            req.attached[property] = value;
+        } else {
+            req.errors.push(eNotPassed);
         }
         next();
-    } else {
-        exports.query.unchecked.regexp(req, res, next, property, exp, type);
-    }
+    };
 };
 
-exports.query.unchecked.regexp = function (req, res, next, property, exp, type) {
-    var value = req.query[property];
-    if (exp.test(value)) {
-        req.attached[property] = value;
+exports.query.mandatory.regexp = function (property, regexp, type) {
+    var eMissing = {location: "query", name: property, message: "Missing Query Parameter '" + property + "'" },
+        uRegExp = exports.query.unchecked.regexp(property, regexp, type);
+    return function (req, res, next) {
+        if (req.query[property] === undefined) {
+            req.errors.push(eMissing);
+            next();
+        } else {
+            uRegExp(req, res, next);
+        }
+    };
+};
+
+exports.query.optional.regexp = function (property, regexp, type, dvalue) {
+    var uRegExp = exports.query.unchecked.regexp(property, regexp, type);
+    if (dvalue === undefined) {
+        return function (req, res, next) {
+            if (req.query[property] === undefined) {
+                next();
+            } else {
+                uRegExp(req, res, next);
+            }
+        };
     } else {
-        req.errors.push({location: "query", name: property, message: "Invalid Query Parameter '" + property + "'" + (type ? ", it is not a valid " + type : "")});
+        return function (req, res, next) {
+            if (req.query[property] === undefined) {
+                req.attached[property] = dvalue;
+                next();
+            } else {
+                uRegExp(req, res, next);
+            }
+        };
     }
-    next();
 };
 
 /**
