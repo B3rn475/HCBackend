@@ -395,16 +395,18 @@ exports.params.id = function (Model) {
     };
 };
 
-exports.params.regexp = function (req, res, next, property, exp, value) {
-    var error = false;
-    if (!exp.test(value)) {
-        error = true;
-        req.errors.add({location: "url", name: property, message: "Invalid '" + property + "'"});
-    }
-    if (!error) {
-        req.attached[property] = value;
-    }
-    next();
+exports.params.regexp = function (property, regexp) {
+    return function (req, res, next, value) {
+        var error = false;
+        if (!regexp.test(value)) {
+            error = true;
+            req.errors.add({location: "url", name: property, message: "Invalid '" + property + "'"});
+        }
+        if (!error) {
+            req.attached[property] = value;
+        }
+        next();
+    };
 };
 
 /**

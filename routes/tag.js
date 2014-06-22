@@ -150,9 +150,7 @@ exports.params = {};
 
 exports.params.id = index.params.id(Tag);
 
-exports.params.language = function (req, res, next, inValue) {
-    index.params.regexp(req, res, next, "language", language, inValue);
-};
+exports.params.language = index.params.regexp("language", language);
 
 /**
  * Query Params
