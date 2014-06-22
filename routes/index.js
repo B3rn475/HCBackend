@@ -358,6 +358,8 @@ exports.algorithms.html.count = function (req, res, next, Model, query) {
 exports.params = {};
 
 exports.params.id = function (Model) {
+    var eInvalid = {location: "url", name: "id", message: "Invalid " + Model.modelName + " 'id', must be greater than 0"},
+        eNotANumber = {location: "url", name: "id", message: "Invalid " + Model.modelName + " 'id', it is not a number"};
     return function (req, res, next, id) {
         var error;
         if (typeof id !== 'number') {
@@ -371,11 +373,11 @@ exports.params.id = function (Model) {
         if (id !== undefined && Math.floor(id) === id) {
             if (id < 0) {
                 error = true;
-                req.errors.push({location: "url", name: "id", message: "Invalid " + Model.modelName + " 'id', must be greater than 0"});
+                req.errors.push(eInvalid);
             }
         } else {
             error = true;
-            req.errors.push({location: "url", name: "id", message: "Invalid " + Model.modelName + " 'id', it is not a number"});
+            req.errors.push(eNotANumber);
         }
         if (error) {
             next();
@@ -396,11 +398,12 @@ exports.params.id = function (Model) {
 };
 
 exports.params.regexp = function (property, regexp) {
+    var eInvalid = {location: "url", name: property, message: "Invalid '" + property + "'"};
     return function (req, res, next, value) {
         var error = false;
         if (!regexp.test(value)) {
             error = true;
-            req.errors.add({location: "url", name: property, message: "Invalid '" + property + "'"});
+            req.errors.add(eInvalid);
         }
         if (!error) {
             req.attached[property] = value;
