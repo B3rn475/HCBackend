@@ -122,13 +122,9 @@ exports.body = {
     route: { }
 };
 
-exports.body.mandatory.id = function (req, res, next) {
-    index.body.mandatory.id(req, res, next, Session);
-};
+exports.body.mandatory.id = index.body.mandatory.id(Session);
 
-exports.body.optional.id = function (req, res, next) {
-    index.body.optional.id(req, res, next, Session);
-};
+exports.body.optional.id = index.body.optional.id(Session);
 
 
 /**

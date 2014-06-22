@@ -197,34 +197,20 @@ exports.body = {
     }
 };
 
-exports.body.mandatory.id = function (req, res, next) {
-    index.body.mandatory.id(req, res, next, Action);
-};
+exports.body.mandatory.id = index.body.mandatory.id(Action);
 
-exports.body.optional.id = function (req, res, next) {
-    index.body.optional.id(req, res, next, Action);
-};
+exports.body.optional.id = index.body.optional.id(Action);
 
-exports.body.mandatory.type = function (req, res, next) {
-    index.body.mandatory.regexp(req, res, next, "type", type, "Action Type");
-};
+exports.body.mandatory.type = index.body.mandatory.regexp("type", type, "Action Type");
 
-exports.body.optional.type = function (req, res, next) {
-    index.body.optional.regexp(req, res, next, "type", type, "Action Type");
-};
+exports.body.optional.type = index.body.optional.regexp("type", type, "Action Type");
 
-exports.body.mandatory.validity = function (req, res, next) {
-    index.body.mandatory.boolean(req, res, next, "validity");
-};
+exports.body.mandatory.validity = index.body.mandatory.boolean("validity");
 
-exports.body.optional.validity = function (req, res, next) {
-    index.body.optional.boolean(req, res, next, "validity");
-};
+exports.body.optional.validity = index.body.optional.boolean("validity");
 
 exports.body.route.update.validity = function (req, res, next) {
-    console.log(req.attached.action);
     if (req.attached.action) {
-        console.log(req.attached.action.segmentation);
         if (req.attached.action.type === "tagging" || req.attached.action.segmentation === undefined) {
             exports.body.mandatory.validity(req, res, next);
         } else {
@@ -235,21 +221,28 @@ exports.body.route.update.validity = function (req, res, next) {
     }
 };
 
-exports.body.route.update.quality = function (req, res, next) {
-    if (req.attached.action && req.attached.action.type === "segmentation" && req.attached.action.segmentation !== undefined) {
-        index.body.optional.float(req, res, next, "quality");
-    } else {
-        next();
-    }
-};
+exports.body.route.update.quality = (function () {
+    var oFloat = index.body.optional.float("quality");
+    return function (req, res, next) {
+        if (req.attached.action && req.attached.action.type === "segmentation" && req.attached.action.segmentation !== undefined) {
+            oFloat(req, res, next);
+        } else {
+            next();
+        }
+    };
+}());
 
-exports.body.route.add.tag = function (req, res, next) {
-    if (req.attached.type === "segmentation") {
-        index.body.mandatory.id(req, res, next, Tag);
-    } else {
-        index.body.optional.id(req, res, next, Tag);
-    }
-};
+exports.body.route.add.tag = (function () {
+    var mId = index.body.mandatory.id(Tag),
+        oId = index.body.optional.id(Tag);
+    return function (req, res, next) {
+        if (req.attached.type === "segmentation") {
+            mId(req, res, next);
+        } else {
+            oId(req, res, next);
+        }
+    };
+}());
 
 var checkInteger = function (int, min, max) {
     if (_.isUndefined(int)) { return false; }
@@ -278,13 +271,16 @@ var mapPoint = function (item) {
     };
 };
 
-exports.body.route.add.points = function (req, res, next) {
-    if (req.attached.type === "segmentation") {
-        index.body.optional.array(req, res, next, "points", checkPoint, mapPoint);
-    } else {
-        next();
-    }
-};
+exports.body.route.add.points = (function () {
+    var oArray = index.body.optional.array("points", checkPoint, mapPoint);
+    return function (req, res, next) {
+        if (req.attached.type === "segmentation") {
+            oArray(req, res, next);
+        } else {
+            next();
+        }
+    };
+}());
 
 /**
  * Checkers

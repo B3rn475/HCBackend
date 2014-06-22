@@ -154,13 +154,9 @@ exports.body = {
     route: { }
 };
 
-exports.body.mandatory.id = function (req, res, next) {
-    index.body.mandatory.id(req, res, next, Task);
-};
+exports.body.mandatory.id = index.body.mandatory.id(Task);
 
-exports.body.optional.id = function (req, res, next) {
-    index.body.optional.id(req, res, next, Task);
-};
+exports.body.optional.id = index.body.optional.id(Task);
 
 /**
  * Checkers

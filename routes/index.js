@@ -503,6 +503,32 @@ var partialToInt = function (value) {
     return value;
 };
 
+var partialToFloat = function (value) {
+    if (typeof value !== 'number') {
+        value = value.toString();
+        if (int.test(value)) {
+            value = parseFloat(value);
+        } else {
+            value = undefined;
+        }
+    }
+    return value;
+};
+
+var partialToArray = function (value) {
+    if (!_.isArray(value)) {
+        try {
+            value = JSON.parse(value.toString());
+            if (!_.isArray(value)) {
+                value = undefined;
+            }
+        } catch (ex) {
+            value = undefined;
+        }
+    }
+    return value;
+};
+
 exports.query.unchecked.integer = function (property, min, max) {
     var eOutOfBound = {location: "query", name: property, message: "Invalid '" + property + "' parameter, out of bound"},
         eNotNumber = {location: "query", name: property, message: "Invalid '" + property + "' parameter, it is not a number"},
@@ -736,303 +762,510 @@ exports.body = {
     unchecked: {},
 };
 
-exports.body.mandatory.id = function (req, res, next, Model) {
-    if (req.body[Model.pname] === undefined) {
-        req.errors.push({location: "body", name: Model.pname, message: "Missing Body Parameter '" + Model.pname + "'" });
+exports.body.unchecked.boolean = function (property) {
+    return function (req, res, next) {
+        var value = req.body[property];
+        req.attached[property] = (value === false || value === "false" || value === "0") ? false : true;
         next();
-    } else {
-        exports.body.unchecked.id(req, res, next, Model);
-    }
+    };
 };
 
-exports.body.optional.id = function (req, res, next, Model) {
-    if (req.body[Model.pname] === undefined) {
-        next();
-    } else {
-        exports.body.unchecked.id(req, res, next, Model);
-    }
-};
-
-exports.body.unchecked.id = function (req, res, next, Model) {
-    exports.body.unchecked.integer(req, res, function () {
-        if (req.attached[Model.pname] === undefined) {
+exports.body.mandatory.boolean = function (property) {
+    var eMissing = {location: "body", name: property, message: "Missing Body Parameter '" + property + "'" },
+        uBoolean = exports.body.unchecked.boolean(property);
+    return function (req, res, next) {
+        if (req.body[property] === undefined) {
+            req.errors.push(eMissing);
             next();
         } else {
-            Model.findOne({_id : req.attached[Model.pname]}, function (err, obj) {
-                if (err) {
-                    next(err);
-                } else if (obj) {
-                    req.attached[Model.pname] = obj;
-                    next();
-                } else {
-                    req.errors.push({location: "body", name: Model.pname, message: "Unable to find " + Model.modelName
-                                     + " " + req.attached[Model.pname]
-                                     + " in Body Parameter '"
-                                     + Model.pname + "'"});
-                    next();
+            uBoolean(req, res, next);
+        }
+    };
+};
+
+exports.body.optional.boolean = function (property, dvalue) {
+    var uBoolean = exports.body.unchecked.boolean(property);
+    if (dvalue === undefined) {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                next();
+            } else {
+                uBoolean(req, res, next);
+            }
+        };
+    } else {
+        return function (req, res, next) {
+            if (req.query[property] === undefined) {
+                req.attached[property] = dvalue;
+                next();
+            } else {
+                uBoolean(req, res, next);
+            }
+        };
+    }
+};
+
+exports.body.unchecked.string = function (property, empty) {
+    var eEmpty = {location: "body", name: property, message: "Invalid Body Parameter '" + property + "' field, it cannot be empty"},
+        eNotString = {location: "body", name: property, message: "Invalid Body Parameter '" + property + "', it is not a string"},
+        checkValue;
+    if (empty) {
+        checkValue = function (value, req) {
+            if (value !== undefined) {
+                if (value !== "") {
+                    req.errors.push(eEmpty);
+                    return false;
                 }
-            });
-        }
-    }, Model.pname, 0);
-};
-
-exports.body.mandatory.boolean = function (req, res, next, property) {
-    if (req.body[property] === undefined) {
-        req.errors.push({location: "body", name: property, message: "Missing Body Parameter '" + property + "'" });
-        next();
-    } else {
-        exports.body.unchecked.boolean(req, res, next, property);
-    }
-};
-
-exports.body.optional.boolean = function (req, res, next, property, dvalue) {
-    if (req.body[property] === undefined) {
-        if (dvalue) {
-            req.attached[property] = dvalue;
-        }
-        next();
-    } else {
-        exports.body.unchecked.boolean(req, res, next, property);
-    }
-};
-
-exports.body.unchecked.boolean = function (req, res, next, property) {
-    var value = req.body[property];
-    req.attached[property] = (value === false || value === "false" || value === "0") ? false : true;
-    next();
-};
-
-exports.body.mandatory.integer = function (req, res, next, property, min, max) {
-    if (req.body[property] === undefined) {
-        req.errors.push({location: "body", name: property, message: "Missing Body Parameter '" + property + "'" });
-        next();
-    } else {
-        exports.body.unchecked.integer(req, res, next, property, min, max);
-    }
-};
-
-exports.body.optional.integer = function (req, res, next, property, min, max, dvalue) {
-    if (req.body[property] === undefined) {
-        if (dvalue) {
-            req.attached[property] = dvalue;
-        }
-        next();
-    } else {
-        exports.body.unchecked.integer(req, res, next, property, min, max);
-    }
-};
-
-exports.body.unchecked.integer = function (req, res, next, property, min, max) {
-    var error,
-        value = req.body[property];
-    if (typeof value !== 'number') {
-        value = value.toString();
-        if (int.test(value)) {
-            value = parseInt(value, 10);
-        } else {
-            value = undefined;
-        }
-    }
-    if (value !== undefined && Math.floor(value) === value) {
-        if ((min && value < min) || (max && value > max)) {
-            error = true;
-            req.errors.push({location: "body", name: property, message: "invalid Body Parameter '" + property + "' field, out of bound"});
-        }
-    } else {
-        error = true;
-        req.errors.push({location: "body", name: property, message: "Invalid Body Parameter '" + property + "', it is not an integer"});
-    }
-    if (!error) {
-        req.attached[property] = value;
-    }
-    next();
-};
-
-exports.body.mandatory.string = function (req, res, next, property, empty) {
-    if (req.body[property] === undefined) {
-        req.errors.push({location: "body", name: property, message: "Missing Body Parameter '" + property + "'" });
-        next();
-    } else {
-        exports.body.unchecked.integer(req, res, next, property, empty);
-    }
-};
-
-exports.body.optional.string = function (req, res, next, property, empty, dvalue) {
-    if (req.body[property] === undefined) {
-        if (dvalue) {
-            req.attached[property] = dvalue;
-        }
-        next();
-    } else {
-        exports.body.unchecked.integer(req, res, next, property, empty);
-    }
-};
-
-exports.body.unchecked.string = function (req, res, next, property, empty) {
-    var error,
-        value = req.body[property];
-    if (empty === undefined) { empty = false; }
-    if (value !== undefined) {
-        if (!empty && value === "") {
-            error = true;
-            req.errors.push({location: "body", name: property, message: "invalid Body Parameter '" + property + "' field, it cannot be empty"});
-        }
-    } else {
-        error = true;
-        req.errors.push({location: "body", name: property, message: "Invalid Body Parameter '" + property + "', it is not a string"});
-    }
-    if (!error) {
-        req.attached[property] = value;
-    }
-    next();
-};
-
-exports.body.mandatory.float = function (req, res, next, property, min, max) {
-    if (req.body[property] === undefined) {
-        req.errors.push({location: "body", name: property, message: "Missing Body Parameter '" + property + "'" });
-        next();
-    } else {
-        exports.body.unchecked.float(req, res, next, property, min, max);
-    }
-};
-
-exports.body.optional.float = function (req, res, next, property, min, max, dvalue) {
-    if (req.body[property] === undefined) {
-        if (dvalue) {
-            req.attached[property] = dvalue;
-        }
-        next();
-    } else {
-        exports.body.unchecked.float(req, res, next, property, min, max);
-    }
-};
-
-exports.body.unchecked.float = function (req, res, next, property, min, max) {
-    var error,
-        value = req.body[property];
-    if (typeof value !== 'number') {
-        value = value.toString();
-        if (float.test(value)) {
-            value = parseFloat(value, 10);
-        } else {
-            value = undefined;
-        }
-    }
-    if (value !== undefined) {
-        if ((min && value < min) || (max && value > max)) {
-            error = true;
-            req.errors.push({location: "body", name: property, message: "invalid Body Parameter '" + property + "' field, out of bound"});
-        }
-    } else {
-        error = true;
-        req.errors.push({location: "body", name: property, message: "Invalid Body Parameter '" + property + "', it is not an float"});
-    }
-    if (!error) {
-        req.attached[property] = value;
-    }
-    next();
-};
-
-exports.body.mandatory.base64 = function (req, res, next, property) {
-    if (req.body[property] === undefined) {
-        req.errors.push({location: "body", name: property, message: "Missing Body Parameter '" + property + "'" });
-        next();
-    } else {
-        exports.body.unchecked.regexp(req, res, next, property, base64, "Base64 String");
-    }
-};
-
-exports.body.optional.base64 = function (req, res, next, property, dvalue) {
-    if (req.body[property] === undefined) {
-        if (dvalue) {
-            req.attached[property] = dvalue;
-        }
-        next();
-    } else {
-        exports.body.unchecked.regexp(req, res, next, property, base64, "Base64 String");
-    }
-};
-
-exports.body.mandatory.regexp = function (req, res, next, property, exp, type) {
-    if (req.body[property] === undefined) {
-        req.errors.push({location: "body", name: property, message: "Missing Body Parameter '" + property + "'" });
-        next();
-    } else {
-        exports.body.unchecked.regexp(req, res, next, property, exp, type);
-    }
-};
-
-exports.body.optional.regexp = function (req, res, next, property, exp, type, dvalue) {
-    if (req.body[property] === undefined) {
-        if (dvalue) {
-            req.attached[property] = dvalue;
-        }
-        next();
-    } else {
-        exports.body.unchecked.regexp(req, res, next, property, exp, type);
-    }
-};
-
-exports.body.unchecked.regexp = function (req, res, next, property, exp, type) {
-    var value = req.body[property];
-    if (exp.test(value)) {
-        req.attached[property] = value;
-    } else {
-        req.errors.push({location: "body", name: property, message: "Invalid Body Parameter '" + property + "'" + (type ? ", it is not a valid " + type : "")});
-    }
-    next();
-};
-
-exports.body.mandatory.array = function (req, res, next, property, check, map) {
-    if (req.body[property] === undefined) {
-        req.errors.push({location: "body", name: property, message: "Missing Body Parameter '" + property + "'" });
-        next();
-    } else {
-        exports.body.unchecked.array(req, res, next, property, check, map);
-    }
-};
-
-exports.body.optional.array = function (req, res, next, property, check, map, dvalue) {
-    if (req.body[property] === undefined) {
-        if (dvalue) {
-            req.attached[property] = dvalue;
-        }
-        next();
-    } else {
-        exports.body.unchecked.array(req, res, next, property, check, map);
-    }
-};
-
-exports.body.unchecked.array = function (req, res, next, property, check, map) {
-    var error,
-        value = req.body[property];
-    if (!_.isArray(value)) {
-        try {
-            value = JSON.parse(value.toString());
-            if (!_.isArray(value)) {
-                value = undefined;
+            } else {
+                req.errors.push(eNotString);
+                return false;
             }
-        } catch (ex) {
-            value = undefined;
-        }
-    }
-    if (value !== undefined) {
-        if (check) {
-            if (!_.every(value, check)) {
-                error = true;
-                req.errors.push({location: "body", name: property, message: "Invalid Body Parameter '" + property + "', some Array items are not valid"});
-            }
-        }
+            return true;
+        };
     } else {
-        error = true;
-        req.errors.push({location: "body", name: property, message: "Invalid Body Parameter '" + property + "', it is not an Array"});
+        checkValue = function (value, req) {
+            if (value === undefined) {
+                req.errors.push(eNotString);
+                return false;
+            }
+            return true;
+        };
     }
-    if (!error) {
-        if (map) {
-            req.attached[property] = _.map(value, map);
-        } else {
+    return function (req, res, next) {
+        var value = req.body[property].toString();
+        if (checkValue(value, req)) {
             req.attached[property] = value;
         }
+        next();
+    };
+};
+
+exports.body.mandatory.string = function (property, empty) {
+    var eMissing = {location: "body", name: property, message: "Missing Body Parameter '" + property + "'" },
+        uString = exports.body.unchecked.string(property, empty);
+    return function (req, res, next) {
+        if (req.body[property] === undefined) {
+            req.errors.push(eMissing);
+            next();
+        } else {
+            uString(req, res, next);
+        }
+    };
+};
+
+exports.body.optional.string = function (property, empty, dvalue) {
+    var uString = exports.body.unchecked.string(property, empty);
+    if (dvalue === undefined) {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                next();
+            } else {
+                uString(req, res, next);
+            }
+        };
+    } else {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                req.attached[property] = dvalue;
+                next();
+            } else {
+                uString(req, res, next);
+            }
+        };
     }
-    next();
+};
+
+exports.body.unchecked.integer = function (property, min, max) {
+    var eOutOfBound = {location: "body", name: property, message: "Invalid '" + property + "' parameter, out of bound"},
+        eNotNumber = {location: "body", name: property, message: "Invalid '" + property + "' parameter, it is not a number"},
+        checkValue;
+    if (min === undefined) {
+        if (max === undefined) {
+            checkValue = function (value, req) {
+                if (value === undefined || Math.floor(value) !== value) {
+                    req.errors.push(eNotNumber);
+                    return false;
+                }
+                return true;
+            };
+        } else {
+            checkValue = function (value, req) {
+                if (value !== undefined && Math.floor(value) === value) {
+                    if (value > max) {
+                        req.errors.push(eOutOfBound);
+                        return false;
+                    }
+                } else {
+                    req.errors.push(eNotNumber);
+                    return false;
+                }
+                return true;
+            };
+        }
+    } else {
+        if (max === undefined) {
+            checkValue = function (value, req) {
+                if (value !== undefined && Math.floor(value) === value) {
+                    if (value < min) {
+                        req.errors.push(eOutOfBound);
+                        return false;
+                    }
+                } else {
+                    req.errors.push(eNotNumber);
+                    return false;
+                }
+                return true;
+            };
+        } else {
+            checkValue = function (value, req) {
+                if (value !== undefined && Math.floor(value) === value) {
+                    if (value < min || value > max) {
+                        req.errors.push(eOutOfBound);
+                        return false;
+                    }
+                } else {
+                    req.errors.push(eNotNumber);
+                    return false;
+                }
+                return true;
+            };
+        }
+    }
+    return function (req, res, next) {
+        var value = partialToInt(req.body[property]);
+        if (checkValue(value, req)) {
+            req.attached[property] = value;
+        }
+        next();
+    };
+};
+
+exports.body.mandatory.integer = function (property, min, max) {
+    var eMissing = {location: "body", name: property, message: "Missing Body Parameter '" + property + "'" },
+        uInteger = exports.body.unchecked.integer(property, min, max);
+    return function (req, res, next) {
+        if (req.body[property] === undefined) {
+            req.errors.push(eMissing);
+            next();
+        } else {
+            uInteger(req, res, next);
+        }
+    };
+};
+
+exports.body.optional.integer = function (property, min, max, dvalue) {
+    var uInteger = exports.body.unchecked.integer(property, min, max);
+    if (dvalue === undefined) {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                next();
+            } else {
+                uInteger(req, res, next);
+            }
+        };
+    } else {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                req.attached[property] = dvalue;
+                next();
+            } else {
+                uInteger(req, res, next);
+            }
+        };
+    }
+};
+
+exports.body.unchecked.id = function (Model) {
+    var property = Model.pname,
+        modelName = Model.modelName,
+        uInteger = exports.body.unchecked.integer(property, 0),
+        getId = function (req, res, next) {
+            if (req.attached[property] === undefined) {
+                next();
+            } else {
+                Model.findOne({_id : req.attached[property]}, function (err, obj) {
+                    if (err) {
+                        next(err);
+                    } else if (obj) {
+                        req.attached[property] = obj;
+                        next();
+                    } else {
+                        req.errors.push({location: "body", name: property, message: "Unable to find " + modelName
+                                         + " " + req.attached[property]
+                                         + " in Body Parameter '"
+                                         + property + "'"});
+                        next();
+                    }
+                });
+            }
+        };
+    return function (req, res, next) {
+        uInteger(req, res, function (err) {
+            if (err) {
+                next(err);
+            } else {
+                getId(req, res, next);
+            }
+        });
+    };
+};
+
+exports.body.mandatory.id = function (Model) {
+    var eMissing = {location: "body", name: Model.pname, message: "Missing Body Parameter '" + Model.pname + "'" },
+        uId = exports.body.unchecked.id(Model);
+    return function (req, res, next) {
+        if (req.body[Model.pname] === undefined) {
+            req.errors.push(eMissing);
+            next();
+        } else {
+            uId(req, res, next);
+        }
+    };
+};
+
+exports.body.optional.id = function (Model) {
+    var uId = exports.body.unchecked.id(Model);
+    return function (req, res, next) {
+        if (req.body[Model.pname] === undefined) {
+            next();
+        } else {
+            uId(req, res, next);
+        }
+    };
+};
+
+exports.body.unchecked.float = function (property, min, max) {
+    var eOutOfBound = {location: "body", name: property, message: "Invalid '" + property + "' parameter, out of bound"},
+        eNotFloat = {location: "body", name: property, message: "Invalid '" + property + "' parameter, it is not a float"},
+        checkValue;
+    if (min === undefined) {
+        if (max === undefined) {
+            checkValue = function (value, req) {
+                if (value === undefined) {
+                    req.errors.push(eNotFloat);
+                    return false;
+                }
+                return true;
+            };
+        } else {
+            checkValue = function (value, req) {
+                if (value !== undefined) {
+                    if (value > max) {
+                        req.errors.push(eOutOfBound);
+                        return false;
+                    }
+                } else {
+                    req.errors.push(eNotFloat);
+                    return false;
+                }
+                return true;
+            };
+        }
+    } else {
+        if (max === undefined) {
+            checkValue = function (value, req) {
+                if (value !== undefined) {
+                    if (value < min) {
+                        req.errors.push(eOutOfBound);
+                        return false;
+                    }
+                } else {
+                    req.errors.push(eNotFloat);
+                    return false;
+                }
+                return true;
+            };
+        } else {
+            checkValue = function (value, req) {
+                if (value !== undefined) {
+                    if (value < min || value > max) {
+                        req.errors.push(eOutOfBound);
+                        return false;
+                    }
+                } else {
+                    req.errors.push(eNotFloat);
+                    return false;
+                }
+                return true;
+            };
+        }
+    }
+    return function (req, res, next) {
+        var value = partialToFloat(req.body[property]);
+        if (checkValue(value, req)) {
+            req.attached[property] = value;
+        }
+        next();
+    };
+};
+
+exports.body.mandatory.float = function (property, min, max) {
+    var eMissing = {location: "body", name: property, message: "Missing Body Parameter '" + property + "'" },
+        uFloat = exports.body.unchecked.float(property, min, max);
+    return function (req, res, next) {
+        if (req.body[property] === undefined) {
+            req.errors.push(eMissing);
+            next();
+        } else {
+            uFloat(req, res, next);
+        }
+    };
+};
+
+exports.body.optional.float = function (property, min, max, dvalue) {
+    var uFloat = exports.body.unchecked.float(property, min, max);
+    if (dvalue === undefined) {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                next();
+            } else {
+                uFloat(req, res, next);
+            }
+        };
+    } else {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                req.attached[property] = dvalue;
+                next();
+            } else {
+                uFloat(req, res, next);
+            }
+        };
+    }
+};
+
+exports.body.unchecked.regexp = function (property, regexp, type) {
+    var eNotValid = {location: "body", name: property, message: "Invalid Body Parameter '" + property + "'" + (type ? ", it is not a valid " + type : "")};
+    return function (req, res, next) {
+        var value = req.body[property];
+        if (regexp.test(value)) {
+            req.attached[property] = value;
+        } else {
+            req.errors.push(eNotValid);
+        }
+        next();
+    };
+};
+
+exports.body.mandatory.regexp = function (property, regexp, type) {
+    var eMissing = {location: "body", name: property, message: "Missing Body Parameter '" + property + "'" },
+        uRegExp = exports.body.unchecked.regexp(property, regexp, type);
+    return function (req, res, next) {
+        if (req.body[property] === undefined) {
+            req.errors.push(eMissing);
+            next();
+        } else {
+            uRegExp(req, res, next);
+        }
+    };
+};
+
+exports.body.optional.regexp = function (property, regexp, type, dvalue) {
+    var uRegExp = exports.body.unchecked.regexp(property, regexp, type);
+    if (dvalue === undefined) {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                next();
+            } else {
+                uRegExp(req, res, next);
+            }
+        };
+    } else {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                req.attached[property] = dvalue;
+                next();
+            } else {
+                uRegExp(req, res, next);
+            }
+        };
+    }
+};
+
+exports.body.mandatory.base64 = function (property) {
+    return exports.body.mandatory.regexp(property, base64, "Base64 String");
+};
+
+exports.body.optional.base64 = function (property, dvalue) {
+    return exports.body.optional.regexp(property, base64, "Base64 String", dvalue);
+};
+
+exports.body.unchecked.array = function (property, check, map) {
+    var eInvalidItem = {location: "body", name: property, message: "Invalid Body Parameter '" + property + "', some Array items are not valid"},
+        eNotArray = {location: "body", name: property, message: "Invalid Body Parameter '" + property + "', it is not an Array"},
+        checkValue;
+    if (typeof check === "function") {
+        checkValue = function (value, req) {
+            if (value !== undefined) {
+                if (!_.every(value, check, {req: req})) {
+                    req.errors.push(eInvalidItem);
+                    return false;
+                }
+            } else {
+                req.errors.push(eNotArray);
+                return false;
+            }
+            return true;
+        };
+    } else {
+        checkValue = function (value, req) {
+            if (value === undefined) {
+                req.errors.push(eNotArray);
+                return false;
+            }
+            return true;
+        };
+    }
+    if (typeof map === "function") {
+        return function (req, res, next) {
+            var value = req.body[property];
+            if (checkValue(value, req, {req: req})) {
+                req.attached[property] = _.map(value, map);
+            }
+            next();
+        };
+    } else {
+        return function (req, res, next) {
+            var value = req.body[property];
+            if (checkValue(value, req)) {
+                req.attached[property] = value;
+            }
+            next();
+        };
+    }
+};
+
+exports.body.mandatory.array = function (property, check, map) {
+    var eMissing = {location: "body", name: property, message: "Missing Body Parameter '" + property + "'" },
+        uArray = exports.body.unchecked.array(property, check, map);
+    return function (req, res, next) {
+        if (req.body[property] === undefined) {
+            req.errors.push(eMissing);
+            next();
+        } else {
+            uArray(req, res, next);
+        }
+    };
+};
+
+exports.body.optional.array = function (property, check, map, dvalue) {
+    var uArray = exports.body.unchecked.array(property, check, map);
+    if (dvalue === undefined) {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                next();
+            } else {
+                uArray(req, res, next);
+            }
+        };
+    } else {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                req.attached[property] = dvalue;
+                next();
+            } else {
+                uArray(req, res, next);
+            }
+        };
+    }
 };

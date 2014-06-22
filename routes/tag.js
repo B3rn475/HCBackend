@@ -178,33 +178,19 @@ exports.body = {
     }
 };
 
-exports.body.mandatory.id = function (req, res, next) {
-    index.body.mandatory.id(req, res, next, Tag);
-};
+exports.body.mandatory.id = index.body.mandatory.id(Tag);
 
-exports.body.optional.id = function (req, res, next) {
-    index.body.optional.id(req, res, next, Tag);
-};
+exports.body.optional.id = index.body.optional.id(Tag);
 
-exports.body.mandatory.language = function (req, res, next) {
-    index.body.mandatory.regexp(req, res, next, "language", language, "Language Code");
-};
+exports.body.mandatory.language = index.body.mandatory.regexp("language", language, "Language Code");
 
-exports.body.optional.language = function (req, res, next) {
-    index.body.optional.regexp(req, res, next, "language", language, "Language Code");
-};
+exports.body.optional.language = index.body.optional.regexp("language", language, "Language Code");
 
-exports.body.mandatory.name = function (req, res, next) {
-    index.body.mandatory.regexp(req, res, next, "name", name, "Alias Name");
-};
+exports.body.mandatory.name = index.body.mandatory.regexp("name", name, "Alias Name");
 
-exports.body.optional.name = function (req, res, next) {
-    index.body.optional.regexp(req, res, next, "name", name, "Alias Name");
-};
+exports.body.optional.name = index.body.optional.regexp("name", name, "Alias Name");
 
-exports.body.route.add.name = function (req, res, next) {
-    index.body.mandatory.regexp(req, res, next, "name", name, "Tag Name");
-};
+exports.body.route.add.name = index.body.mandatory.regexp("name", name, "Tag Name");
 
 exports.body.route.add.exist = function (req, res, next) {
     if (req.attached.name) {

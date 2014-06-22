@@ -144,29 +144,17 @@ exports.body = {
     }
 };
 
-exports.body.mandatory.id = function (req, res, next) {
-    index.body.mandatory.id(req, res, next, Microtask);
-};
+exports.body.mandatory.id = index.body.mandatory.id(Microtask);
 
-exports.body.optional.id = function (req, res, next) {
-    index.body.optional.id(req, res, next, Microtask);
-};
+exports.body.optional.id = index.body.optional.id(Microtask);
 
-exports.body.mandatory.type = function (req, res, next) {
-    index.body.mandatory.regexp(req, res, next, "type", type, "Microtask Type");
-};
+exports.body.mandatory.type = index.body.mandatory.regexp("type", type, "Microtask Type");
 
-exports.body.optional.type = function (req, res, next) {
-    index.body.optional.regexp(req, res, next, "type", type, "Microtask Type");
-};
+exports.body.optional.type = index.body.optional.regexp("type", type, "Microtask Type");
 
-exports.body.mandatory.order = function (req, res, next) {
-    index.body.mandatory.integer(req, res, next, "order", 0);
-};
+exports.body.mandatory.order = index.body.mandatory.integer("order", 0);
 
-exports.body.optional.order = function (req, res, next) {
-    index.body.optional.integer(req, res, next, "order", 0);
-};
+exports.body.optional.order = index.body.optional.integer("order", 0);
 
 /**
  * Checkers

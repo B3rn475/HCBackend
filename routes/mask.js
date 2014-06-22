@@ -119,26 +119,14 @@ exports.body = {
     route: {}
 };
 
-exports.body.mandatory.payload = function (req, res, next) {
-    index.body.mandatory.base64(req, res, next, "payload");
-};
+exports.body.mandatory.payload = index.body.mandatory.base64("payload");
 
-exports.body.optional.payload = function (req, res, next) {
-    index.body.optional.base64(req, res, next, "payload");
-};
+exports.body.optional.payload = index.body.optional.base64("payload");
 
-exports.body.mandatory.quality = function (req, res, next) {
-    index.body.mandatory.float(req, res, next, "quality");
-};
+exports.body.mandatory.quality = index.body.mandatory.float("quality");
 
-exports.body.optional.quality = function (req, res, next) {
-    index.body.optional.float(req, res, next, "quality");
-};
+exports.body.optional.quality = index.body.optional.float("quality");
 
-exports.body.mandatory.segmentations = function (req, res, next) {
-    index.body.mandatory.integer(req, res, next, "segmentations", 1);
-};
+exports.body.mandatory.segmentations = index.body.mandatory.integer("segmentations", 1);
 
-exports.body.optional.segmentations = function (req, res, next) {
-    index.body.optional.integer(req, res, next, "segmentations", 1);
-};
+exports.body.optional.segmentations = index.body.optional.integer("segmentations", 1);

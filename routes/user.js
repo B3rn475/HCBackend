@@ -153,37 +153,21 @@ exports.body = {
     }
 };
 
-exports.body.mandatory.id = function (req, res, next) {
-    index.body.mandatory.id(req, res, next, User);
-};
+exports.body.mandatory.id = index.body.mandatory.id(User);
 
-exports.body.optional.id = function (req, res, next) {
-    index.body.optional.id(req, res, next, User);
-};
+exports.body.optional.id = index.body.optional.id(User);
 
-exports.body.mandatory.app_id = function (req, res, next) {
-    index.body.mandatory.integer(req, res, next, "app_id", 0);
-};
+exports.body.mandatory.app_id = index.body.mandatory.integer("app_id", 0);
 
-exports.body.optional.app_id = function (req, res, next) {
-    index.body.optional.integer(req, res, next, "app_id", 0);
-};
+exports.body.optional.app_id = index.body.optional.integer("app_id", 0);
 
-exports.body.mandatory.app_user_id = function (req, res, next) {
-    index.body.mandatory.string(req, res, next, "app_user_id");
-};
+exports.body.mandatory.app_user_id = index.body.mandatory.string("app_user_id");
 
-exports.body.optional.app_user_id = function (req, res, next) {
-    index.body.optional.string(req, res, next, "app_user_id");
-};
+exports.body.optional.app_user_id = index.body.optional.string("app_user_id");
 
-exports.body.mandatory.quality = function (req, res, next) {
-    index.body.mandatory.float(req, res, next, "quality");
-};
+exports.body.mandatory.quality = index.body.mandatory.float("quality");
 
-exports.body.optional.quality = function (req, res, next) {
-    index.body.optional.float(req, res, next, "quality");
-};
+exports.body.optional.quality = index.body.optional.float("quality");
 
 exports.body.route.add.exist = function (req, res, next) {
     if (req.attached.app_id !== undefined && req.attached.app_user_id !== undefined) {

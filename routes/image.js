@@ -143,37 +143,21 @@ exports.body = {
     route: {}
 };
 
-exports.body.mandatory.id = function (req, res, next) {
-    index.body.mandatory.id(req, res, next, Image);
-};
+exports.body.mandatory.id = index.body.mandatory.id(Image);
 
-exports.body.optional.id = function (req, res, next) {
-    index.body.optional.id(req, res, next, Image);
-};
+exports.body.optional.id = index.body.optional.id(Image);
 
-exports.body.mandatory.width = function (req, res, next) {
-    index.body.mandatory.integer(req, res, next, "width", 1);
-};
+exports.body.mandatory.width = index.body.mandatory.integer("width", 1);
 
-exports.body.optional.width = function (req, res, next) {
-    index.body.optional.integer(req, res, next, "width", 1);
-};
+exports.body.optional.width = index.body.optional.integer("width", 1);
 
-exports.body.mandatory.height = function (req, res, next) {
-    index.body.mandatory.integer(req, res, next, "height", 1);
-};
+exports.body.mandatory.height = index.body.mandatory.integer("height", 1);
 
-exports.body.optional.height = function (req, res, next) {
-    index.body.optional.integer(req, res, next, "height", 1);
-};
+exports.body.optional.height = index.body.optional.integer("height", 1);
 
-exports.body.mandatory.payload = function (req, res, next) {
-    index.body.mandatory.base64(req, res, next, "payload");
-};
+exports.body.mandatory.payload = index.body.mandatory.base64("payload");
 
-exports.body.optional.payload = function (req, res, next) {
-    index.body.optional.base64(req, res, next, "payload");
-};
+exports.body.optional.payload = index.body.optional.base64("payload");
 
 var checkInteger = function (int, min, max) {
     if (_.isUndefined(int)) { return false; }
@@ -184,8 +168,8 @@ var checkInteger = function (int, min, max) {
     return true;
 };
 
-var checkPose = function (image) {
-    return function (item) {
+var checkPose = function (item) {
+        var image = this.req.attached.ckimage;
         if (!checkInteger(item.x0, 0, image.width - 1)) { return false; }
         if (!checkInteger(item.y0, 0, image.height - 1)) { return false; }
         if (!checkInteger(item.x1, 0, image.width - 1)) { return false; }
@@ -193,7 +177,6 @@ var checkPose = function (image) {
         if (!location.test(item.location)) { return false; }
         return true;
     };
-};
 
 var mapPose = function (item) {
     return {
@@ -205,22 +188,32 @@ var mapPose = function (item) {
     };
 };
 
-exports.body.mandatory.pose = function (req, res, next) {
-    if (req.attached.image) {
-        index.body.mandatory.array(req, res, next, "pose", checkPose(req.attached.image), mapPose);
-    } else if (req.attached.width && req.attached.height) {
-        index.body.mandatory.array(req, res, next, "pose", checkPose({width: req.attached.width, height: req.attached.height}), mapPose);
-    } else {
-        next();
-    }
-};
+exports.body.mandatory.pose = (function () {
+    var mArray = index.body.mandatory.array("pose", checkPose, mapPose);
+    return function (req, res, next) {
+        if (req.attached.image) {
+            req.attached.ckimage = req.attached.image;
+            mArray(req, res, next);
+        } else if (req.attached.width && req.attached.height) {
+            req.attached.ckimage = {width: req.attached.width, height: req.attached.height};
+            mArray(req, res, next);
+        } else {
+            next();
+        }
+    };
+}());
 
-exports.body.optional.pose = function (req, res, next) {
-    if (req.attached.image) {
-        index.body.optional.array(req, res, next, "pose", checkPose(req.attached.image), mapPose);
-    } else if (req.attached.width && req.attached.height) {
-        index.body.optional.array(req, res, next, "pose", checkPose({width: req.attached.width, height: req.attached.height}), mapPose);
-    } else {
-        next();
-    }
-};
+exports.body.optional.pose = (function () {
+    var mArray = index.body.optional.array("pose", checkPose, mapPose);
+    return function (req, res, next) {
+        if (req.attached.image) {
+            req.attached.ckimage = req.attached.image;
+            mArray(req, res, next);
+        } else if (req.attached.width && req.attached.height) {
+            req.attached.ckimage = {width: req.attached.width, height: req.attached.height};
+            mArray(req, res, next);
+        } else {
+            next();
+        }
+    };
+}());
