@@ -132,10 +132,6 @@ exports.query = {
     optional: {},
 };
                 
-exports.query.mandatory.limit = function (req, res, next) {
-    index.query.mandatory.integer(req, res, next, "limit", 1, 100);
-};
+exports.query.mandatory.limit = index.query.mandatory.integer("limit", 1, 100);
 
-exports.query.optional.limit = function (req, res, next) {
-    index.query.optional.integer(req, res, next, "limit", 1, 100, 1);
-};
+exports.query.optional.limit = index.query.optional.integer("limit", 1, 100, 1);
