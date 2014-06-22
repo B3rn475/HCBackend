@@ -92,9 +92,7 @@ exports.routes.complete = function (req, res, next) {
 
 exports.params = {};
 
-exports.params.id = function (req, res, next, inId) {
-    index.params.id(req, res, next, Session, inId);
-};
+exports.params.id = index.params.id(Session);
 
 /**
  * Query Params

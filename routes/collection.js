@@ -97,9 +97,7 @@ exports.routes.removeImage = function (req, res, next) {
 
 exports.params = {};
 
-exports.params.id = function (req, res, next, inId) {
-    index.params.id(req, res, next, Collection, inId);
-};
+exports.params.id = index.params.id(Collection);
 
 /**
  * Query Oarans

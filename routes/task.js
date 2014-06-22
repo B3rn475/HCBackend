@@ -124,9 +124,7 @@ exports.routes.addUser = function (req, res, next) {
 
 exports.params = {};
 
-exports.params.id = function (req, res, next, inId) {
-    index.params.id(req, res, next, Task, inId);
-};
+exports.params.id = index.params.id(Task);
 
 /**
  * Query Params

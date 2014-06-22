@@ -148,9 +148,7 @@ exports.routes.removeAlias = function (req, res, next) {
 
 exports.params = {};
 
-exports.params.id = function (req, res, next, inId) {
-    index.params.id(req, res, next, Tag, inId);
-};
+exports.params.id = index.params.id(Tag);
 
 exports.params.language = function (req, res, next, inValue) {
     index.params.regexp(req, res, next, "language", language, inValue);

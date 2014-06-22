@@ -107,9 +107,7 @@ exports.routes.update = function (req, res, next) {
 
 exports.params = {};
 
-exports.params.id = function (req, res, next, inId) {
-    index.params.id(req, res, next, Mask, inId);
-};
+exports.params.id = index.params.id(Mask);
 
 /**
  * Body Params

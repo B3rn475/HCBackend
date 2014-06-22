@@ -357,40 +357,42 @@ exports.algorithms.html.count = function (req, res, next, Model, query) {
 
 exports.params = {};
 
-exports.params.id = function (req, res, next, Model, id) {
-    var error;
-    if (typeof id !== 'number') {
-        id = id.toString();
-        if (int.test(id)) {
-            id = parseInt(id, 10);
-        } else {
-            id = undefined;
-        }
-    }
-    if (id !== undefined && Math.floor(id) === id) {
-        if (id < 0) {
-            error = true;
-            req.errors.push({location: "url", name: "id", message: "Invalid " + Model.modelName + " 'id', must be greater than 0"});
-        }
-    } else {
-        error = true;
-        req.errors.push({location: "url", name: "id", message: "Invalid " + Model.modelName + " 'id', it is not a number"});
-    }
-    if (error) {
-        next();
-    } else {
-        Model.findOne({_id : id}, function (err, obj) {
-            if (err) {
-                next(err);
-            } else if (obj) {
-                req.attached[Model.pname] = obj;
-                next();
+exports.params.id = function (Model) {
+    return function (req, res, next, id) {
+        var error;
+        if (typeof id !== 'number') {
+            id = id.toString();
+            if (int.test(id)) {
+                id = parseInt(id, 10);
             } else {
-                req.errors.push({location: "url", name: "id", message: "Unable to find " + Model.pname + " " + id});
-                next();
+                id = undefined;
             }
-        });
-    }
+        }
+        if (id !== undefined && Math.floor(id) === id) {
+            if (id < 0) {
+                error = true;
+                req.errors.push({location: "url", name: "id", message: "Invalid " + Model.modelName + " 'id', must be greater than 0"});
+            }
+        } else {
+            error = true;
+            req.errors.push({location: "url", name: "id", message: "Invalid " + Model.modelName + " 'id', it is not a number"});
+        }
+        if (error) {
+            next();
+        } else {
+            Model.findOne({_id : id}, function (err, obj) {
+                if (err) {
+                    next(err);
+                } else if (obj) {
+                    req.attached[Model.pname] = obj;
+                    next();
+                } else {
+                    req.errors.push({location: "url", name: "id", message: "Unable to find " + Model.pname + " " + id});
+                    next();
+                }
+            });
+        }
+    };
 };
 
 exports.params.regexp = function (req, res, next, property, exp, value) {

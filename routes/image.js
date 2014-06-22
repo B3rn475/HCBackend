@@ -117,9 +117,7 @@ exports.routes.tag = function (req, res, next) {
 
 exports.params = {};
 
-exports.params.id = function (req, res, next, inId) {
-    index.params.id(req, res, next, Image, inId);
-};
+exports.params.id = index.params.id(Image);
 
 /**
  * Query Params

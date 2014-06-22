@@ -125,9 +125,7 @@ exports.routes.count = function (req, res, next) {
 
 exports.params = {};
 
-exports.params.id = function (req, res, next, inId) {
-    index.params.id(req, res, next, User, inId);
-};
+exports.params.id = index.params.id(User);
 
 /**
  * Query Params
