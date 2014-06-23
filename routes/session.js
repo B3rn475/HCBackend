@@ -73,7 +73,7 @@ exports.routes.complete = function (req, res, next) {
                 index.algorithms.json.error(req, res);
             } else {
                 var session = req.attached.session;
-                session.ended_at = new Date();
+                session.completed_at = new Date();
                 session.save(function (err, action) {
                     if (err) {
                         next(err);
