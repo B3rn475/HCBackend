@@ -33,7 +33,7 @@ exports.routes.index = function (req, res, next) {
     if (req.attached.image) { query.image = req.attached.image.id; }
     if (req.attached.tag) { query.tag = req.attached.tag.id; }
     if (req.attached.session) { query.session = req.attached.session.id; }
-    if (req.attached.populate === undefined || !req.attached.populate) { fields = "-segmentation.points"; }
+    if (req.attached.populate === undefined || !req.attached.populate) { fields = "-segmentation.points -segmentation.history"; }
     res.format({
         html: function () {
             index.algorithms.html.list(req, res, next, Action, query, fields);
@@ -53,7 +53,7 @@ exports.routes.add = function (req, res, next) {
         obj.tag = req.attached.tag.id;
     }
     if (req.attached.points !== undefined) {
-        obj.segmentation = { points: req.attached.points, quality: null };
+        obj.segmentation = { points: req.attached.points, history: req.attached.history, quality: null };
     }
     obj.validity = true;
     res.format({
@@ -76,8 +76,8 @@ exports.routes.update = function (req, res, next) {
                 index.algorithms.json.error(req, res);
             } else {
                 var action = req.attached.action;
-                if (req.attached.validity !== undefined) { action.validity = false; }
-                if (req.attached.quality !== undefined && action.segmentation !== null) { action.segmentation.quality = req.attached.quality; }
+                if (req.attached.validity !== undefined) { action.validity = req.attached.validity; }
+                if (req.attached.quality !== undefined && action.segmentation !== undefined) { action.segmentation.quality = req.attached.quality; }
                 action.save(function (err, action) {
                     if (err) {
                         next(err);
@@ -102,7 +102,7 @@ exports.routes.complete = function (req, res, next) {
                 var action = req.attached.action;
                 if (req.attached.tag !== undefined) { action.tag = req.attached.tag.id; }
                 if (req.attached.points !== undefined) {
-                    action.segmentation = { points: req.attached.points, quality: null };
+                    action.segmentation = { points: req.attached.points, history: req.attached.history, quality: null };
                 }
                 action.completed_at = new Date();
                 action.save(function (err, action) {
@@ -153,7 +153,7 @@ exports.routes.get = function (req, res, next) {
         json: function () {
             var populate;
             if (req.attached.populate) {
-                populate = ["image", "tag", "user", "segmentation"];
+                populate = ["image", "tag", "user"];
             }
             index.algorithms.json.get(req, res, next, Action, populate);
         }
@@ -302,9 +302,19 @@ var checkInteger = function (int, min, max) {
 var checkPoint = function (item) {
     if (!checkInteger(item.x, 0)) { return false; }
     if (!checkInteger(item.y, 0)) { return false; }
+    if (!checkInteger(item.size, 1)) { return false; }
     if (typeof item.color !== "string") { return false; }
-    if (!color.test(item.color)) {return false; }
-    if (!_.isBoolean(item.removed)) { return false; }
+    if (!color.test(item.color)) { return false; }
+    return true;
+};
+            
+var checkHistory = function (item) {
+    if (!checkInteger(item.x, 0)) { return false; }
+    if (!checkInteger(item.y, 0)) { return false; }
+    if (!checkInteger(item.size, 1)) { return false; }
+    if (typeof item.color !== "string") { return false; }
+    if (!color.test(item.color)) { return false; }
+    if (typeof item.time !== "date") { return false; }
     return true;
 };
 
@@ -312,13 +322,34 @@ var mapPoint = function (item) {
     return {
         x: item.x,
         y: item.y,
-        color: {r: item.color.r, g: item.color.g, b: item.color.b},
-        removed: item.removed
+        size : item.size,
+        color: item.color,
+    };
+};
+            
+var mapHistory = function (item) {
+    return {
+        x: item.x,
+        y: item.y,
+        size : item.size,
+        color: item.color,
+        time: item.time
     };
 };
 
 exports.body.route.add.points = (function () {
     var oArray = index.body.optional.array("points", checkPoint, mapPoint);
+    return function (req, res, next) {
+        if (req.attached.type === "segmentation") {
+            oArray(req, res, next);
+        } else {
+            next();
+        }
+    };
+}());
+
+exports.body.route.add.history = (function () {
+    var oArray = index.body.optional.array("history", checkHistory, mapHistory);
     return function (req, res, next) {
         if (req.attached.type === "segmentation") {
             oArray(req, res, next);
@@ -338,13 +369,24 @@ exports.body.route.complete.points = (function () {
         }
     };
 }());
+            
+exports.body.route.complete.history = (function () {
+    var oArray = index.body.optional.array("history", checkHistory, mapHistory);
+    return function (req, res, next) {
+        if (req.attached.action !== undefined && req.attached.action.type === "segmentation") {
+            oArray(req, res, next);
+        } else {
+            next();
+        }
+    };
+}());
 
 /**
  * Checkers
  */
 
 exports.checkers = {
-    routes: {}
+    route: {}
 };
 
 exports.checkers.open = function (req, res, next) {
@@ -365,7 +407,7 @@ exports.checkers.completed = function (req, res, next) {
     next();
 };
             
-exports.checkers.routes.update = function (req, res, next) {
+exports.checkers.route.update = function (req, res, next) {
     if (req.attached.action) {
         if (req.attached.action.type === "segmentation" && req.attached.action.segmentation !== undefined) {
             if (req.attached.validity === undefined && req.attached.quality === undefined) {
@@ -376,9 +418,23 @@ exports.checkers.routes.update = function (req, res, next) {
     next();
 };
 
-exports.checkers.routes.validity = function (req, res, next) {
+exports.checkers.route.validity = function (req, res, next) {
     if (!(req.attached.image || req.attached.tag || req.attached.session)) {
         req.errors.push({location: "query", name: "image|tag|session", message: "Missing Image or Tag or Session id. At least one is required as filter" });
+    }
+    next();
+};
+            
+exports.checkers.route.add = function (req, res, next) {
+    if ((req.attached.points === undefined) !== (req.attached.history === undefined)) {
+        req.errors.push({location: "query", name: "points|history", message: "The parameters history and points must be set or not at the same time" });
+    }
+    next();
+};
+            
+exports.checkers.route.complete = function (req, res, next) {
+    if ((req.attached.points === undefined) !== (req.attached.history === undefined)) {
+        req.errors.push({location: "query", name: "points|history", message: "The parameters history and points must be set or not at the same time" });
     }
     next();
 };

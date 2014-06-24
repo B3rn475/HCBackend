@@ -6,7 +6,7 @@ var mongooseAI = require("mongoose-auto-increment");
 
 exports.regexp = {};
 
-exports.regexp.color = /#([a-f]|[A-F]|[0-9]){3}(([a-f]|[A-F]|[0-9]){3})?\b/;
+exports.regexp.color = /(rgb\(([0-2][0-9]{2}|[0-9]{2}|[0-2][0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-2][0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-2][0-9])\))|(rgba\(([0-2][0-9]{2}|[0-9]{2}|[0-2][0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-2][0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-2][0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-2][0-9])\))\b/;
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                     session: {type: Number, min: 0, ref: "Session"},

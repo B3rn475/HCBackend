@@ -327,13 +327,15 @@ app.route("/action")
           action.body.mandatory.type,
           action.body.route.add.tag,
           action.body.route.add.points,
+          action.body.route.add.history,
+          action.checkers.route.add,
           action.routes.add)
     .put(image.query.optional.id,
         tag.query.optional.id,
         session.query.optional.id,
-        action.checkers.routes.validity,
+        action.checkers.route.validity,
         action.query.optional.type,
-         action.query.optional.completed,
+        action.query.optional.completed,
         action.body.mandatory.validity,
         action.routes.validity);
 app.route("/action/count")
@@ -350,11 +352,13 @@ app.route("/action/:actionId")
     .post(action.checkers.open,
           action.body.route.complete.tag,
           action.body.route.complete.points,
+          action.body.route.complete.history,
+          action.checkers.route.complete,
           action.routes.complete)
     .put(action.checkers.completed,
          action.body.route.update.validity,
          action.body.route.update.quality,
-         action.checkers.routes.update,
+         action.checkers.route.update,
          action.routes.update);
 
 /**
