@@ -29,7 +29,26 @@ exports.routes.index = function (req, res, next) {
 exports.routes.add = function (req, res, next) {
     var obj = {width: req.attached.width, height: req.attached.height},
         cb = function (image, next) {
-            fs.writeFile("./storage/image/" + image.id.toString() + ".jpg", new Buffer(req.attached.payload, "base64"), next);
+            var action = new Action();
+            action.type = "upload";
+            action.image = image.id;
+            action.validity = undefined;
+            action.save(function (err) {
+                if (err) {
+                    next(err);
+                } else {
+                    fs.writeFile("./storage/image/" + image.id.toString() + ".jpg",
+                        new Buffer(req.attached.payload, "base64"),
+                        function (err) {
+                            if (err) {
+                                next(err);
+                            } else {
+                                action.completed_at = new Date();
+                                action.save(next);
+                            }
+                        });
+                }
+            });
         };
     if (req.attached.pose) { obj.pose = req.attached.pose; }
     res.format({

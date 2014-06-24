@@ -104,7 +104,7 @@ fields:
 * image: **Image**
 * tag: **Tag**
 * user: **User**
-* type: {type: String, enum: ["tagging", "segmentation"]},
+* type: {type: String, enum: ["tagging", "segmentation", "upload"]},
 * segmentation:
     * quality: { type: Number}
     * points: []

@@ -52,11 +52,10 @@ exports.routes.add = function (req, res, next) {
     if (req.attached.tag) {
         obj.tag = req.attached.tag.id;
     }
-    if (req.attached.points === undefined) {
-        obj.segmentation = undefined;
-    } else {
+    if (req.attached.points !== undefined) {
         obj.segmentation = { points: req.attached.points, quality: null };
     }
+    obj.validity = true;
     res.format({
         html: function () {
             index.algorithms.html.add(req, res, next, Action, obj);
@@ -90,6 +89,33 @@ exports.routes.update = function (req, res, next) {
         }
     });
 };
+            
+exports.routes.complete = function (req, res, next) {
+    res.format({
+        html: function () {
+            res.send(501, "not implemented");
+        },
+        json: function () {
+            if (req.errors.length) {
+                index.algorithms.json.error(req, res);
+            } else {
+                var action = req.attached.action;
+                if (req.attached.tag !== undefined) { action.tag = req.attached.tag.id; }
+                if (req.attached.points !== undefined) {
+                    action.segmentation = { points: req.attached.points, quality: null };
+                }
+                action.completed_at = new Date();
+                action.save(function (err, action) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.send({status: "OK"});
+                    }
+                });
+            }
+        }
+    });
+};
 
 exports.routes.validity = function (req, res, next) {
     var query = {},
@@ -97,7 +123,11 @@ exports.routes.validity = function (req, res, next) {
         options = {multi: true};
     if (req.attached.image) { query.image = req.attached.image.id; }
     if (req.attached.tag) { query.tag = req.attached.tag.id; }
-    if (req.attached.type) { query.type = req.attached.type; }
+    if (req.attached.type) {
+        query.type = req.attached.type;
+    } else {
+        query.type = {$ne: "upload"};
+    }
     if (req.attached.session) { query.session = req.attached.session; }
     if (req.attached.completed !== undefined) {
         query.$or = [
@@ -243,6 +273,22 @@ exports.body.route.add.tag = (function () {
         }
     };
 }());
+            
+exports.body.route.complete.tag = (function () {
+    var mId = index.body.mandatory.id(Tag),
+        oId = index.body.optional.id(Tag);
+    return function (req, res, next) {
+        if (req.attached.action !== undefined) {
+            if (req.attached.action.type === "segmentation") {
+                mId(req, res, next);
+            } else {
+                oId(req, res, next);
+            }
+        } else {
+            next();
+        }
+    };
+}());
 
 var checkInteger = function (int, min, max) {
     if (_.isUndefined(int)) { return false; }
@@ -281,6 +327,17 @@ exports.body.route.add.points = (function () {
         }
     };
 }());
+            
+exports.body.route.complete.points = (function () {
+    var oArray = index.body.optional.array("points", checkPoint, mapPoint);
+    return function (req, res, next) {
+        if (req.attached.action !== undefined && req.attached.action.type === "segmentation") {
+            oArray(req, res, next);
+        } else {
+            next();
+        }
+    };
+}());
 
 /**
  * Checkers
@@ -290,6 +347,24 @@ exports.checkers = {
     routes: {}
 };
 
+exports.checkers.open = function (req, res, next) {
+    if (req.attached.action) {
+        if (req.attached.action.completed_at !== undefined) {
+            req.errors.push({location: "status", name: "action", message: "Action is already completed" });
+        }
+    }
+    next();
+};
+            
+exports.checkers.completed = function (req, res, next) {
+    if (req.attached.action) {
+        if (req.attached.action.completed_at === undefined) {
+            req.errors.push({location: "status", name: "action", message: "Action is still open" });
+        }
+    }
+    next();
+};
+            
 exports.checkers.routes.update = function (req, res, next) {
     if (req.attached.action) {
         if (req.attached.action.type === "segmentation" && req.attached.action.segmentation !== undefined) {

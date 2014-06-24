@@ -94,7 +94,8 @@ exports.routes.leastused = function (req, res, next) {
                     {validity: true},
                     {$or: [
                         {type: "tagging", tag: {$exists: true}},
-                        {type: "segmentation", segmentation: {$exists: true}}
+                        {type: "segmentation", segmentation: {$exists: true}},
+                        {type: "segmentation", completed_at: {$exists: false}}
                     ]}
                 ]}},
                 {$project: {image: true, tag: true, type: true}},

@@ -346,8 +346,13 @@ app.route("/action/count")
          action.routes.count);
 app.route("/action/:actionId")
     .get(index.query.optional.populate,
-        action.routes.get)
-    .put(action.body.route.update.validity,
+         action.routes.get)
+    .post(action.checkers.open,
+          action.body.route.complete.tag,
+          action.body.route.complete.points,
+          action.routes.complete)
+    .put(action.checkers.completed,
+         action.body.route.update.validity,
          action.body.route.update.quality,
          action.checkers.routes.update,
          action.routes.update);
