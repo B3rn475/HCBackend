@@ -210,6 +210,40 @@ returns the list of the images
 * __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
 * __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
 
+Example result:
+```json
+{
+    "status" : "OK",
+    "search_metadata" : {
+        "count" : 100,
+        "refresh_url" : "?since_id=2&count=100"
+    }
+    "images" : [
+        {
+            "width" : 600,
+            "height" : 921,
+            "pose" : [],
+            "id" : 2,
+            "mediaLocator" : "/storage/image/2.jpg"
+        },
+        {
+            "width" : 600,
+            "height" : 921,
+            "pose" : [],
+            "id" : 1,
+            "mediaLocator" : "/storage/image/1.jpg"
+        },
+        {
+            "width" : 600,
+            "height" : 921,
+            "pose": [],
+            "id": 0,
+            "mediaLocator": "/storage/image/0.jpg"
+        }
+    ]
+}
+```
+
 **POST** : /image  
 adds a new image
 
@@ -218,11 +252,42 @@ adds a new image
 * __body__ : payload : __mandatory__ : the content of the image encoded in Base64 (jpeg format)
 * __body__ : pose : __optional__ : pose of the image (see definition)
 
+Example result:
+```json
+{
+    "status" : "OK",
+    "id" : 0
+}
+```
+
+
 **GET** : /image/count  
 returns the number of images
 
+Example result:
+```json
+{
+    "status" : "OK",
+    "count" : 123
+}
+```
+
 **GET** : /image/:imageId  
 returns an image
+
+Example result:
+```json
+{
+    "status" : "OK",
+    "image" : {
+        "width" : 600,
+        "height" : 921,
+        "pose" : [],
+        "id" : 0,
+        "mediaLocator" : "/storage/image/0.jpg"
+    }
+}
+```
 
 **PUT** : /image/:imageId  
 updates the image information
@@ -231,6 +296,33 @@ updates the image information
 
 **GET** : /image/:imageId/tag  
 returns the list of tags related to this image
+
+Example result:
+```json
+{
+    "status" : "OK",
+    "search_metadata" : {
+        "count" : 100
+        "refresh_url" : "?since_id=0&count=100"
+    },
+    "tags" : [
+        {
+            "aliases" : [
+                {
+                    "language" : "en-US",
+                    "name" : "hat"
+                },
+                {
+                    "language" : "it-IT",
+                    "name" : "cappello"
+                }
+            }
+            "name" : "hat",
+            "id" : 0
+        }
+    ]
+}
+```
 
 **Collection**
 ______________
@@ -345,6 +437,27 @@ returns the list of masks
 * __query__ : image : __optional__ : returns only mask related to that image
 * __query__ : tag : __optional__ : returns only mask related to that tag
 
+Example result:
+```json
+{
+    "status" : "OK",
+    "search_metadata" : {
+        "count" : 100,
+        "refresh_url" : "?since_id=0&count=100"
+    },
+    "masks": [
+        {
+            "image" : 0,
+            "tag" : 0,
+            "segmentations" : 3,
+            "quality" : 0.3,
+            "mediaLocator" : "/storage/mask/0.png",
+            "id" : 0
+        }
+    ]
+}
+```json
+
 **POST** : /mask
 adds a new mask
 
@@ -357,11 +470,34 @@ adds a new mask
 **GET** : /mask/count  
 returns the number of mask
 
+Example result:
+```json
+{
+    "status" : "OK",
+    "count" : 123
+}
+```json
+
 * __query__ : image : __optional__ : counts only mask related to that image
 * __query__ : tag : __optional__ : counts only mask related to that tag
 
 **GET** : /mask/:maskId  
 returns a mask
+
+Example result:
+```json
+{
+    "status" : "OK",
+    "mask": {
+        "image" : 0,
+        "tag" : 0,
+        "segmentations" : 3,
+        "quality" : 0.3,
+        "mediaLocator" : "/storage/mask/0.png",
+        "id" : 0
+    }
+}
+```json
 
 **PUT** : /mask/:maskId
 updates a mask
