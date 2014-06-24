@@ -57,7 +57,7 @@ schema.statics.pname = "action";
 
 exports.schema = schema;
 
-schema.plugin(mongooseAI.plugin, { model: 'ACtion', field: '_id' });
+schema.plugin(mongooseAI.plugin, { model: 'Action', field: '_id' });
 
 var model = mongoose.model('Action',
                            schema,
