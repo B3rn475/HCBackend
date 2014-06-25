@@ -24,8 +24,8 @@ HTTP Methods
 The main idea is to use the right **HTTP Method** for the operation.
 
 * **GET** to obtain data
-* **POST** to adds new data or to do one time operations
-* **PUT** to updates elements
+* **POST** to add new data or to do one time operations
+* **PUT** to update elements
 * **DELETE** to remove items
 
 Stored Objects
