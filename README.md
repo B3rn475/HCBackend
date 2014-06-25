@@ -162,7 +162,7 @@ Format:
 
 ```json
 {
-    "status": "KO"
+    "status": "KO",
     "errors": [{"location": "url|body|query|status|internal", 
         "name": "parameter that has generate the error",
         "message": "description of the error"
