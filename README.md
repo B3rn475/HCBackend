@@ -162,10 +162,10 @@ Format:
 
 ```json
 {
-    status: "KO"
-    errors: [{location: "url|body|query|status|internal", 
-        name: "parameter that has generate the error",
-        message: "description of the error"
+    "status": "KO"
+    "errors": [{"location": "url|body|query|status|internal", 
+        "name": "parameter that has generate the error",
+        "message": "description of the error"
         }]
 }
 ```
@@ -179,7 +179,7 @@ If there are not errors during the operation the following object will be sent:
 
 ```json
 {
-    status: "OK"
+    "status": "OK"
     ... //Other data related to the api
 }
 ```
