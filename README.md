@@ -456,7 +456,7 @@ Example result:
         }
     ]
 }
-```json
+```
 
 **POST** : /mask
 adds a new mask
@@ -476,7 +476,7 @@ Example result:
     "status" : "OK",
     "count" : 123
 }
-```json
+```
 
 * __query__ : image : __optional__ : counts only mask related to that image
 * __query__ : tag : __optional__ : counts only mask related to that tag
@@ -497,7 +497,7 @@ Example result:
         "id" : 0
     }
 }
-```json
+```
 
 **PUT** : /mask/:maskId
 updates a mask

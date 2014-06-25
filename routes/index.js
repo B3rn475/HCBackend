@@ -506,7 +506,7 @@ var partialToInt = function (value) {
 var partialToFloat = function (value) {
     if (typeof value !== 'number') {
         value = value.toString();
-        if (int.test(value)) {
+        if (float.test(value)) {
             value = parseFloat(value);
         } else {
             value = undefined;
