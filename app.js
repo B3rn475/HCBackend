@@ -131,7 +131,9 @@ app.route("/collection")
         index.query.optional.since_id,
         index.query.optional.max_id,
         collection.routes.index)
-    .post(collection.routes.add);
+    .post(collection.body.route.add.name,
+          collection.body.route.add.exist,
+          collection.routes.add);
 app.route("/collection/count")
     .get(collection.routes.count);
 app.route("/collection/:collectionId")

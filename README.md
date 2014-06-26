@@ -50,6 +50,7 @@ fields:
 fields:
 
 * id: { type: Number, min: 0, index: { unique: true }}
+* name: {type: String, validate: /[a-zA-Z ]+$/}
 * images : [ **Image** ]
 
 **Tag**
@@ -335,6 +336,8 @@ returns the list of collections
 
 **POST** : /collection  
 adds a new collection
+
+* __body__ : name : __mandatory__ : name of the collection
 
 **GET** :/collection/count  
 returns the number of collections

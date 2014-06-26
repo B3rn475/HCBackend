@@ -4,7 +4,16 @@
 var mongoose = require("mongoose");
 var mongooseAI = require("mongoose-auto-increment");
 
+/**
+ * RegExps
+ */
+
+exports.regexp = {};
+
+exports.regexp.name = /[a-zA-Z ]+$/;
+
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
+                                name: { type: String, index: { unique: true }, validate: exports.regexp.name },
                                 images : [{type: Number, min: 0, ref: "Image"}]
                                 }, { id: false});
 

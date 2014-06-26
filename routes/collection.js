@@ -2,6 +2,7 @@
 "use strict";
 
 var Collection = require("../models/collection.js").model,
+    name = require("../models/collection.js").regexp.name,
     index = require("./index.js"),
     _ = require("underscore-node");
 
@@ -23,14 +24,26 @@ exports.routes.index = function (req, res, next) {
 };
 
 exports.routes.add = function (req, res, next) {
-    res.format({
-        html: function () {
-            index.algorithms.html.add(req, res, next, Collection);
-        },
-        json: function () {
-            index.algorithms.json.add(req, res, next, Collection);
-        }
-    });
+    var obj = {name: req.attached.name};
+    if (req.attached.collection === undefined) {
+        res.format({
+            html: function () {
+                index.algorithms.html.add(req, res, next, Collection, obj);
+            },
+            json: function () {
+                index.algorithms.json.add(req, res, next, Collection, obj);
+            }
+        });
+    } else {
+        res.format({
+            html: function () {
+                res.send(501, "not implemented");
+            },
+            json: function () {
+                res.send({ status: "OK", id: req.attached.collection.id});
+            }
+        });
+    }
 };
 
 exports.routes.get = function (req, res, next) {
@@ -112,3 +125,34 @@ exports.query = {
 exports.query.mandatory.id = index.query.register(Collection.pname, index.query.mandatory.id(Collection), "id");
 
 exports.query.optional.id = index.query.register(Collection.pname, index.query.optional.id(Collection), "id");
+
+/**
+ * Body Params
+ */
+
+exports.body = {
+    mandatory: {},
+    optional: {},
+    route: {
+        add: {}
+    }
+};
+
+exports.body.route.add.name = index.body.mandatory.regexp("name", name, "Collection Name");
+
+exports.body.route.add.exist = function (req, res, next) {
+    if (req.attached.name) {
+        Collection.findOne({name: req.attached.name }, function (err, collection) {
+            if (err) {
+                next(err);
+            } else {
+                if (collection) {
+                    req.attached.collection = collection;
+                }
+                next();
+            }
+        });
+    } else {
+        next();
+    }
+};
