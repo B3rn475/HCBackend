@@ -24,8 +24,8 @@ HTTP Methods
 The main idea is to use the right **HTTP Method** for the operation.
 
 * **GET** to obtain data
-* **POST** to adds new data or to do one time operations
-* **PUT** to updates elements
+* **POST** to add new data or to do one time operations
+* **PUT** to update elements
 * **DELETE** to remove items
 
 Stored Objects
@@ -163,10 +163,10 @@ Format:
 
 ```json
 {
-    status: "KO"
-    errors: [{location: "url|body|query|status|internal", 
-        name: "parameter that has generate the error",
-        message: "description of the error"
+    "status": "KO",
+    "errors": [{"location": "url|body|query|status|internal", 
+        "name": "parameter that has generate the error",
+        "message": "description of the error"
         }]
 }
 ```
@@ -180,7 +180,7 @@ If there are not errors during the operation the following object will be sent:
 
 ```json
 {
-    status: "OK"
+    "status": "OK"
     ... //Other data related to the api
 }
 ```
