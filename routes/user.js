@@ -1,4 +1,13 @@
 /*jslint node: true, nomen: true, es5: true */
+/**
+ * Developed By Carlo Bernaschina (B3rn475)
+ * www.bernaschina.scom
+ *
+ * Copyright (c) 2014 Politecnico di Milano  
+ * www.polimi.it
+ *
+ * Distributed under the MIT Licence
+ */
 "use strict";
 
 var User = require("../models/user.js").model,
