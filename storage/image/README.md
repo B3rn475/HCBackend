@@ -3,7 +3,7 @@ Image
 
 This folder contains the images uploaded to the server
 
-Developed By __Carlo Bernaschina__ (__B3rn475__)  
+Developed By __Carlo Bernaschina__ (GitHub - __B3rn475__)  
 www.bernaschina.com
 
 Copyright (c) 2014 __Politecnico di Milano__  

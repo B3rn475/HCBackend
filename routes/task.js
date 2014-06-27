@@ -1,7 +1,7 @@
 /*jslint node: true, nomen: true, es5: true */
 /**
- * Developed By Carlo Bernaschina (B3rn475)
- * www.bernaschina.scom
+ * Developed By Carlo Bernaschina (GitHub - B3rn475)
+ * www.bernaschina.com
  *
  * Copyright (c) 2014 Politecnico di Milano  
  * www.polimi.it

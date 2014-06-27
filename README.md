@@ -5,7 +5,7 @@ Storage Backend for **Human Computation** application.
 
 This application allow to **Store**, **Retrieve** and **Update** data related to Human Computation tasks using **REST** APIs.
 
-Developed By __Carlo Bernaschina__ (__B3rn475__)  
+Developed By __Carlo Bernaschina__ (GitHub - __B3rn475__)  
 www.bernaschina.com
 
 Copyright (c) 2014 __Politecnico di Milano__  
