@@ -680,6 +680,7 @@ completes the action
 
 * __body__ : tag : __optional__ (only for tagging) : the tag of the action
 * __body__ : points : __optional__ (only for segmentation) : the points of the segmentation
+* __body__ : history : __optional__ (only for segmentation) : the history of the segmentation
 
 If it is a __tagging__ action and the tag is not present the action is skipped.
 If it is a __segmentation__ action and the points are not present the action is skipped.
