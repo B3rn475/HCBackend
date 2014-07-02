@@ -1202,7 +1202,8 @@ exports.body.optional.base64 = function (property, dvalue) {
 exports.body.unchecked.array = function (property, check, map) {
     var eInvalidItem = {location: "body", name: property, message: "Invalid Body Parameter '" + property + "', some Array items are not valid"},
         eNotArray = {location: "body", name: property, message: "Invalid Body Parameter '" + property + "', it is not an Array"},
-        checkValue;
+        checkValue,
+        convert;
     if (typeof check === "function") {
         checkValue = function (value, req) {
             if (value !== undefined) {
@@ -1225,9 +1226,18 @@ exports.body.unchecked.array = function (property, check, map) {
             return true;
         };
     }
+    convert = function (value) {
+        if (typeof value === "string") {
+            try {
+                return JSON.parse(value);
+            } catch (e) {
+            }
+        }
+        return value;
+    };
     if (typeof map === "function") {
         return function (req, res, next) {
-            var value = req.body[property];
+            var value = convert(req.body[property]);
             if (checkValue(value, req, {req: req})) {
                 req.attached[property] = _.map(value, map);
             }
@@ -1235,7 +1245,7 @@ exports.body.unchecked.array = function (property, check, map) {
         };
     } else {
         return function (req, res, next) {
-            var value = req.body[property];
+            var value = convert(req.body[property]);
             if (checkValue(value, req)) {
                 req.attached[property] = value;
             }

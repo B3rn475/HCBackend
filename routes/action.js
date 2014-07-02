@@ -11,8 +11,7 @@
 "use strict";
 
 var Action = require("../models/action.js").model,
-    pcolor = require("../models/action.js").regexp.points.color,
-    hcolor = require("../models/action.js").regexp.history.color,
+    color = require("../models/action.js").regexp.color,
     Tag = require("../models/tag.js").model,
     index = require("./index.js"),
     _ = require("underscore-node");
@@ -314,17 +313,17 @@ var checkPoint = function (item) {
     if (!checkInteger(item.y, 0)) { return false; }
     if (!checkInteger(item.size, 1)) { return false; }
     if (typeof item.color !== "string") { return false; }
-    if (!pcolor.test(item.color)) { return false; }
+    if (!color.test(item.color)) { return false; }
     return true;
 };
-            
+
 var checkHistory = function (item) {
-    if (!checkInteger(item.x, 0)) { return false; }
-    if (!checkInteger(item.y, 0)) { return false; }
-    if (!checkInteger(item.size, 1)) { return false; }
-    if (typeof item.color !== "string") { return false; }
-    if (!hcolor.test(item.color)) { return false; }
-    if (typeof item.time !== "date") { return false; }
+    if (item.points === undefined) { return false; }
+    if (!_.isArray(item.points)) { return false; }
+    if (!_.every(item.points, checkPoint)) { return false; }
+    if (item.time === undefined) { return false; }
+    if (item.time === null) { return false; }      
+    if (isNaN((new Date(item.time)).getTime())) { return false; }
     return true;
 };
 
@@ -339,11 +338,8 @@ var mapPoint = function (item) {
             
 var mapHistory = function (item) {
     return {
-        x: item.x,
-        y: item.y,
-        size : item.size,
-        color: item.color,
-        time: item.time
+        points: _.map(item.points, mapPoint),
+        time: new Date(item.time)
     };
 };
 
