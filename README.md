@@ -326,7 +326,7 @@ Example result:
                     "language" : "it-IT",
                     "name" : "cappello"
                 }
-            }
+            ],
             "name" : "hat",
             "id" : 0
         }
