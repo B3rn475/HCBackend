@@ -227,7 +227,7 @@ Example result:
     "search_metadata" : {
         "count" : 100,
         "refresh_url" : "?since_id=2&count=100"
-    }
+    },
     "images" : [
         {
             "width" : 600,
