@@ -435,13 +435,19 @@ exports.query.register = function (property, middleware, path) {
     var set;
     if (path === undefined) {
         set = function (req) {
-            req.search_metadata[property] = req.attached[property];
+            var value = req.attached[property];
+            if (value !== undefined) {
+                req.search_metadata[property] = req.attached[property];
+            }
         };
     } else {
         set = function (req) {
             var value = req.attached[property];
             if (value !== undefined) {
-                req.search_metadata[property] = value[path];
+                value = value[path];
+                if (value !== undefined) {
+                    req.search_metadata[property] = req.attached[property];
+                }
             }
         };
     }
