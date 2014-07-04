@@ -224,12 +224,6 @@ exports.algorithms.json.list = function (req, res, next, Model, query, fields, o
                     key,
                     url_tail,
                     search_metadata = req.search_metadata;
-                if (req.attached.max_id !== undefined) {
-                    search_metadata.max_id = req.attached.max_id;
-                }
-                if (req.attached.since_id !== undefined) {
-                    search_metadata.since_id = req.attached.since_id;
-                }
                 if (objects.length > 0) {
                     url_tail = _.reduce(_.pairs(req.search_metadata), function (memo, n) {
                         return memo + "&" + encodeURIComponent(n[0]) + "=" + encodeURIComponent(n[1]);
@@ -245,6 +239,12 @@ exports.algorithms.json.list = function (req, res, next, Model, query, fields, o
                             search_metadata.next_results += url_tail;
                         }
                     }
+                }
+                if (req.attached.max_id !== undefined) {
+                    search_metadata.max_id = req.attached.max_id;
+                }
+                if (req.attached.since_id !== undefined) {
+                    search_metadata.since_id = req.attached.since_id;
                 }
                 json.search_metadata = search_metadata;
                 if (cbPrepare === undefined) {
