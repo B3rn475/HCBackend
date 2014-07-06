@@ -13,9 +13,12 @@
 var mongoose = require("mongoose");
 var mongooseAI = require("mongoose-auto-increment");
 
-exports.regexp = { points: {}, history: {}};
+exports.regexp = { points: {}, history: {}, params: {}, query: {}};
 
 exports.regexp.color = /(rgb\(([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9])\))|(rgba\(([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9])\))\b/;
+
+exports.regexp.params.type = /tagging|segmentation$/;
+exports.regexp.query.type = /tagging|segmentation|upload$/;
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                     session: {type: Number, min: 0, ref: "Session"},

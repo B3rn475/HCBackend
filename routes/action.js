@@ -11,16 +11,10 @@
 "use strict";
 
 var Action = require("../models/action.js").model,
-    color = require("../models/action.js").regexp.color,
+    regexp = require("../models/action.js").regexp,
     Tag = require("../models/tag.js").model,
     index = require("./index.js"),
     _ = require("underscore-node");
-
-/**
- * RegExps
- */
-
-var type = /tagging|segmentation$/;
 
 /**
  * Routes
@@ -210,9 +204,9 @@ exports.query = {
     route: {}
 };
 
-exports.query.mandatory.type = index.query.register("type", index.query.mandatory.regexp("type", type, "Action Type"));
+exports.query.mandatory.type = index.query.register("type", index.query.mandatory.regexp("type", regexp.query.type, "Action Type"));
 
-exports.query.optional.type = index.query.register("type", index.query.optional.regexp("type", type, "Action Type"));
+exports.query.optional.type = index.query.register("type", index.query.optional.regexp("type", regexp.query.type, "Action Type"));
 
 exports.query.mandatory.validity = index.query.register("validity", index.query.mandatory.boolean("validity"));
 
@@ -240,9 +234,9 @@ exports.body.mandatory.id = index.body.mandatory.id(Action);
 
 exports.body.optional.id = index.body.optional.id(Action);
 
-exports.body.mandatory.type = index.body.mandatory.regexp("type", type, "Action Type");
+exports.body.mandatory.type = index.body.mandatory.regexp("type", regexp.params.type, "Action Type");
 
-exports.body.optional.type = index.body.optional.regexp("type", type, "Action Type");
+exports.body.optional.type = index.body.optional.regexp("type", regexp.params.type, "Action Type");
 
 exports.body.mandatory.validity = index.body.mandatory.boolean("validity");
 
@@ -313,7 +307,7 @@ var checkPoint = function (item) {
     if (!checkInteger(item.y, 0)) { return false; }
     if (!checkInteger(item.size, 1)) { return false; }
     if (typeof item.color !== "string") { return false; }
-    if (!color.test(item.color)) { return false; }
+    if (!regexp.color.test(item.color)) { return false; }
     return true;
 };
 
@@ -322,7 +316,7 @@ var checkHistory = function (item) {
     if (!_.isArray(item.points)) { return false; }
     if (!_.every(item.points, checkPoint)) { return false; }
     if (item.time === undefined) { return false; }
-    if (item.time === null) { return false; }      
+    if (item.time === null) { return false; }
     if (isNaN((new Date(item.time)).getTime())) { return false; }
     return true;
 };
