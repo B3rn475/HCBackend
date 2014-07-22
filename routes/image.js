@@ -243,8 +243,8 @@ exports.body.optional.pose = (function () {
         if (req.attached.image) {
             req.attached.ckimage = req.attached.image;
             mArray(req, res, next);
-        } else if (req.attached.width && req.attached.height) {
-            req.attached.ckimage = {width: req.attached.width, height: req.attached.height};
+        } else if (req.attached.payload) {
+            req.attached.ckimage = sizeof(req.attached.payload);
             mArray(req, res, next);
         } else {
             next();
