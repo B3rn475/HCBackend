@@ -30,7 +30,12 @@ var env = process.env.NODE_ENV || 'development';
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-app.use(bodyParser({ limit: '1mb'}));
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+// parse application/json
+app.use(bodyParser.json());
+// parse application/vnd.api+json as json
+app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 app.use(methodOverride());
 
 /**
@@ -110,9 +115,7 @@ var choose = require("./routes/choose.js");
  * Image Routes
  */
 app.route("/image")
-    .post(//image.body.mandatory.width,
-          //image.body.mandatory.height,
-          image.body.mandatory.payload,
+    .post(image.body.mandatory.payload,
           image.body.optional.pose,
           image.routes.add)
     .get(index.query.optional.count,
