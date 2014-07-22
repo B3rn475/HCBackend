@@ -1207,40 +1207,45 @@ exports.body.optional.base64 = function (property, dvalue) {
     return exports.body.optional.regexp(property, base64, "Base64 String", dvalue);
 };
 
+exports.body.unchecked.base64jpg = function (property) {
+    var eNoJpg = {location: "body", name: property, message: "Body Parameter '" + property + "' is not a valid Base64 encoded JPG" };
+    return function (req, res, next) {
+        if (req.attached[property]) {
+            var buffer = new Buffer(req.attached[property], "Base64");
+            if (isJPG(buffer)) {
+                req.attached[property] = buffer;
+            } else {
+                req.attached[property] = undefined;
+                req.error.push(eNoJpg);
+            }
+        }
+    };
+};
+
 exports.body.mandatory.base64jpg = function (property) {
     var exp = exports.body.mandatory.base64(property),
-        eNoJpg = {location: "body", name: property, message: "Body Parameter '" + property + "' is not a valid Base64 encoded JPG" };
+        unchecked = exports.body.unchecked.base64jpg(property);
     return function (req, res, next) {
         exp(req, res, function (err) {
-            if (req.attached[property]) {
-                var buffer = new Buffer(req.attached[property], "Base64");
-                if (isJPG(buffer)) {
-                    req.attached[property] = buffer;
-                } else {
-                    req.attached[property] = undefined;
-                    req.error.push(eNoJpg);
-                }
+            if (err) {
+                next(err);
+            } else {
+                unchecked(req, res, next);
             }
-            next(err);
         });
     };
 };
 
 exports.body.optional.base64jpg = function (property) {
-    var exp = exports.body.mandatory.base64(property),
-        eNoJpg = {location: "body", name: property, message: "Body Parameter '" + property + "' is not a valid Base64 encoded JPG" };
+    var exp = exports.body.optional.base64(property),
+        unchecked = exports.body.unchecked.base64jpg(property);
     return function (req, res, next) {
         exp(req, res, function (err) {
-            if (req.attached[property]) {
-                var buffer = new Buffer(req.attached[property], "Base64");
-                if (isJPG(buffer)) {
-                    req.attached[property] = buffer;
-                } else {
-                    req.attached[property] = undefined;
-                    req.error.push(eNoJpg);
-                }
+            if (err) {
+                next(err);
+            } else {
+                unchecked(req, res, next);
             }
-            next(err);
         });
     };
 };
