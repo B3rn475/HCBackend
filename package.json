@@ -23,5 +23,8 @@
     , "async" : "*"
     , "image-size": "*"
     , "is-jpg": "*"
+    , "is-png": "*"
+    , "valid-url": "*"
+    , "sharp" : "*"
   }
 }

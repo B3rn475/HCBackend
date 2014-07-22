@@ -115,8 +115,10 @@ var choose = require("./routes/choose.js");
  * Image Routes
  */
 app.route("/image")
-    .post(image.body.mandatory.payload,
+    .post(image.body.optional.payload,
+          image.body.optional.url,
           image.body.optional.pose,
+          image.checkers.route.add,
           image.routes.add)
     .get(index.query.optional.count,
          index.query.optional.since_id,

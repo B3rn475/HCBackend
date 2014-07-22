@@ -17,7 +17,8 @@ var fs = require("fs"),
     Tag = require("../models/tag.js").model,
     index = require("./index.js"),
     _ = require("underscore-node"),
-    sizeof = require("image-size");
+    sizeof = require("image-size"),
+    sharp = require("sharp");
 
 /**
  * Routes
@@ -38,6 +39,7 @@ exports.routes.index = function (req, res, next) {
 
 exports.routes.add = function (req, res, next) {
     var obj,
+        data = req.attached.payload || req.attached.url,
         cb = function (image, next) {
             var action = new Action();
             action.type = "upload";
@@ -47,8 +49,7 @@ exports.routes.add = function (req, res, next) {
                 if (err) {
                     next(err);
                 } else {
-                    fs.writeFile("./storage/image/" + image.id.toString() + ".jpg",
-                        req.attached.payload,
+                    sharp(data).toFile("./storage/image/" + image.id.toString() + ".jpg",
                         function (err) {
                             if (err) {
                                 next(err);
@@ -193,6 +194,10 @@ exports.body.mandatory.payload = index.body.mandatory.base64jpg("payload");
 
 exports.body.optional.payload = index.body.optional.base64jpg("payload");
 
+exports.body.mandatory.url = index.body.mandatory.urlFile("url");
+
+exports.body.optional.url = index.body.optional.urlFile("url");
+
 var checkInteger = function (int, min, max) {
     if (_.isUndefined(int)) { return false; }
     if (!_.isNumber(int)) { return false; }
@@ -251,3 +256,18 @@ exports.body.optional.pose = (function () {
         }
     };
 }());
+
+/**
+ * Checkers
+ */
+
+exports.checkers = {
+    route: {}
+};
+
+exports.checkers.route.add = function (req, res, next) {
+    if (req.attached.payload === undefined && req.attached.url === undefined) {
+        req.errors.push({location: "query", name: "image|tag|session", message: "Missing Image or Tag or Session id. At least one is required as filter" });
+    }
+    next();
+};

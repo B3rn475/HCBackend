@@ -11,7 +11,11 @@
 "use strict";
 
 var _ = require("underscore-node"),
-    isJPG = require("is-jpg");
+    isJPG = require("is-jpg"),
+    isPNG = require("is-png"),
+    validUrl = require("valid-url"),
+    http = require("http"),
+    url = require("url");
 
 /**
  * RegExps
@@ -849,7 +853,10 @@ exports.body.unchecked.string = function (property, empty) {
         };
     }
     return function (req, res, next) {
-        var value = req.body[property].toString();
+        var value;
+        if (req.body[property] !== undefined) {
+            value = req.body[property].toString();
+        }
         if (checkValue(value, req)) {
             req.attached[property] = value;
         }
@@ -887,6 +894,58 @@ exports.body.optional.string = function (property, empty, dvalue) {
                 next();
             } else {
                 uString(req, res, next);
+            }
+        };
+    }
+};
+
+exports.body.unchecked.url = function (property) {
+    var eNotUrl = {location: "body", name: property, message: "Invalid Body Parameter '" + property + "', it is not a valid url"};
+    return function (req, res, next) {
+        if (req.body[property] === undefined) {
+            req.errors.push(eNotUrl);
+        } else {
+            var value = req.body[property].toString();
+            if (validUrl.isUri(value)) {
+                req.attached[property] = value;
+            } else {
+                req.errors.push(eNotUrl);
+            }
+        }
+        next();
+    };
+};
+
+exports.body.mandatory.url = function (property) {
+    var eMissing = {location: "body", name: property, message: "Missing Body Parameter '" + property + "'" },
+        uUrl = exports.body.unchecked.url(property);
+    return function (req, res, next) {
+        if (req.body[property] === undefined) {
+            req.errors.push(eMissing);
+            next();
+        } else {
+            uUrl(req, res, next);
+        }
+    };
+};
+
+exports.body.optional.url = function (property, dvalue) {
+    var uUrl = exports.body.unchecked.url(property);
+    if (dvalue === undefined) {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                next();
+            } else {
+                uUrl(req, res, next);
+            }
+        };
+    } else {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                req.attached[property] = dvalue;
+                next();
+            } else {
+                uUrl(req, res, next);
             }
         };
     }
@@ -1339,4 +1398,70 @@ exports.body.optional.array = function (property, check, map, dvalue) {
             }
         };
     }
+};
+
+exports.body.unchecked.urlFile = function (property) {
+    var eInvalidImage = {location: "body", name: property, message: "The Body Parameter '" + property + "' does not link to a valid image" };
+    return function (req, res, next) {
+        if (req.attached[property]) {
+            var parsed = url.parse(req.attached[property]),
+                options = {
+                    hostname: parsed.hostname,
+                    port: parsed.port,
+                    path: parsed.path
+                },
+                iReq;
+            req.attached[property] = undefined;
+            iReq = http.request(options, function (iRes) {
+                var bufs = [];
+                iRes.on("data", function (chunck) {
+                    bufs.push(chunck);
+                });
+                iRes.on("end", function () {
+                    var buf = Buffer.concat(bufs);
+                    if (isJPG(buf) || isPNG(buf)) {
+                        req.attached[property] = buf;
+                    } else {
+                        req.errors.push(eInvalidImage);
+                    }
+                    next();
+                });
+            });
+            iReq.on("error", function (err) {
+                req.error.push({location: "body", name: property, message: err });
+                next();
+            });
+            iReq.end();
+        } else {
+            next();
+        }
+    };
+};
+
+exports.body.mandatory.urlFile = function (property) {
+    var base = exports.body.mandatory.url(property),
+        unchecked = exports.body.unchecked.urlFile(property);
+    return function (req, res, next) {
+        base(req, res, function (err) {
+            if (err) {
+                next(err);
+            } else {
+                unchecked(req, res, next);
+            }
+        });
+    };
+};
+
+exports.body.optional.urlFile = function (property) {
+    var base = exports.body.optional.url(property),
+        unchecked = exports.body.unchecked.urlFile(property);
+    return function (req, res, next) {
+        base(req, res, function (err) {
+            if (err) {
+                next(err);
+            } else {
+                unchecked(req, res, next);
+            }
+        });
+    };
 };
