@@ -267,7 +267,7 @@ exports.checkers = {
 
 exports.checkers.route.add = function (req, res, next) {
     if (req.attached.payload === undefined && req.attached.url === undefined) {
-        req.errors.push({location: "query", name: "image|tag|session", message: "Missing Image or Tag or Session id. At least one is required as filter" });
+        req.errors.push({location: "query", name: "payload|url", message: "Missing Payload or Url. At least one is required for Image upload" });
     }
     next();
 };
