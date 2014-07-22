@@ -10,7 +10,8 @@
  */
 "use strict";
 
-var _ = require("underscore-node");
+var _ = require("underscore-node"),
+    isJPG = require("is-jpg");
 
 /**
  * RegExps
@@ -23,7 +24,8 @@ var alpha = /^[a-zA-Z]+$/,
     float = /^(?:-?(?:[0-9]+))?(?:\.[0-9]*)?(?:[eE][\+\-]?(?:[0-9]+))?$/,
     hexadecimal = /^[0-9a-fA-F]+$/,
     hexcolor = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/,
-    base64 = /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{4})$/;
+    base64 = /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{4})$/,
+    base64jpg = /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{4})$/;
 
 /**
  * Middlewares
@@ -1162,9 +1164,9 @@ exports.body.unchecked.regexp = function (property, regexp, type) {
     };
 };
 
-exports.body.mandatory.regexp = function (property, regexp, type) {
+exports.body.mandatory.regexp = function (property, regexp, type, checker) {
     var eMissing = {location: "body", name: property, message: "Missing Body Parameter '" + property + "'" },
-        uRegExp = exports.body.unchecked.regexp(property, regexp, type);
+        uRegExp = exports.body.unchecked.regexp(property, regexp, type, checker);
     return function (req, res, next) {
         if (req.body[property] === undefined) {
             req.errors.push(eMissing);
@@ -1175,8 +1177,8 @@ exports.body.mandatory.regexp = function (property, regexp, type) {
     };
 };
 
-exports.body.optional.regexp = function (property, regexp, type, dvalue) {
-    var uRegExp = exports.body.unchecked.regexp(property, regexp, type);
+exports.body.optional.regexp = function (property, regexp, type, dvalue, checker) {
+    var uRegExp = exports.body.unchecked.regexp(property, regexp, type, checker);
     if (dvalue === undefined) {
         return function (req, res, next) {
             if (req.body[property] === undefined) {
@@ -1203,6 +1205,44 @@ exports.body.mandatory.base64 = function (property) {
 
 exports.body.optional.base64 = function (property, dvalue) {
     return exports.body.optional.regexp(property, base64, "Base64 String", dvalue);
+};
+
+exports.body.mandatory.base64jpg = function (property) {
+    var exp = exports.body.mandatory.base64(property),
+        eNoJpg = {location: "body", name: property, message: "Body Parameter '" + property + "' is not a valid Base64 encoded JPG" };
+    return function (req, res, next) {
+        exp(req, res, function (err) {
+            if (req.attached[property]) {
+                var buffer = new Buffer(req.attached[property], "Base64");
+                if (isJPG(buffer)) {
+                    req.attached[property] = buffer;
+                } else {
+                    req.attached[property] = undefined;
+                    req.error.push(eNoJpg);
+                }
+            }
+            next(err);
+        });
+    };
+};
+
+exports.body.optional.base64jpg = function (property) {
+    var exp = exports.body.mandatory.base64(property),
+        eNoJpg = {location: "body", name: property, message: "Body Parameter '" + property + "' is not a valid Base64 encoded JPG" };
+    return function (req, res, next) {
+        exp(req, res, function (err) {
+            if (req.attached[property]) {
+                var buffer = new Buffer(req.attached[property], "Base64");
+                if (isJPG(buffer)) {
+                    req.attached[property] = buffer;
+                } else {
+                    req.attached[property] = undefined;
+                    req.error.push(eNoJpg);
+                }
+            }
+            next(err);
+        });
+    };
 };
 
 exports.body.unchecked.array = function (property, check, map) {

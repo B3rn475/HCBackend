@@ -22,5 +22,6 @@
     , "underscore-node" : "*"
     , "async" : "*"
     , "image-size": "*"
+    , "is-jpg": "*"
   }
 }

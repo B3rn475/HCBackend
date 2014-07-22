@@ -37,8 +37,7 @@ exports.routes.index = function (req, res, next) {
 };
 
 exports.routes.add = function (req, res, next) {
-    var payload = new Buffer(req.attached.payload, "base64"),
-        obj = sizeof(payload),
+    var obj,
         cb = function (image, next) {
             var action = new Action();
             action.type = "upload";
@@ -49,7 +48,7 @@ exports.routes.add = function (req, res, next) {
                     next(err);
                 } else {
                     fs.writeFile("./storage/image/" + image.id.toString() + ".jpg",
-                        payload,
+                        req.attached.payload,
                         function (err) {
                             if (err) {
                                 next(err);
@@ -61,6 +60,11 @@ exports.routes.add = function (req, res, next) {
                 }
             });
         };
+    if (req.attached.payload) {
+        obj = sizeof(req.attached.payload);
+    } else {
+        obj = {};
+    }
     if (req.attached.pose) { obj.pose = req.attached.pose; }
     res.format({
         html: function () {
@@ -185,9 +189,9 @@ exports.body.mandatory.height = index.body.mandatory.integer("height", 1);
 
 exports.body.optional.height = index.body.optional.integer("height", 1);
 
-exports.body.mandatory.payload = index.body.mandatory.base64("payload");
+exports.body.mandatory.payload = index.body.mandatory.base64jpg("payload");
 
-exports.body.optional.payload = index.body.optional.base64("payload");
+exports.body.optional.payload = index.body.optional.base64jpg("payload");
 
 var checkInteger = function (int, min, max) {
     if (_.isUndefined(int)) { return false; }
