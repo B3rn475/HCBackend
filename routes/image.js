@@ -16,7 +16,8 @@ var fs = require("fs"),
     Action = require("../models/action.js").model,
     Tag = require("../models/tag.js").model,
     index = require("./index.js"),
-    _ = require("underscore-node");
+    _ = require("underscore-node"),
+    sizeof = require("image-size");
 
 /**
  * Routes
@@ -36,7 +37,8 @@ exports.routes.index = function (req, res, next) {
 };
 
 exports.routes.add = function (req, res, next) {
-    var obj = {width: req.attached.width, height: req.attached.height},
+    var payload = new Buffer(req.attached.payload, "base64"),
+        obj = sizeof(payload),
         cb = function (image, next) {
             var action = new Action();
             action.type = "upload";
@@ -47,7 +49,7 @@ exports.routes.add = function (req, res, next) {
                     next(err);
                 } else {
                     fs.writeFile("./storage/image/" + image.id.toString() + ".jpg",
-                        new Buffer(req.attached.payload, "base64"),
+                        payload,
                         function (err) {
                             if (err) {
                                 next(err);

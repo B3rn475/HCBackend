@@ -257,8 +257,6 @@ Example result:
 **POST** : /image  
 adds a new image
 
-* __body__ : width : __mandatory__ : the width of the image
-* __body__ : height : __mandatory__ : the height of the image
 * __body__ : payload : __mandatory__ : the content of the image encoded in Base64 (jpeg format)
 * __body__ : pose : __optional__ : pose of the image (see definition)
 

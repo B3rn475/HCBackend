@@ -21,5 +21,6 @@
     , "cli-color" : "*"
     , "underscore-node" : "*"
     , "async" : "*"
+    , "image-size": "*"
   }
 }

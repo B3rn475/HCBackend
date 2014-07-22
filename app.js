@@ -110,8 +110,8 @@ var choose = require("./routes/choose.js");
  * Image Routes
  */
 app.route("/image")
-    .post(image.body.mandatory.width,
-          image.body.mandatory.height,
+    .post(//image.body.mandatory.width,
+          //image.body.mandatory.height,
           image.body.mandatory.payload,
           image.body.optional.pose,
           image.routes.add)
