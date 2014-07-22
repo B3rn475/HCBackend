@@ -1219,6 +1219,7 @@ exports.body.unchecked.base64jpg = function (property) {
                 req.error.push(eNoJpg);
             }
         }
+        next();
     };
 };
 
