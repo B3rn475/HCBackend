@@ -77,7 +77,7 @@ fields:
 
 * id: { type: Number, min: 0, index: { unique: true }}
 * app_id: { type: Number, min: 0}
-* app_user_id: { type: Number, min: 0}
+* app_user_id: { type: String}
 * quality: { type: Number}
 * statistics : {
         sessions: {type: Number}
