@@ -182,9 +182,12 @@ exports.checkers.open = function (req, res, next) {
     next();
 };
 
-exports.checkers.route.index = function (req, res, next) {
-    if (req.attached.image && req.attached.collection) {
-        req.errors.push({location: "query", name: "image|collection", message: "Cannot set both Image and Collection as filter" });
-    }
-    next();
-};
+exports.checkers.route.index = (function () {
+    var eFilter = {location: "query", name: "image|collection", message: "Cannot set both Image and Collection as filter" };
+    return function (req, res, next) {
+        if (req.attached.image && req.attached.collection) {
+            req.errors.push(eFilter);
+        }
+        next();
+    };
+}());

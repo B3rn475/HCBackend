@@ -265,9 +265,12 @@ exports.checkers = {
     route: {}
 };
 
-exports.checkers.route.add = function (req, res, next) {
-    if (req.attached.payload === undefined && req.attached.url === undefined) {
-        req.errors.push({location: "query", name: "payload|url", message: "Missing Payload or Url. At least one is required for Image upload" });
-    }
-    next();
-};
+exports.checkers.route.add = (function () {
+    var eRequired = {location: "query", name: "payload|url", message: "Missing Payload or Url. At least one is required for Image upload" };
+    return function (req, res, next) {
+        if (req.attached.payload === undefined && req.attached.url === undefined) {
+            req.errors.push(eRequired);
+        }
+        next();
+    };
+}());
