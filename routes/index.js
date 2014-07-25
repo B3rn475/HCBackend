@@ -951,6 +951,58 @@ exports.body.optional.url = function (property, dvalue) {
     }
 };
 
+exports.body.unchecked.date = function (property) {
+    var eNotDate = {location: "body", name: property, message: "Invalid Body Parameter '" + property + "', it is not a valid date"};
+    return function (req, res, next) {
+        if (req.body[property] === undefined) {
+            req.errors.push(eNotDate);
+        } else {
+            var value = new Date(req.body[property].toString());
+            if (isNaN(value.getTime())) {
+                req.errors.push(eNotDate);
+            } else {
+                req.attached[property] = value;
+            }
+        }
+        next();
+    };
+};
+
+exports.body.mandatory.date = function (property) {
+    var eMissing = {location: "body", name: property, message: "Missing Body Parameter '" + property + "'" },
+        uDate = exports.body.unchecked.date(property);
+    return function (req, res, next) {
+        if (req.body[property] === undefined) {
+            req.errors.push(eMissing);
+            next();
+        } else {
+            uDate(req, res, next);
+        }
+    };
+};
+
+exports.body.optional.date = function (property, dvalue) {
+    var uDate = exports.body.unchecked.date(property);
+    if (dvalue === undefined) {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                next();
+            } else {
+                uDate(req, res, next);
+            }
+        };
+    } else {
+        return function (req, res, next) {
+            if (req.body[property] === undefined) {
+                req.attached[property] = dvalue;
+                next();
+            } else {
+                uDate(req, res, next);
+            }
+        };
+    }
+};
+
 exports.body.unchecked.integer = function (property, min, max) {
     var eOutOfBound = {location: "body", name: property, message: "Invalid '" + property + "' parameter, out of bound"},
         eNotNumber = {location: "body", name: property, message: "Invalid '" + property + "' parameter, it is not a number"},

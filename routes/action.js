@@ -52,9 +52,9 @@ exports.routes.add = function (req, res, next) {
     if (req.attached.session) { obj.session = req.attached.session.id; }
     if (req.attached.image) { obj.image = req.attached.image.id; }
     if (req.attached.user) { obj.user = req.attached.user.id; }
-    if (req.attached.tag) {
-        obj.tag = req.attached.tag.id;
-    }
+    if (req.attached.created_at) { obj.created_at = req.attached.created_at; }
+    if (req.attached.completed_at) { obj.completed_at = req.attached.completed_at; }
+    if (req.attached.tag) { obj.tag = req.attached.tag.id; }
     if (req.attached.points !== undefined) {
         obj.segmentation = { points: req.attached.points, history: req.attached.history, quality: null };
     }
@@ -241,6 +241,14 @@ exports.body.optional.type = index.body.optional.regexp("type", regexp.params.ty
 exports.body.mandatory.validity = index.body.mandatory.boolean("validity");
 
 exports.body.optional.validity = index.body.optional.boolean("validity");
+            
+exports.body.mandatory.created_at = index.body.mandatory.date("created_at");
+
+exports.body.optional.created_at = index.body.optional.date("created_at");
+            
+exports.body.mandatory.completed_at = index.body.mandatory.date("completed_at");
+
+exports.body.optional.completed_at = index.body.optional.date("completed_at");
 
 exports.body.route.update.validity = function (req, res, next) {
     if (req.attached.action) {
@@ -389,52 +397,74 @@ exports.checkers = {
     route: {}
 };
 
-exports.checkers.open = function (req, res, next) {
-    if (req.attached.action) {
-        if (req.attached.action.completed_at !== undefined) {
-            req.errors.push({location: "status", name: "action", message: "Action is already completed" });
-        }
-    }
-    next();
-};
-            
-exports.checkers.completed = function (req, res, next) {
-    if (req.attached.action) {
-        if (req.attached.action.completed_at === undefined) {
-            req.errors.push({location: "status", name: "action", message: "Action is still open" });
-        }
-    }
-    next();
-};
-            
-exports.checkers.route.update = function (req, res, next) {
-    if (req.attached.action) {
-        if (req.attached.action.type === "segmentation" && req.attached.action.segmentation !== undefined) {
-            if (req.attached.validity === undefined && req.attached.quality === undefined) {
-                req.errors.push({location: "body", name: "validity|quality", message: "Missing validity or quality Body paramaters. At least one is required" });
+exports.checkers.open = (function () {
+    var eAlreadyCompleted = {location: "status", name: "action", message: "Action is already completed" };
+    return function (req, res, next) {
+        if (req.attached.action) {
+            if (req.attached.action.completed_at !== undefined) {
+                req.errors.push(eAlreadyCompleted);
             }
         }
-    }
-    next();
-};
+        next();
+    };
+}());
+            
+exports.checkers.completed = (function () {
+    var eOpen = {location: "status", name: "action", message: "Action is still open" };
+    return function (req, res, next) {
+        if (req.attached.action) {
+            if (req.attached.action.completed_at === undefined) {
+                req.errors.push(eOpen);
+            }
+        }
+        next();
+    };
+}());
+            
+exports.checkers.route.update = (function () {
+    var eRequired = {location: "body", name: "validity|quality", message: "Missing validity or quality Body paramaters. At least one is required" };
+    return function (req, res, next) {
+        if (req.attached.action) {
+            if (req.attached.action.type === "segmentation" && req.attached.action.segmentation !== undefined) {
+                if (req.attached.validity === undefined && req.attached.quality === undefined) {
+                    req.errors.push(eRequired);
+                }
+            }
+        }
+        next();
+    };
+}());
 
-exports.checkers.route.validity = function (req, res, next) {
-    if (!(req.attached.image || req.attached.tag || req.attached.session)) {
-        req.errors.push({location: "query", name: "image|tag|session", message: "Missing Image or Tag or Session id. At least one is required as filter" });
-    }
-    next();
-};
+exports.checkers.route.validity = (function () {
+    var eRequired = {location: "query", name: "image|tag|session", message: "Missing Image or Tag or Session id. At least one is required as filter" };
+    return function (req, res, next) {
+        if (!(req.attached.image || req.attached.tag || req.attached.session)) {
+            req.errors.push(eRequired);
+        }
+        next();
+    };
+}());
             
-exports.checkers.route.add = function (req, res, next) {
-    if ((req.attached.points === undefined) !== (req.attached.history === undefined)) {
-        req.errors.push({location: "query", name: "points|history", message: "The parameters history and points must be set or not at the same time" });
-    }
-    next();
-};
+exports.checkers.route.add = (function () {
+    var eParameters = {location: "body", name: "points|history", message: "The parameters history and points must be set or not at the same time" },
+        eCompletion = {location: "body", name: "completed_at", message: "The parameters completed_at cannot be set if created_at is not present" };
+    return function (req, res, next) {
+        if ((req.attached.points === undefined) !== (req.attached.history === undefined)) {
+            req.errors.push(eParameters);
+        }
+        if (req.attached.created_at === undefined && req.attached.completed_at !== undefined) {
+            req.errors.push(eCompletion);
+        }
+        next();
+    };
+}());
             
-exports.checkers.route.complete = function (req, res, next) {
-    if ((req.attached.points === undefined) !== (req.attached.history === undefined)) {
-        req.errors.push({location: "query", name: "points|history", message: "The parameters history and points must be set or not at the same time" });
-    }
-    next();
-};
+exports.checkers.route.complete = (function () {
+    var eParameters = {location: "query", name: "points|history", message: "The parameters history and points must be set or not at the same time" };
+    return function (req, res, next) {
+        if ((req.attached.points === undefined) !== (req.attached.history === undefined)) {
+            req.errors.push(eParameters);
+        }
+        next();
+    };
+}());

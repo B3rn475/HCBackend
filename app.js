@@ -344,6 +344,8 @@ app.route("/action")
           action.body.route.add.tag,
           action.body.route.add.points,
           action.body.route.add.history,
+          action.body.optional.created_at,
+          action.body.optional.completed_at,
           action.checkers.route.add,
           action.routes.add)
     .put(image.query.optional.id,
