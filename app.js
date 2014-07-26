@@ -31,9 +31,9 @@ var env = process.env.NODE_ENV || 'development';
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: false, limit: '5mb' }));
 // parse application/json
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '5mb'}));
 // parse application/vnd.api+json as json
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 app.use(methodOverride());
