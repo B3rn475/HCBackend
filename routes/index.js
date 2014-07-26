@@ -954,7 +954,7 @@ exports.body.optional.url = function (property, dvalue) {
 exports.body.unchecked.date = function (property) {
     var eNotDate = {location: "body", name: property, message: "Invalid Body Parameter '" + property + "', it is not a valid date"};
     return function (req, res, next) {
-        if (req.body[property] === undefined) {
+        if (req.body[property] === undefined || req.body[property] === null) {
             req.errors.push(eNotDate);
         } else {
             var value = new Date(req.body[property].toString());
