@@ -101,7 +101,7 @@ fields:
 fields:
 
 * id: { type: Number, min: 0, index: { unique: true }}
-* started_at: {type: Date}
+* created_at: {type: Date}
 * completed_at: {type: Date}
 
 **Action**
@@ -579,6 +579,8 @@ returns the list of sessions
 **POST** : /session
 adds a new session
 
+* __body__ : created_at : __optional__ : creation date (default now)
+
 ***GET** : /session/count
 returns the number of sessions
 
@@ -589,6 +591,8 @@ returns a session
 
 **POST** : /session/:sessionId  
 complete a session
+
+* __body__ : completed_at : __optional__ : completion date (default now)
 
 **GET** : /session/:sessionId/action  
 returns the actions related to this session (same as /action?session=:sessionId)

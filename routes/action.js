@@ -241,14 +241,6 @@ exports.body.optional.type = index.body.optional.regexp("type", regexp.params.ty
 exports.body.mandatory.validity = index.body.mandatory.boolean("validity");
 
 exports.body.optional.validity = index.body.optional.boolean("validity");
-            
-exports.body.mandatory.created_at = index.body.mandatory.date("created_at");
-
-exports.body.optional.created_at = index.body.optional.date("created_at");
-            
-exports.body.mandatory.completed_at = index.body.mandatory.date("completed_at");
-
-exports.body.optional.completed_at = index.body.optional.date("completed_at");
 
 exports.body.route.update.validity = function (req, res, next) {
     if (req.attached.action) {

@@ -14,16 +14,16 @@ var mongoose = require("mongoose");
 var mongooseAI = require("mongoose-auto-increment");
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
-                                started_at: {type: Date},
+                                created_at: {type: Date},
                                 completed_at: {type: Date}
                                 }, { id: false});
 
 schema.virtual('id').get(function () { return this._id; });
 
 schema.pre('save', function (next) {
-    if (this.started_at === undefined) {
+    if (this.created_at === undefined) {
         var now = new Date();
-        this.started_at = now;
+        this.created_at = now;
     }
     next();
 });

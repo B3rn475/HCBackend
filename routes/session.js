@@ -34,12 +34,16 @@ exports.routes.index = function (req, res, next) {
 };
 
 exports.routes.add = function (req, res, next) {
+    var obj = {};
+    if (req.attached.created_at) {
+        obj.created_at = req.attached.created_at;
+    }
     res.format({
         html: function () {
-            index.algorithms.html.add(req, res, next, Session);
+            index.algorithms.html.add(req, res, next, Session, obj);
         },
         json: function () {
-            index.algorithms.json.add(req, res, next, Session);
+            index.algorithms.json.add(req, res, next, Session, obj);
         }
     });
 };
@@ -82,7 +86,11 @@ exports.routes.complete = function (req, res, next) {
                 index.algorithms.json.error(req, res);
             } else {
                 var session = req.attached.session;
-                session.completed_at = new Date();
+                if (req.attached.completed_at) {
+                    session.completed_at = req.attached.completed_at;
+                } else {
+                    session.completed_at = new Date();
+                }
                 session.save(function (err, action) {
                     if (err) {
                         next(err);

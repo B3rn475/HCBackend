@@ -1517,3 +1517,11 @@ exports.body.optional.urlFile = function (property) {
         });
     };
 };
+
+exports.body.mandatory.created_at = exports.body.mandatory.date("created_at");
+
+exports.body.optional.created_at = exports.body.optional.date("created_at");
+            
+exports.body.mandatory.completed_at = exports.body.mandatory.date("completed_at");
+
+exports.body.optional.completed_at = exports.body.optional.date("completed_at");

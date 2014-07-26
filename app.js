@@ -288,15 +288,17 @@ app.route("/session")
         index.query.optional.max_id,
         session.query.optional.completed,
         session.routes.index)
-    .post(session.routes.add);
+    .post(index.body.optional.created_at,
+          session.routes.add);
 app.route("/session/count")
     .get(session.query.optional.completed,
          session.routes.count);
 app.route("/session/:sessionId")
     .get(index.query.optional.populate,
-        session.routes.get)
+         session.routes.get)
     .post(session.checkers.open,
-        session.routes.complete);
+          index.body.optional.completed_at,
+          session.routes.complete);
 app.route("/session/:sessionId/action")
     .get(index.query.optional.count,
          index.query.optional.since_id,
@@ -344,8 +346,8 @@ app.route("/action")
           action.body.route.add.tag,
           action.body.route.add.points,
           action.body.route.add.history,
-          action.body.optional.created_at,
-          action.body.optional.completed_at,
+          index.body.optional.created_at,
+          index.body.optional.completed_at,
           action.checkers.route.add,
           action.routes.add)
     .put(image.query.optional.id,
