@@ -309,8 +309,8 @@ var checkPoint = function (item) {
 };
             
 var checkHistoryPoint = function (item) {
-    if (!checkInteger(item.x, 0)) { return false; }
-    if (!checkInteger(item.y, 0)) { return false; }
+    if (!checkInteger(item.x)) { return false; }
+    if (!checkInteger(item.y)) { return false; }
     return true;
 };
 
