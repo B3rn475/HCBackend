@@ -119,15 +119,14 @@ fields:
     * points: []
         * x: { type: Number, min: 0}
         * y: { type: Number, min: 0}
+        * end: { type: Boolean: default: undefined}
+    * history: []
         * size: {type: Number, min: 1}
         * color: {type: String, validate: /(rgb\(([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9])\))|(rgba\(([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9])\))\b/}
-    * history: []
+        * time : {type:Date}
         * points: []
             * x: { type: Number, min: 0}
             * y: { type: Number, min: 0}
-            * size: {type: Number, min: 1}
-            * color: {type: String, validate: /(rgb\(([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9])\))|(rgba\(([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9])\))\b/}
-        * time : {type:Date}
 * started_at: {type: Date},
 * completed_at: {type: Date},
 * validity: {type: Boolean, default: true}

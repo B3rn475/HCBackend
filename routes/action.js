@@ -305,9 +305,6 @@ var checkInteger = function (int, min, max) {
 var checkPoint = function (item) {
     if (!checkInteger(item.x, 0)) { return false; }
     if (!checkInteger(item.y, 0)) { return false; }
-    if (!checkInteger(item.size, 1)) { return false; }
-    if (typeof item.color !== "string") { return false; }
-    if (!regexp.color.test(item.color)) { return false; }
     return true;
 };
 
@@ -315,9 +312,10 @@ var checkHistory = function (item) {
     if (item.points === undefined) { return false; }
     if (!_.isArray(item.points)) { return false; }
     if (!_.every(item.points, checkPoint)) { return false; }
-    if (item.time === undefined) { return false; }
-    if (item.time === null) { return false; }
-    if (isNaN((new Date(item.time)).getTime())) { return false; }
+    if (!checkInteger(item.size, 1)) { return false; }
+    if (typeof item.color !== "string") { return false; }
+    if (!regexp.color.test(item.color)) { return false; }
+    if (!checkInteger(item.size, 0)) { return false; }
     return true;
 };
 
@@ -325,15 +323,15 @@ var mapPoint = function (item) {
     return {
         x: item.x,
         y: item.y,
-        size : item.size,
-        color: item.color,
     };
 };
             
 var mapHistory = function (item) {
     return {
-        points: _.map(item.points, mapPoint),
-        time: new Date(item.time)
+        time: item.time,
+        size : item.size,
+        color: item.color,
+        points: _.map(item.points, mapPoint)
     };
 };
 
