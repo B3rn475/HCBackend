@@ -315,15 +315,19 @@ var checkHistory = function (item) {
     if (!checkInteger(item.size, 1)) { return false; }
     if (typeof item.color !== "string") { return false; }
     if (!regexp.color.test(item.color)) { return false; }
-    if (!checkInteger(item.size, 0)) { return false; }
+    if (!checkInteger(item.time, 0)) { return false; }
     return true;
 };
 
 var mapPoint = function (item) {
-    return {
+    var obj = {
         x: item.x,
         y: item.y,
     };
+    if (item.end) {
+        obj.end = true;
+    }
+    return obj;
 };
             
 var mapHistory = function (item) {
