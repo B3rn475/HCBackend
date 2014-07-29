@@ -315,6 +315,8 @@ app.route("/session/:sessionId/action")
           action.body.mandatory.type,
           action.body.route.add.tag,
           action.body.route.add.points,
+          action.body.route.add.history,
+          action.checkers.route.add,
           action.routes.add)
     .put(image.query.optional.id,
          tag.query.optional.id,
