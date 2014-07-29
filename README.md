@@ -125,8 +125,8 @@ fields:
         * color: {type: String, validate: /(rgb\(([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9])\))|(rgba\(([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9]),[ ]*([0-2][0-9]{2}|[0-9]{2}|[0-9])\))\b/}
         * time : {type:Number, min 0}
         * points: []
-            * x: { type: Number, min: 0}
-            * y: { type: Number, min: 0}
+            * x: { type: Number}
+            * y: { type: Number}
 * started_at: {type: Date},
 * completed_at: {type: Date},
 * validity: {type: Boolean, default: true}

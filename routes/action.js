@@ -307,11 +307,17 @@ var checkPoint = function (item) {
     if (!checkInteger(item.y, 0)) { return false; }
     return true;
 };
+            
+var checkHistoryPoint = function (item) {
+    if (!checkInteger(item.x, 0)) { return false; }
+    if (!checkInteger(item.y, 0)) { return false; }
+    return true;
+};
 
 var checkHistory = function (item) {
     if (item.points === undefined) { return false; }
     if (!_.isArray(item.points)) { return false; }
-    if (!_.every(item.points, checkPoint)) { return false; }
+    if (!_.every(item.points, checkHistoryPoint)) { return false; }
     if (!checkInteger(item.size, 1)) { return false; }
     if (typeof item.color !== "string") { return false; }
     if (!regexp.color.test(item.color)) { return false; }
