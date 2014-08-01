@@ -80,7 +80,10 @@ exports.routes.update = function (req, res, next) {
             } else {
                 var action = req.attached.action;
                 if (req.attached.validity !== undefined) { action.validity = req.attached.validity; }
-                if (req.attached.quality !== undefined && action.segmentation !== undefined) { action.segmentation.quality = req.attached.quality; }
+                if (req.attached.quality !== undefined && action.segmentation !== undefined) {
+                    action.segmentation.quality = req.attached.quality;
+                    action.markModified("segmentation");
+                }
                 action.save(function (err, action) {
                     if (err) {
                         next(err);
