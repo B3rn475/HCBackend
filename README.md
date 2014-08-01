@@ -256,8 +256,11 @@ Example result:
 **POST** : /image  
 adds a new image
 
-* __body__ : payload : __mandatory__ : the content of the image encoded in Base64 (jpeg format)
+* __body__ : payload : __optional__ : the content of the image encoded in Base64 (jpeg or png format)
+* __body__ : url : __optional__ : the url of the image (jpeg or png format)
 * __body__ : pose : __optional__ : pose of the image (see definition)
+
+at least one between __payload__ or __url__ must be present.
 
 Example result:
 ```json
