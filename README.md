@@ -691,7 +691,8 @@ If it is a __segmentation__ action and the points are not present the action is 
 **PUT** : /action/:actionId  
 updates an action
 
-* __body__ : validity : __mandatory__ : the new validity of the action
+* __body__ : validity : __optional__ : the new quality of the action
+* __body__ : quality : __optional__ : the new quality of the action
 
 **Microtask**
 _____________
