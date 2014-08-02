@@ -98,21 +98,25 @@ exports.routes.leastused = function (req, res, next) {
             res.send(501, "not Implemented");
         },
         json: function () {
-            var aggregate = [
-                {$match: {$and: [
-                    {validity: true},
-                    {$or: [
-                        {type: "tagging", tag: {$exists: true}},
-                        {type: "segmentation", segmentation: {$exists: true}},
-                        {type: "segmentation", completed_at: {$exists: false}}
-                    ]}
-                ]}},
-                {$project: {image: true, tag: true, type: true}},
-                {$group: {_id: {image: "$image", tag: "$tag"}, count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
-                {$sort: {count: 1}},
-                {$project: {_id: false, image: "$_id.image", tag: "$_id.tag"}},
-                {$limit: req.attached.limit},
-            ];
+            var oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
+                aggregate = [
+                    {$match: {$and: [
+                        {validity: true},
+                        {$or: [
+                            {type: "tagging", tag: {$exists: true}},
+                            {type: "segmentation", segmentation: {$exists: true}},
+                            {$and: [
+                                {type: "segmentation", completed_at: {$exists: false}},
+                                {type: "segmentation", created_at: {$lt: oneHourAgo}}
+                            ]}
+                        ]}
+                    ]}},
+                    {$project: {image: true, tag: true, type: true}},
+                    {$group: {_id: {image: "$image", tag: "$tag"}, count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
+                    {$sort: {count: 1}},
+                    {$project: {_id: false, image: "$_id.image", tag: "$_id.tag"}},
+                    {$limit: req.attached.limit},
+                ];
             if (req.attached.collection) {
                 if (req.attached.collection.images.length !== 0) {
                     aggregate = _.union([{$match: {image: {$in: req.attached.collection.images}}}], aggregate);
