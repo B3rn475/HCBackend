@@ -40,7 +40,7 @@ exports.routes.list = function (req, res, next) {
                             {type: "segmentation", segmentation: {$exists: true}},
                         ]}
                     ]}},
-                    {$project: {image: true, tag: true, type: true}},
+                    {$project: {image: true, type: true}},
                     {$group: {_id: "$image", count: {$sum: {$cond: [{$eq: ["$type", "upload"]}, 0, 1]}}}},
                     {$group: {_id: 0, min: {$min: "$count"}, max: {$max: "$count"}}}
                 ];
