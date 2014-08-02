@@ -38,10 +38,6 @@ exports.routes.list = function (req, res, next) {
                         {$or: [
                             {type: "upload"},
                             {type: "segmentation", segmentation: {$exists: true}},
-                            {$and: [
-                                {type: "segmentation", completed_at: {$exists: false}},
-                                {type: "segmentation", created_at: {$lt: oneHourAgo}}
-                            ]}
                         ]}
                     ]}},
                     {$project: {image: true, tag: true, type: true}},
