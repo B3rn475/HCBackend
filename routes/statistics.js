@@ -31,7 +31,6 @@ exports.routes.list = function (req, res, next) {
                         segmentations_per_image: {}
                     }
                 },
-                oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
                 aggregate = [
                     {$match: {$and: [
                         {validity: true},
