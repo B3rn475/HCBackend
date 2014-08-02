@@ -443,7 +443,7 @@ exports.query.register = function (property, middleware, path) {
         set = function (req) {
             var value = req.attached[property];
             if (value !== undefined) {
-                req.search_metadata[property] = req.attached[property];
+                req.search_metadata[property] = value;
             }
         };
     } else {
@@ -452,7 +452,7 @@ exports.query.register = function (property, middleware, path) {
             if (value !== undefined) {
                 value = value[path];
                 if (value !== undefined) {
-                    req.search_metadata[property] = req.attached[property];
+                    req.search_metadata[property] = value;
                 }
             }
         };
