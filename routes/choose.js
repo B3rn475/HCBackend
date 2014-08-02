@@ -113,8 +113,15 @@ exports.routes.leastused = function (req, res, next) {
                     ]}},
                     {$project: {image: true, tag: true, type: true}},
                     {$group: {_id: {image: "$image", tag: "$tag"}, count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
+                    {$group: {_id: "$_id.image", tags : {$push : {image: "$_id.image", tag: "$_id.tag", count: "$count"}}, maxCount: {$max: "$count"}}},
+                    {$project: {_id: false, tags: true, maxCount: true}},
+                    {$unwind: "$tags"},
+                    {$project: {image: "$tags.image", tag: "$tags.tag", count: "$tags.count", equals: {$eq: ["$tags.count", "$maxCount"]}}},
+                    {$match: {equals : true}},
+                    {$project: {image: true, tag: true, count: true}},
+                    {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$count"}}},
                     {$sort: {count: 1}},
-                    {$project: {_id: false, image: "$_id.image", tag: "$_id.tag"}},
+                    {$project: {_id: false, image: "$_id", tag: true}},
                     {$limit: req.attached.limit},
                 ];
             if (req.attached.collection) {
