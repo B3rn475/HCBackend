@@ -32,7 +32,63 @@ exports.routes.index = function (req, res, next) {
             index.algorithms.html.list(req, res, next, Image);
         },
         json: function () {
-            index.algorithms.json.list(req, res, next, Image);
+            if (req.attached.min_segmentations !== undefined || req.attached.max_segmentations !== undefined) {
+                var _id = {},
+                    prematch = {$and: [
+                        {validity: true},
+                        {$or: [
+                            {type: "upload"},
+                            {type: "segmentation", segmentation: {$exists: true}},
+                        ]},
+                    ]},
+                    count = {},
+                    aggregate = [
+                        {$match: prematch},
+                        {$project: {image: true, type: true}},
+                        {$group: {_id: "$image", count: {$sum: {$cond: [{$eq: ["$type", "upload"]}, 0, 1]}}}},
+                        {$sort: {_id: -1}},
+                        {$match: {count: count}}
+                    ];
+                if (req.attached.min_segmentations !== undefined) {
+                    count.$gte = req.attached.min_segmentations;
+                }
+                if (req.attached.max_segmentations !== undefined) {
+                    count.$lte = req.attached.max_segmentations;
+                }
+                if (req.attached.since_id !== undefined || req.attached.max_id !== undefined) {
+                    if (req.attached.since_id !== undefined) {
+                        _id.$gt = req.attached.since_id;
+                    }
+                    if (req.attached.max_id !== undefined) {
+                        _id.$lte = req.attached.max_id;
+                    }
+                    prematch.$and.push({_id: _id});
+                }
+                if (req.attached.count !== undefined) {
+                    aggregate.push(
+                        {$limit: req.attached.count}
+                    );
+                }
+                aggregate.push(
+                    {$group: {_id: 0, images: {$push: "$_id"}}}
+                );
+                
+                Action.aggregate(aggregate, function (err, results) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        var query;
+                        if (results.length > 0) {
+                            query = {_id: {$in: results[0].images}};
+                        } else {
+                            query = {_id: {$in: []}};
+                        }
+                        index.algorithms.json.list(req, res, next, Image, query);
+                    }
+                });
+            } else {
+                index.algorithms.json.list(req, res, next, Image);
+            }
         }
     });
 };
@@ -167,6 +223,14 @@ exports.query = {
 exports.query.mandatory.id = index.query.register(Image.pname, index.query.mandatory.id(Image), "id");
 
 exports.query.optional.id = index.query.register(Image.pname, index.query.optional.id(Image), "id");
+
+exports.query.mandatory.min_segmentations = index.query.register("min_segmentations", index.query.mandatory.integer("min_segmentations", 0));
+
+exports.query.optional.min_segmentations = index.query.register("min_segmentations", index.query.optional.integer("min_segmentations", 0));
+
+exports.query.mandatory.max_segmentations = index.query.register("max_segmentations", index.query.mandatory.integer("max_segmentations", 0));
+
+exports.query.optional.max_segmentations = index.query.register("max_segmentations", index.query.optional.integer("max_segmentations", 0));
 
 /**
  * Body Params

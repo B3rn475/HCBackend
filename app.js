@@ -124,6 +124,8 @@ app.route("/image")
     .get(index.query.optional.count,
          index.query.optional.since_id,
          index.query.optional.max_id,
+         image.query.optional.max_segmentations,
+         image.query.optional.min_segmentations,
          image.routes.index);
 app.route("/image/count")
     .get(image.routes.count);

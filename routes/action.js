@@ -281,15 +281,10 @@ exports.body.route.add.tag = (function () {
 }());
             
 exports.body.route.complete.tag = (function () {
-    var mId = index.body.mandatory.id(Tag),
-        oId = index.body.optional.id(Tag);
+    var oId = index.body.optional.id(Tag);
     return function (req, res, next) {
-        if (req.attached.action !== undefined) {
-            if (req.attached.action.type === "segmentation") {
-                mId(req, res, next);
-            } else {
-                oId(req, res, next);
-            }
+        if (req.attached.action !== undefined && req.attached.action.type === "tagging") {
+            oId(req, res, next);
         } else {
             next();
         }
