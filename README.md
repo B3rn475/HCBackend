@@ -218,6 +218,8 @@ returns the list of the images
 * __query__ : count : __optional__ : max number of items to returns (max: 100)
 * __query__ : max\_id : __optional__ : upper bound for the id to returns (included)
 * __query__ : since\_id : __optional__ : lower bound for the id to returns (not included)
+* __query__ : min\_segmentations : __optional__ : lower bound for the number of segmentations (included)
+* __query__ : max\_segmentations : __optional__ : upper bound for the number of segmentations (included)
 
 Example result:
 ```json
