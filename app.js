@@ -110,6 +110,7 @@ var microtask = require("./routes/microtask.js");
 app.param("microtaskId", microtask.params.id);
 
 var choose = require("./routes/choose.js");
+var statistics = require("./routes/statistics.js");
 
 /**
  * Image Routes
@@ -421,6 +422,12 @@ app.route("/choose/leastused")
     .get(collection.query.optional.id,
          choose.query.optional.limit,
          choose.routes.leastused);
+
+/**
+ * Statistics
+ */
+app.route("/statistics")
+    .get(statistics.routes.list);
 
 /**
  * Static Files

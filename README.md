@@ -735,7 +735,7 @@ complete a microtask
  */
  
 **GET** : /choose
-returns the list of available aglorithsm
+returns the list of available aglorithms
 
 **GET** : /choose/random
 choose a random combination of __image__ and __tag__ that has already been tagged by a user
@@ -750,3 +750,10 @@ choose the least used combination of __image__ and __tag__ that has already been
 * __query__ : collection : __optional__ : collection from which take the images
 
 actions open from more than 1 hour are considered skipped from this route.
+
+/**
+ * Statistics Routes
+ */
+ 
+**GET** : /statistics
+returns statistics about the system
