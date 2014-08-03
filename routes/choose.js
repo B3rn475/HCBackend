@@ -111,8 +111,14 @@ exports.routes.image.leastused = function (req, res, next) {
                     {$match: {$and: [
                         {validity: true},
                         {$or: [
-                            {type: "uploading"},
-                            {type: "tagging", tag: {$exists: true}},
+                            {type: "upload"},
+                            {$or: [
+                                {type: "tagging", tag: {$exists: true}},
+                                {$and: [
+                                    {type: "tagging", completed_at: {$exists: false}},
+                                    {type: "tagging", created_at: {$lt: oneHourAgo}}
+                                ]}
+                            ]}
                         ]}
                     ]}},
                     {$project: {_id: false, image: true, type: true}},
