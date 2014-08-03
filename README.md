@@ -737,15 +737,33 @@ complete a microtask
  */
  
 **GET** : /choose
-returns the list of available aglorithms
+returns the list of the available objects to choose
 
-**GET** : /choose/random
+**GET** : /choose/image
+returns the list of the available algorithms to choose __images__
+
+**GET** : /choose/image/random
+choose a random __image__
+
+* __query__ : limit : __optional__ : number of elements to return (default: 1, max: 100)
+* __query__ : collection : __optional__ : collection from which take the images
+
+**GET** : /choose/image/leastused
+choose the least used __image__
+
+* __query__ : limit : __optional__ : number of elements to return (default: 1, max: 100)
+* __query__ : collection : __optional__ : collection from which take the images
+
+**GET** : /choose/imageandtag
+returns the list of the available algorithms to choose __image__ and __tag__ pairs
+
+**GET** : /choose/imageandtag/random
 choose a random combination of __image__ and __tag__ that has already been tagged by a user
 
 * __query__ : limit : __optional__ : number of elements to return (default: 1, max: 100)
 * __query__ : collection : __optional__ : collection from which take the images
 
-**GET** : /choose/leastused
+**GET** : /choose/imageandtag/leastused
 choose the least used combination of __image__ and __tag__ that has already been tagged by a user.
 
 * __query__ : limit : __optional__ : number of elements to return (default: 1, max: 100)
