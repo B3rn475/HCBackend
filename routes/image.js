@@ -70,7 +70,7 @@ exports.routes.index = function (req, res, next) {
                     );
                 }
                 aggregate.push(
-                    {$group: {_id: 0, images: {$push: "$_id"}}}
+                    {$group: {_id: null, images: {$push: "$_id"}}}
                 );
                 
                 Action.aggregate(aggregate, function (err, results) {
