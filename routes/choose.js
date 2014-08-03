@@ -85,7 +85,7 @@ exports.routes.image.random = function (req, res, next) {
                         for (i = 0; i < req.attached.limit; i = i + 1) {
                             inputs.push(i);
                         }
-                        async.mapLimit(inputs, 10,
+                        async.map(inputs,
                             map,
                             function (err, results) {
                                 if (err) {
@@ -203,8 +203,7 @@ exports.routes.imageandtag.random = function (req, res, next) {
                         for (i = 0; i < req.attached.limit; i = i + 1) {
                             inputs.push(i);
                         }
-                        async.mapLimit(inputs, 10,
-                            map,
+                        async.map(inputs, map,
                             function (err, results) {
                                 if (err) {
                                     next(err);
