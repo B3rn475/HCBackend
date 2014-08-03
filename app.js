@@ -416,14 +416,26 @@ app.route("/microtask/:microtaskId")
  */
 app.route("/choose")
     .get(choose.routes.list);
-app.route("/choose/random")
+app.route("/choose/image")
+    .get(choose.routes.image.list);
+app.route("/choose/image/random")
     .get(collection.query.optional.id,
          choose.query.optional.limit,
-         choose.routes.random);
-app.route("/choose/leastused")
+         choose.routes.image.random);
+app.route("/choose/image/leastused")
     .get(collection.query.optional.id,
          choose.query.optional.limit,
-         choose.routes.leastused);
+         choose.routes.image.leastused);
+app.route("/choose/imageandtag")
+    .get(choose.routes.imageandtag.list);
+app.route("/choose/imageandtag/random")
+    .get(collection.query.optional.id,
+         choose.query.optional.limit,
+         choose.routes.imageandtag.random);
+app.route("/choose/imageandtag/leastused")
+    .get(collection.query.optional.id,
+         choose.query.optional.limit,
+         choose.routes.imageandtag.leastused);
 
 /**
  * Statistics

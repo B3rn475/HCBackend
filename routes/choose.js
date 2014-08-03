@@ -12,6 +12,7 @@
 
 var index = require("./index.js"),
     Action = require("../models/action.js").model,
+    Image = require("../models/image.js").model,
     async = require("async"),
     _ = require("underscore-node");
 
@@ -19,9 +20,20 @@ var index = require("./index.js"),
  * Routes
  */
 
-exports.routes = {};
+exports.routes = { image: {}, imageandtag: {}};
 
 exports.routes.list = function (req, res, next) {
+    res.format({
+        html: function () {
+            res.send(501, "not Implemented");
+        },
+        json: function () {
+            res.send({ status: "OK", objects: ["image", "imageandtag"] });
+        }
+    });
+};
+
+exports.routes.image.list = function (req, res, next) {
     res.format({
         html: function () {
             res.send(501, "not Implemented");
@@ -32,7 +44,121 @@ exports.routes.list = function (req, res, next) {
     });
 };
 
-exports.routes.random = function (req, res, next) {
+exports.routes.image.random = function (req, res, next) {
+    res.format({
+        html: function () {
+            res.send(501, "not Implemented");
+        },
+        json: function () {
+            var aggregate = [
+                {$group: {_id: null, count: {$sum: 1}}}
+            ];
+            if (req.attached.collection) {
+                if (req.attached.collection.images.length !== 0) {
+                    aggregate = _.union([{$match: {_id: {$in: req.attached.collection.images}}}], aggregate);
+                } else {
+                    res.send({ status: "OK", results: []});
+                    return;
+                }
+            }
+            Image.aggregate(aggregate,
+                function (err, result) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        var inputs = [],
+                            i,
+                            map = function (item, next) {
+                                var aggregate = [
+                                    {$skip: Math.floor(result[0].count * Math.random())},
+                                    {$limit: 1},
+                                    {$project: {_id: true}}
+                                ];
+                                Image.aggregate(aggregate, function (err, results) {
+                                    if (err) {
+                                        next(err);
+                                    } else {
+                                        next(undefined, results[0]._id);
+                                    }
+                                });
+                            };
+                        for (i = 0; i < req.attached.limit; i = i + 1) {
+                            inputs.push(i);
+                        }
+                        async.mapLimit(inputs, 10,
+                            map,
+                            function (err, results) {
+                                if (err) {
+                                    next(err);
+                                } else {
+                                    res.send({ status: "OK", results: results});
+                                }
+                            });
+                    }
+                });
+        }
+    });
+};
+
+exports.routes.image.leastused = function (req, res, next) {
+    res.format({
+        html: function () {
+            res.send(501, "not Implemented");
+        },
+        json: function () {
+            var oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
+                aggregate = [
+                    {$match: {$and: [
+                        {validity: true},
+                        {$or: [
+                            {type: "uploading"},
+                            {type: "tagging", tag: {$exists: true}},
+                        ]}
+                    ]}},
+                    {$project: {_id: false, image: true, type: true}},
+                    {$group: {_id: "$image", count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
+                    {$sort: {count: 1}},
+                    {$limit: req.attached.limit},
+                    {$group: {_id: null, images: {$push: "$_id"}}}
+                ];
+            if (req.attached.collection) {
+                if (req.attached.collection.images.length !== 0) {
+                    aggregate = _.union([{$match: {image: {$in: req.attached.collection.images}}}], aggregate);
+                } else {
+                    res.send({ status: "OK", results: []});
+                    return;
+                }
+            }
+            Action.aggregate(aggregate,
+                function (err, results) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        var images;
+                        if (results.length > 0) {
+                            images = results[0].images;
+                        } else {
+                            images = [];
+                        }
+                        res.send({ status: "OK", results: images});
+                    }
+                });
+        }
+    });
+};
+
+exports.routes.imageandtag.list = function (req, res, next) {
+    res.format({
+        html: function () {
+            res.send(501, "not Implemented");
+        },
+        json: function () {
+            res.send({ status: "OK", algorithms: ["random", "leastused"] });
+        }
+    });
+};
+
+exports.routes.imageandtag.random = function (req, res, next) {
     res.format({
         html: function () {
             res.send(501, "not Implemented");
@@ -58,14 +184,14 @@ exports.routes.random = function (req, res, next) {
                     } else {
                         var inputs = [],
                             i,
-                            aggregate = [
-                                {$match: {type: "tagging", tag: {$exists: true}, validity: true}},
-                                {$group: {_id: {image: "$image", tag: "$tag"}}},
-                                {$project: {_id: false, image: "$_id.image", tag: "$_id.tag"}},
-                                {$skip: Math.floor(result[0].count * Math.random())},
-                                {$limit: 1}
-                            ],
                             map = function (item, next) {
+                                var aggregate = [
+                                    {$match: {type: "tagging", tag: {$exists: true}, validity: true}},
+                                    {$group: {_id: {image: "$image", tag: "$tag"}}},
+                                    {$skip: Math.floor(result[0].count * Math.random())},
+                                    {$limit: 1},
+                                    {$project: {_id: false, image: "$_id.image", tag: "$_id.tag"}}
+                                ];
                                 Action.aggregate(aggregate, function (err, results) {
                                     if (err) {
                                         next(err);
@@ -92,7 +218,7 @@ exports.routes.random = function (req, res, next) {
     });
 };
 
-exports.routes.leastused = function (req, res, next) {
+exports.routes.imageandtag.leastused = function (req, res, next) {
     res.format({
         html: function () {
             res.send(501, "not Implemented");
@@ -111,7 +237,7 @@ exports.routes.leastused = function (req, res, next) {
                             ]}
                         ]}
                     ]}},
-                    {$project: {image: true, tag: true, type: true}},
+                    {$project: {_id: false, image: true, tag: true, type: true}},
                     {$group: {_id: {image: "$image", tag: "$tag"}, count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
                     {$group: {_id: "$_id.image", tags : {$push : {image: "$_id.image", tag: "$_id.tag", count: "$count"}}, maxCount: {$max: "$count"}}},
                     {$project: {_id: false, tags: true, maxCount: true}},
@@ -143,7 +269,7 @@ exports.routes.leastused = function (req, res, next) {
         }
     });
 };
-                
+
 /**
  * Query Parameters
  */
