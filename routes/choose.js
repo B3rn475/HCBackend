@@ -78,7 +78,7 @@ exports.routes.image.random = function (req, res, next) {
                                     if (err) {
                                         next(err);
                                     } else {
-                                        next(undefined, results[0]._id);
+                                        next(undefined, {image: results[0]._id});
                                     }
                                 });
                             };
