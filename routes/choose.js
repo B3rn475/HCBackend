@@ -125,7 +125,7 @@ exports.routes.image.leastused = function (req, res, next) {
                     {$group: {_id: "$image", count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
                     {$sort: {count: 1}},
                     {$limit: req.attached.limit},
-                    {$group: {_id: null, images: {$push: {image: "$_id", count: "count"}}}}
+                    {$group: {_id: null, images: {$push: {image: "$_id", count: "$count"}}}}
                 ];
             if (req.attached.collection) {
                 if (req.attached.collection.images.length !== 0) {
