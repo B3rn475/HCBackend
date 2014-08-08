@@ -21,14 +21,14 @@ exports.regexp.params.type = /tagging|segmentation$/;
 exports.regexp.query.type = /tagging|segmentation|upload$/;
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
-                                    session: {type: Number, min: 0, ref: "Session"},
-                                    image: {type: Number, min: 0, ref: "Image"},
-                                    tag: {type: Number, min: 0, ref: "Tag"},
-                                    user: {type: Number, min: 0, ref: "User"},
-                                    type: {type: String, enum: ["tagging", "segmentation", "upload"]},
+                                    session: {type: Number, min: 0, index: true, ref: "Session"},
+                                    image: {type: Number, min: 0, index: true, ref: "Image"},
+                                    tag: {type: Number, min: 0, index: true, ref: "Tag"},
+                                    user: {type: Number, min: 0, index: true, ref: "User"},
+                                    type: {type: String, index: true, enum: ["tagging", "segmentation", "upload"]},
                                     segmentation: { type: mongoose.Schema.Types.Mixed},
-                                    created_at: {type: Date},
-                                    completed_at: {type: Date},
+                                    created_at: {type: Date, index: true},
+                                    completed_at: {type: Date, index: true},
                                     validity: {type: Boolean, default: true}
                                 }, { id: false});
 
