@@ -116,7 +116,7 @@ exports.routes.image.leastused = function (req, res, next) {
                                 {type: "tagging", tag: {$exists: true}},
                                 {$and: [
                                     {type: "tagging", completed_at: {$exists: false}},
-                                    {type: "tagging", created_at: {$lt: oneHourAgo}}
+                                    {type: "tagging", created_at: {$gt: oneHourAgo}}
                                 ]}
                             ]}
                         ]}
@@ -238,7 +238,7 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
                             {type: "segmentation", segmentation: {$exists: true}},
                             {$and: [
                                 {type: "segmentation", completed_at: {$exists: false}},
-                                {type: "segmentation", created_at: {$lt: oneHourAgo}}
+                                {type: "segmentation", created_at: {$gt: oneHourAgo}}
                             ]}
                         ]}
                     ]}},
