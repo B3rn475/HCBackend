@@ -616,11 +616,12 @@ adds a new action to the session (the same as /action, but with the session id e
 * __body__ : type : __mandatory__ : the type of the action
 * __body__ : user : __mandatory__ : the user related to the action
 * __body__ : tag : __optional__ (for tagging) | __mandatory__ (for segmentation) : the tag of the action
-* __body__ : points : __optional__ (only for tagging) : the points of the segmentation
+* __body__ : points : __optional__ (only for segmentation) : the points of the segmentation
+* __body__ : history : __optional__ (only for segmentation) : the points of the segmentation
 
 If it is a __tagging__ action the tag is optional. If it is present the action is completed correctly otherwise it is still open.  
 If it is a __segmentation__ action the tag is mandatory.  
-If it is a __segmentation__ action the points are optional. If they are present the action is completed correctly otherwise it is still open.
+If it is a __segmentation__ action the points and the history are optional. If they are present the action is completed correctly otherwise it is skipped.
 
 **PUT** : /session/:sessionId/action
 updates all the session (same as /action)
@@ -659,7 +660,7 @@ adds a new action
 
 If it is a __tagging__ action the tag is optional. If it is present the action is completed correctly otherwise it is skipped.  
 If it is a __segmentation__ action the tag is mandatory.  
-If it is a __segmentation__ action the points are optional. If they are present the action is completed correctly otherwise it is skipped.
+If it is a __segmentation__ action the points and the history are optional. If they are present the action is completed correctly otherwise it is skipped.
 
 **PUT** : /action
 updates all the actions
