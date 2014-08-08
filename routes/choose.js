@@ -112,17 +112,15 @@ exports.routes.image.leastused = function (req, res, next) {
                         {validity: true},
                         {$or: [
                             {type: "upload"},
-                            {$or: [
-                                {type: "tagging", tag: {$exists: true}},
-                                {$and: [
-                                    {type: "tagging", completed_at: {$exists: false}},
-                                    {type: "tagging", created_at: {$gt: oneHourAgo}}
-                                ]}
+                            {type: "tagging", tag: {$exists: true}},
+                            {$and: [
+                                {type: "tagging", completed_at: {$exists: false}},
+                                {type: "tagging", created_at: {$gt: oneHourAgo}}
                             ]}
                         ]}
                     ]}},
                     {$project: {_id: false, image: true, type: true}},
-                    {$group: {_id: "$image", count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
+                    {$group: {_id: "$image", count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 1, 0]}}}},
                     {$sort: {count: 1}},
                     {$limit: req.attached.limit},
                     {$group: {_id: null, images: {$push: {image: "$_id", count: "$count"}}}}
