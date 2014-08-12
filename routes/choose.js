@@ -135,12 +135,15 @@ exports.routes.image.leastused = function (req, res, next) {
         },
         json: function () {
             var oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
-                aggregate = [
-                    {$match: {$or: [
+                filter = [
+                    {$or: [
                         {type: "upload", validity: true},
                         {type: "tagging", validity: true, tag: {$exists: true}},
                         {type: "tagging", validity: true, completed_at: {$exists: false}, created_at: {$gt: oneHourAgo}}
-                    ]}},
+                    ]}
+                ],
+                aggregate = [
+                    {$match: {$and: filter}},
                     {$project: {_id: false, image: true, type: true}},
                     {$group: {_id: "$image", count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 1, 0]}}}},
                     {$sort: {count: 1}},
@@ -149,7 +152,7 @@ exports.routes.image.leastused = function (req, res, next) {
                 ];
             if (req.attached.collection) {
                 if (req.attached.collection.images.length !== 0) {
-                    aggregate = _.union(computeCollectionMatch(req.attached.collection), aggregate);
+                    filter.push(computeCollectionMatch(req.attached.collection));
                 } else {
                     res.send({ status: "OK", results: []});
                     return;
@@ -250,12 +253,15 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
         },
         json: function () {
             var oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
-                aggregate = [
-                    {$match: {$or: [
+                filter = [
+                    {$or: [
                         {type: "tagging", validity: true, tag: {$exists: true}},
                         {type: "segmentation", validity: true, segmentation: {$exists: true}},
                         {type: "segmentation", validity: true, completed_at: {$exists: false}, created_at: {$gt: oneHourAgo}}
-                    ]}},
+                    ]}
+                ],
+                aggregate = [
+                    {$match: {$and: filter}},
                     {$project: {_id: false, image: true, tag: true, type: true}},
                     {$group: {_id: {image: "$image", tag: "$tag"}, count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
                     {$group: {_id: "$_id.image", tags : {$push : {image: "$_id.image", tag: "$_id.tag", count: "$count"}}, maxCount: {$max: "$count"}}},
@@ -271,7 +277,7 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
                 ];
             if (req.attached.collection) {
                 if (req.attached.collection.images.length !== 0) {
-                    aggregate = _.union(computeCollectionMatch(req.attached.collection), aggregate);
+                    filter.push(computeCollectionMatch(req.attached.collection));
                 } else {
                     res.send({ status: "OK", results: []});
                     return;
