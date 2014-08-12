@@ -110,6 +110,7 @@ exports.routes.add = function (req, res, next) {
                             if (err) {
                                 next(err);
                             } else {
+                                action.validity = true;
                                 action.completed_at = new Date();
                                 action.save(next);
                             }

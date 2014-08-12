@@ -108,13 +108,10 @@ exports.routes.image.leastused = function (req, res, next) {
         json: function () {
             var oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
                 aggregate = [
-                    {$match: {$and: [
-                        {validity: true},
-                        {$or: [
-                            {type: "upload"},
-                            {type: "tagging", tag: {$exists: true}},
-                            {type: "tagging", completed_at: {$exists: false}, created_at: {$gt: oneHourAgo}}
-                        ]}
+                    {$match: {$or: [
+                        {type: "upload", validity: true},
+                        {type: "tagging", validity: true, tag: {$exists: true}},
+                        {type: "tagging", validity: true, completed_at: {$exists: false}, created_at: {$gt: oneHourAgo}}
                     ]}},
                     {$project: {_id: false, image: true, type: true}},
                     {$group: {_id: "$image", count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 1, 0]}}}},
@@ -226,13 +223,10 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
         json: function () {
             var oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
                 aggregate = [
-                    {$match: {$and: [
-                        {validity: true},
-                        {$or: [
-                            {type: "tagging", tag: {$exists: true}},
-                            {type: "segmentation", segmentation: {$exists: true}},
-                            {type: "segmentation", completed_at: {$exists: false}, created_at: {$gt: oneHourAgo}}
-                        ]}
+                    {$match: {$or: [
+                        {type: "tagging", validity: true, tag: {$exists: true}},
+                        {type: "segmentation", validity: true, segmentation: {$exists: true}},
+                        {type: "segmentation", validity: true, completed_at: {$exists: false}, created_at: {$gt: oneHourAgo}}
                     ]}},
                     {$project: {_id: false, image: true, tag: true, type: true}},
                     {$group: {_id: {image: "$image", tag: "$tag"}, count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
