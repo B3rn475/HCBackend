@@ -123,7 +123,7 @@ var computeCollectionMatch = function (collection) {
     if (item.$lt === item.$gte + 1) {
         or.push({image: item.$gte});
     } else {
-        or.push({imte: item});
+        or.push({image: item});
     }
     return [match];
 };
