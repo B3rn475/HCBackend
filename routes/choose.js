@@ -103,8 +103,7 @@ exports.routes.image.random = function (req, res, next) {
 var computeCollectionMatch = function (collection) {
     var images = _.sortBy(collection.images, function (item) { return item; }),
         item,
-        or = [],
-        match = {$match: {$or: or}};
+        or = [];
     if (images.length === 0) { return []; }
     if (images.length === 1) { return [{$match: {images: images[0]}}]; }
     item = {$gte: images[0], $lt: images[0]};
@@ -125,7 +124,7 @@ var computeCollectionMatch = function (collection) {
     } else {
         or.push({image: item});
     }
-    return [match];
+    return {$or: or};
 };
 
 exports.routes.image.leastused = function (req, res, next) {
