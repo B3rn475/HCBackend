@@ -127,6 +127,7 @@ exports.algorithms.json.get = function (req, res, next, Model, populate) {
             iMax,
             obj = req.attached[Model.pname];
         if (populate === undefined) {
+            json.completed_in = Date.now() - req.started_at;
             json[Model.pname] = obj;
             res.send(json);
         } else {
@@ -144,8 +145,8 @@ exports.algorithms.json.get = function (req, res, next, Model, populate) {
                 if (err) {
                     next(err);
                 } else {
-                    json[Model.pname] = obj;
                     json.completed_in = Date.now() - req.started_at;
+                    json[Model.pname] = obj;
                     res.send(json);
                 }
             });
@@ -256,6 +257,7 @@ exports.algorithms.json.list = function (req, res, next, Model, query, fields, o
                 }
                 json.search_metadata = search_metadata;
                 if (cbPrepare === undefined) {
+                    json.completed_in = Date.now() - req.started_at;
                     json[Model.json_list_property] = objects;
                     res.send(json);
                 } else {
@@ -263,8 +265,8 @@ exports.algorithms.json.list = function (req, res, next, Model, query, fields, o
                         if (err) {
                             next(err);
                         } else {
-                            json[Model.json_list_property] = objects;
                             json.completed_in = Date.now() - req.started_at;
+                            json[Model.json_list_property] = objects;
                             res.send(json);
                         }
                     });
