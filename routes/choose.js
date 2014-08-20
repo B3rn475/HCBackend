@@ -151,7 +151,7 @@ exports.routes.image.leastused = function (req, res, next) {
                     {$group: {_id: null, images: {$push: {image: "$_id", count: "$count"}}}}
                 ];
             if (req.attached.collection) {
-                if (req.attached.collection.image !== undefined && req.attached.collection.images.length !== 0) {
+                if (req.attached.collection.images !== undefined && req.attached.collection.images.length !== 0) {
                     filter.push(computeCollectionMatch(req.attached.collection));
                 } else {
                     res.send({ status: "OK", results: []});
