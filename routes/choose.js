@@ -143,14 +143,15 @@ exports.routes.image.leastused = function (req, res, next) {
                 ],
                 aggregate = [
                     {$match: {$and: filter}},
-                    {$project: {_id: false, image: true, type: true}},
-                    {$group: {_id: "$image", count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 1, 0]}}}},
+                    {$project: {_id: false, image: true, type: true, tag: true }},
+                    {$group: {_id: {image: "$image", tag: {$ifNull: ["$tag", -1]}}, count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 1, 0]}}}},
+                    {$group: {_id: "$_id.image", count: {$sum: {$cond: [{$eq: ["$tag", -1]}, "$count", 1]}}}},
                     {$sort: {count: 1}},
                     {$limit: req.attached.limit},
                     {$group: {_id: null, images: {$push: {image: "$_id", count: "$count"}}}}
                 ];
             if (req.attached.collection) {
-                if (req.attached.collection.images.length !== 0) {
+                if (req.attached.collection.image !== undefined && req.attached.collection.images.length !== 0) {
                     filter.push(computeCollectionMatch(req.attached.collection));
                 } else {
                     res.send({ status: "OK", results: []});
