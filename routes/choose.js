@@ -169,7 +169,7 @@ exports.routes.image.leastused = function (req, res, next) {
                         } else {
                             images = [];
                         }
-                        res.send({ status: "OK", results: images});
+                        res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: images});
                     }
                 });
         }
@@ -237,7 +237,7 @@ exports.routes.imageandtag.random = function (req, res, next) {
                                 if (err) {
                                     next(err);
                                 } else {
-                                    res.send({ status: "OK", results: results});
+                                    res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: results});
                                 }
                             });
                     }
@@ -288,7 +288,7 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
                     if (err) {
                         next(err);
                     } else {
-                        res.send({ status: "OK", results: results});
+                        res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: results});
                     }
                 });
         }

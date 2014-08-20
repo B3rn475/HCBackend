@@ -38,6 +38,7 @@ var alpha = /^[a-zA-Z]+$/,
 exports.middlewares = {};
 
 exports.middlewares.init = function (req, res, next) {
+    req.started_at = Date.now();
     req.attached = {};
     req.errors = [];
     req.search_metadata = {};
@@ -144,6 +145,7 @@ exports.algorithms.json.get = function (req, res, next, Model, populate) {
                     next(err);
                 } else {
                     json[Model.pname] = obj;
+                    json.completed_in = Date.now() - req.started_at;
                     res.send(json);
                 }
             });
@@ -262,6 +264,7 @@ exports.algorithms.json.list = function (req, res, next, Model, query, fields, o
                             next(err);
                         } else {
                             json[Model.json_list_property] = objects;
+                            json.completed_in = Date.now() - req.started_at;
                             res.send(json);
                         }
                     });
