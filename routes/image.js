@@ -19,6 +19,7 @@ var fs = require("fs"),
     index = require("./index.js"),
     _ = require("underscore-node"),
     sizeof = require("image-size"),
+    isJPG = require("is-jpg"),
     sharp = require("sharp");
 
 /**
@@ -106,16 +107,26 @@ exports.routes.add = function (req, res, next) {
                 if (err) {
                     next(err);
                 } else {
-                    sharp(data).toFile("./storage/image/" + image.id.toString() + ".jpg",
-                        function (err) {
-                            if (err) {
-                                next(err);
-                            } else {
-                                action.validity = true;
-                                action.completed_at = new Date();
-                                action.save(next);
-                            }
-                        });
+                    if (isJPG(data)) {
+                        fs.writeFile("./storage/image/" + image.id.toString() + ".jpg",
+                            data,
+                            function (err) {
+                                if (err) {
+                                    next(err);
+                                }
+                            });
+                    } else {
+                        sharp(data).toFile("./storage/image/" + image.id.toString() + ".jpg",
+                            function (err) {
+                                if (err) {
+                                    next(err);
+                                } else {
+                                    action.validity = true;
+                                    action.completed_at = new Date();
+                                    action.save(next);
+                                }
+                            });
+                    }
                 }
             });
         };
