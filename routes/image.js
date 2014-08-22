@@ -113,6 +113,10 @@ exports.routes.add = function (req, res, next) {
                             function (err) {
                                 if (err) {
                                     next(err);
+                                } else {
+                                    action.validity = true;
+                                    action.completed_at = new Date();
+                                    action.save(next);
                                 }
                             });
                     } else {
