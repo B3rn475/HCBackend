@@ -320,13 +320,7 @@ app.route("/session/:sessionId/action")
           action.body.route.add.points,
           action.body.route.add.history,
           action.checkers.route.add,
-          action.routes.add)
-    .put(image.query.optional.id,
-         tag.query.optional.id,
-         action.query.optional.type,
-         action.query.optional.completed,
-         action.body.mandatory.validity,
-         action.routes.validity);
+          action.routes.add);
 
 /**
  * Action Routes
@@ -354,15 +348,7 @@ app.route("/action")
           index.body.optional.created_at,
           index.body.optional.completed_at,
           action.checkers.route.add,
-          action.routes.add)
-    .put(image.query.optional.id,
-        tag.query.optional.id,
-        session.query.optional.id,
-        action.checkers.route.validity,
-        action.query.optional.type,
-        action.query.optional.completed,
-        action.body.mandatory.validity,
-        action.routes.validity);
+          action.routes.add);
 app.route("/action/count")
     .get(action.query.optional.type,
          action.query.optional.validity,

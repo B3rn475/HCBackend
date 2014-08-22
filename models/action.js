@@ -12,6 +12,7 @@
 
 var mongoose = require("mongoose");
 var mongooseAI = require("mongoose-auto-increment");
+var ImageTags = require("./imagetags.js").model;
 
 exports.regexp = { points: {}, history: {}, params: {}, query: {}};
 
@@ -41,6 +42,7 @@ schema.post('init', function (doc) {
 });
 
 schema.pre('save', function (next) {
+    this.wasNew = this.isNew;
     if (this.created_at === undefined) {
         this.created_at = new Date();
     }
@@ -52,7 +54,54 @@ schema.pre('save', function (next) {
             this.completed_at = new Date();
         }
     }
+    if (this.validity === undefined) {
+        this.validity = true;
+    }
+    this.wasCompletedAtModified = this.isModified("completed_at");
+    this.wasValidityModified = this.isModified("validity");
     next();
+});
+
+schema.post('save', function () {
+    var addAndUpdate = false,
+        me = this;
+    if (this.type === "tagging") {
+        if (this.wasNew) {
+            if (this.tag === undefined) {
+                if (this.completed_at === undefined) {
+                    ImageTags.update({image: this.image}, {$inc: {count: 1}}, function (err) { if (err) { console.log(err); } });
+                }
+            } else {
+                addAndUpdate = true;
+            }
+        } else {
+            if (this.wasCompletedAtModified) {
+                ImageTags.update({image: this.image}, {$inc: {count: -1}}, function (err) { if (err) { console.log(err); } });
+                if (this.tag !== undefined) {
+                    addAndUpdate = true;
+                }
+            } else {
+                if (this.wasValidityModified) {
+                    if (this.validity) {
+                        addAndUpdate = true;
+                    } else {
+                        exports.model.count({type: "tagging", image: this.image, tag: this.tag, validity: true}, function (err, count) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                if (count === 0) {
+                                    ImageTags.update({image: me.image, tags: {$in: [me.tag]}}, {$inc: {count: -1}, $pull: {tags: me.tag}}, function (err) { if (err) { console.log(err); } });
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        if (addAndUpdate) {
+            ImageTags.findOneAndUpdate({image: this.image, tags: {$nin: [this.tag]}}, {$addToSet: {tags: this.tag}, $inc: {count: 1}}, function (err) { if (err) { console.log(err); } });
+        }
+    }
 });
 
 schema.options.toJSON = {

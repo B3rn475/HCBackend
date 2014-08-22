@@ -13,6 +13,8 @@
 var mongoose = require("mongoose");
 var mongooseAI = require("mongoose-auto-increment");
 
+var ImageTags = require("./imagetags.js").model;
+
 var computeMediaLocator = function (id) {
     return "/storage/image/" + id + ".jpg";
 };
@@ -45,6 +47,11 @@ schema.options.toJSON = {
         return ret;
     }
 };
+
+schema.post('save', function () {
+    ImageTags.update({image: this._id}, {$inc: {count: 0}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
+});
+
 
 schema.statics.json_list_property = "images";
 schema.statics.pname = "image";

@@ -623,15 +623,6 @@ If it is a __tagging__ action the tag is optional. If it is present the action i
 If it is a __segmentation__ action the tag is mandatory.  
 If it is a __segmentation__ action the points and the history are optional. If they are present the action is completed correctly otherwise it is skipped.
 
-**PUT** : /session/:sessionId/action
-updates all the session (same as /action)
-
-* __query__ : image : __optional__ : filter on the image
-* __query__ : tag : __optional__ : filter on the tag
-* __query__ : type : __optional__ : filter on the type
-* __query__ : completed : __optional__ : filters completed or not completed actions
-* __body__ : validity : __mandatory__ : the new validity for the actions
-
 **Action**
 __________
 
@@ -661,16 +652,6 @@ adds a new action
 If it is a __tagging__ action the tag is optional. If it is present the action is completed correctly otherwise it is skipped.  
 If it is a __segmentation__ action the tag is mandatory.  
 If it is a __segmentation__ action the points and the history are optional. If they are present the action is completed correctly otherwise it is skipped.
-
-**PUT** : /action
-updates all the actions
-
-* __query__ : session : __optional__ : filter on the session (it is required if image and tag are not present)
-* __query__ : image : __optional__ : filter on the image (it is required if session and tag are not present)
-* __query__ : tag : __optional__ : filter on the tag (it is required if session and image are not present)
-* __query__ : type : __optional__ : filter on the type
-* __query__ : completed : __optional__ : filters completed or not completed actions
-* __body__ : validity : __mandatory__ : the new validity for the actions
 
 **GET** : /action/count  
 returns the number of actions

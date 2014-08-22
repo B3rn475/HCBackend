@@ -11,6 +11,7 @@
 "use strict";
 
 var index = require("./index.js"),
+    ImageTags = require("../models/imagetags.js").model,
     Action = require("../models/action.js").model,
     Image = require("../models/image.js").model,
     async = require("async"),
@@ -133,45 +134,17 @@ exports.routes.image.leastused = function (req, res, next) {
             res.send(501, "not Implemented");
         },
         json: function () {
-            var oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
-                filter = [
-                    {$or: [
-                        {type: "upload", validity: true},
-                        {type: "tagging", validity: true, tag: {$exists: true}},
-                        {type: "tagging", validity: true, completed_at: {$exists: false}, created_at: {$gt: oneHourAgo}}
-                    ]}
-                ],
-                aggregate = [
-                    {$match: {$and: filter}},
-                    {$project: {_id: false, image: true, type: true, tag: true }},
-                    {$group: {_id: {image: "$image", tag: {$ifNull: ["$tag", -1]}}, count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 1, 0]}}}},
-                    {$group: {_id: "$_id.image", count: {$sum: {$cond: [{$eq: ["$tag", -1]}, "$count", 1]}}}},
-                    {$sort: {count: 1}},
-                    {$limit: req.attached.limit},
-                    {$group: {_id: null, images: {$push: {image: "$_id", count: "$count"}}}}
-                ];
-            if (req.attached.collection) {
-                if (req.attached.collection.images !== undefined && req.attached.collection.images.length !== 0) {
-                    filter.push(computeCollectionMatch(req.attached.collection));
+            var options = {
+                sort: {count: 1},
+                limit: req.attached.limit
+            };
+            ImageTags.find({}, "image count", options, function (err, results) {
+                if (err) {
+                    next(err);
                 } else {
-                    res.send({ status: "OK", results: []});
-                    return;
+                    res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: results});
                 }
-            }
-            Action.aggregate(aggregate,
-                function (err, results) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        var images;
-                        if (results.length > 0) {
-                            images = results[0].images;
-                        } else {
-                            images = [];
-                        }
-                        res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: images});
-                    }
-                });
+            });
         }
     });
 };

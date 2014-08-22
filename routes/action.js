@@ -58,7 +58,6 @@ exports.routes.add = function (req, res, next) {
     if (req.attached.points !== undefined) {
         obj.segmentation = { points: req.attached.points, history: req.attached.history, quality: null };
     }
-    obj.validity = true;
     res.format({
         html: function () {
             index.algorithms.html.add(req, res, next, Action, obj);
@@ -119,34 +118,6 @@ exports.routes.complete = function (req, res, next) {
                     }
                 });
             }
-        }
-    });
-};
-
-exports.routes.validity = function (req, res, next) {
-    var query = {},
-        update = {$set: {validity: req.attached.validity}},
-        options = {multi: true};
-    if (req.attached.image) { query.image = req.attached.image.id; }
-    if (req.attached.tag) { query.tag = req.attached.tag.id; }
-    if (req.attached.type) {
-        query.type = req.attached.type;
-    } else {
-        query.type = {$ne: "upload"};
-    }
-    if (req.attached.session) { query.session = req.attached.session; }
-    if (req.attached.completed !== undefined) {
-        query.$or = [
-            {type: "tagging", tag : {$exists: req.attached.completed}},
-            {type: "segmentation", segmentation : {$exists: req.attached.completed}},
-        ];
-    }
-    res.format({
-        html: function () {
-            index.algorithms.html.update(req, res, next, Action, query, update, options);
-        },
-        json: function () {
-            index.algorithms.json.update(req, res, next, Action, query, update, options);
         }
     });
 };

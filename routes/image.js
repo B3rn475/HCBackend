@@ -12,6 +12,7 @@
 
 var fs = require("fs"),
     Image = require("../models/image.js").model,
+    ImageTags = require("../models/imagetags.js").model,
     location = require("../models/image.js").regexp.location,
     Action = require("../models/action.js").model,
     Tag = require("../models/tag.js").model,
@@ -180,13 +181,11 @@ exports.routes.count = function (req, res, next) {
 };
 
 exports.routes.tag = function (req, res, next) {
-    var match = { type: "tagging", validity: true, tag: {$ne : null} },
-        group = {$group: {_id: "$tag"}},
-        grouping = {$group: {_id: null, result: {$addToSet: "$_id"}}},
+    var image,
         cbNext = function (err, objects) {
             var query = {};
-            if (objects.length > 0) {
-                query._id = { $in: objects[0].result};
+            if (objects.length > 0 && objects[0].tags !== undefined) {
+                query._id = { $in: objects[0].tags};
             } else {
                 query._id = { $in: []};
             }
@@ -199,8 +198,12 @@ exports.routes.tag = function (req, res, next) {
                 }
             });
         };
-    if (req.attached.image) { match.image = req.attached.image.id; }
-    index.algorithms.aggregate(req, res, cbNext, Action, [{$match: match}, group], grouping);
+    if (req.attached.image) {
+        image = req.attached.image.id;
+        ImageTags.find({image: image}, cbNext);
+    } else {
+        cbNext(undefined, []);
+    }
 };
 
 /**
