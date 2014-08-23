@@ -51,52 +51,56 @@ exports.routes.image.random = function (req, res, next) {
             res.send(501, "not Implemented");
         },
         json: function () {
-            var aggregate = [
-                {$group: {_id: null, count: {$sum: 1}}}
-            ];
-            if (req.attached.collection) {
-                if (req.attached.collection.images.length !== 0) {
-                    aggregate = _.union([{$match: {_id: {$in: req.attached.collection.images}}}], aggregate);
-                } else {
-                    res.send({ status: "OK", results: []});
-                    return;
-                }
-            }
-            Image.aggregate(aggregate,
-                function (err, result) {
-                    if (err) {
-                        next(err);
+            if (req.errors.length) {
+                exports.algorithms.json.error(req, res);
+            } else {
+                var aggregate = [
+                    {$group: {_id: null, count: {$sum: 1}}}
+                ];
+                if (req.attached.collection) {
+                    if (req.attached.collection.images.length !== 0) {
+                        aggregate = _.union([{$match: {_id: {$in: req.attached.collection.images}}}], aggregate);
                     } else {
-                        var inputs = [],
-                            i,
-                            map = function (item, next) {
-                                var aggregate = [
-                                    {$skip: Math.floor(result[0].count * Math.random())},
-                                    {$limit: 1},
-                                    {$project: {_id: true}}
-                                ];
-                                Image.aggregate(aggregate, function (err, results) {
+                        res.send({ status: "OK", results: []});
+                        return;
+                    }
+                }
+                Image.aggregate(aggregate,
+                    function (err, result) {
+                        if (err) {
+                            next(err);
+                        } else {
+                            var inputs = [],
+                                i,
+                                map = function (item, next) {
+                                    var aggregate = [
+                                        {$skip: Math.floor(result[0].count * Math.random())},
+                                        {$limit: 1},
+                                        {$project: {_id: true}}
+                                    ];
+                                    Image.aggregate(aggregate, function (err, results) {
+                                        if (err) {
+                                            next(err);
+                                        } else {
+                                            next(undefined, {image: results[0]._id});
+                                        }
+                                    });
+                                };
+                            for (i = 0; i < req.attached.limit; i = i + 1) {
+                                inputs.push(i);
+                            }
+                            async.map(inputs,
+                                map,
+                                function (err, results) {
                                     if (err) {
                                         next(err);
                                     } else {
-                                        next(undefined, {image: results[0]._id});
+                                        res.send({ status: "OK", results: results});
                                     }
                                 });
-                            };
-                        for (i = 0; i < req.attached.limit; i = i + 1) {
-                            inputs.push(i);
                         }
-                        async.map(inputs,
-                            map,
-                            function (err, results) {
-                                if (err) {
-                                    next(err);
-                                } else {
-                                    res.send({ status: "OK", results: results});
-                                }
-                            });
-                    }
-                });
+                    });
+            }
         }
     });
 };
@@ -134,26 +138,30 @@ exports.routes.image.leastused = function (req, res, next) {
             res.send(501, "not Implemented");
         },
         json: function () {
-            var query = {},
-                options = {
-                    sort: {count: 1},
-                    limit: req.attached.limit
-                };
-            if (req.attached.collection) {
-                if (req.attached.collection.images && req.attached.collection.images.length !== 0) {
-                    query = computeCollectionMatch(req.attached.collection);
-                } else {
-                    res.send({ status: "OK", results: []});
-                    return;
+            if (req.errors.length) {
+                exports.algorithms.json.error(req, res);
+            } else {
+                var query = {},
+                    options = {
+                        sort: {count: 1},
+                        limit: req.attached.limit
+                    };
+                if (req.attached.collection) {
+                    if (req.attached.collection.images && req.attached.collection.images.length !== 0) {
+                        query = computeCollectionMatch(req.attached.collection);
+                    } else {
+                        res.send({ status: "OK", results: []});
+                        return;
+                    }
                 }
+                ImageTags.find(query, "image count", options, function (err, results) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: results});
+                    }
+                });
             }
-            ImageTags.find(query, "image count", options, function (err, results) {
-                if (err) {
-                    next(err);
-                } else {
-                    res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: results});
-                }
-            });
         }
     });
 };
@@ -175,55 +183,59 @@ exports.routes.imageandtag.random = function (req, res, next) {
             res.send(501, "not Implemented");
         },
         json: function () {
-            var aggregate = [
-                {$match: {type: "tagging", tag: {$exists: true}, validity: true}},
-                {$group: {_id: {image: "$image", tag: "$tag"}}},
-                {$group: {_id: null, count: {$sum: 1}}}
-            ];
-            if (req.attached.collection) {
-                if (req.attached.collection.images.length !== 0) {
-                    aggregate = _.union([{$match: {image: {$in: req.attached.collection.images}}}], aggregate);
-                } else {
-                    res.send({ status: "OK", results: []});
-                    return;
-                }
-            }
-            Action.aggregate(aggregate,
-                function (err, result) {
-                    if (err) {
-                        next(err);
+            if (req.errors.length) {
+                exports.algorithms.json.error(req, res);
+            } else {
+                var aggregate = [
+                    {$match: {type: "tagging", tag: {$exists: true}, validity: true}},
+                    {$group: {_id: {image: "$image", tag: "$tag"}}},
+                    {$group: {_id: null, count: {$sum: 1}}}
+                ];
+                if (req.attached.collection) {
+                    if (req.attached.collection.images.length !== 0) {
+                        aggregate = _.union([{$match: {image: {$in: req.attached.collection.images}}}], aggregate);
                     } else {
-                        var inputs = [],
-                            i,
-                            map = function (item, next) {
-                                var aggregate = [
-                                    {$match: {type: "tagging", tag: {$exists: true}, validity: true}},
-                                    {$group: {_id: {image: "$image", tag: "$tag"}}},
-                                    {$skip: Math.floor(result[0].count * Math.random())},
-                                    {$limit: 1},
-                                    {$project: {_id: false, image: "$_id.image", tag: "$_id.tag"}}
-                                ];
-                                Action.aggregate(aggregate, function (err, results) {
+                        res.send({ status: "OK", results: []});
+                        return;
+                    }
+                }
+                Action.aggregate(aggregate,
+                    function (err, result) {
+                        if (err) {
+                            next(err);
+                        } else {
+                            var inputs = [],
+                                i,
+                                map = function (item, next) {
+                                    var aggregate = [
+                                        {$match: {type: "tagging", tag: {$exists: true}, validity: true}},
+                                        {$group: {_id: {image: "$image", tag: "$tag"}}},
+                                        {$skip: Math.floor(result[0].count * Math.random())},
+                                        {$limit: 1},
+                                        {$project: {_id: false, image: "$_id.image", tag: "$_id.tag"}}
+                                    ];
+                                    Action.aggregate(aggregate, function (err, results) {
+                                        if (err) {
+                                            next(err);
+                                        } else {
+                                            next(undefined, results[0]);
+                                        }
+                                    });
+                                };
+                            for (i = 0; i < req.attached.limit; i = i + 1) {
+                                inputs.push(i);
+                            }
+                            async.map(inputs, map,
+                                function (err, results) {
                                     if (err) {
                                         next(err);
                                     } else {
-                                        next(undefined, results[0]);
+                                        res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: results});
                                     }
                                 });
-                            };
-                        for (i = 0; i < req.attached.limit; i = i + 1) {
-                            inputs.push(i);
                         }
-                        async.map(inputs, map,
-                            function (err, results) {
-                                if (err) {
-                                    next(err);
-                                } else {
-                                    res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: results});
-                                }
-                            });
-                    }
-                });
+                    });
+            }
         }
     });
 };
@@ -234,45 +246,49 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
             res.send(501, "not Implemented");
         },
         json: function () {
-            var oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
-                filter = [
-                    {$or: [
-                        {type: "tagging", validity: true, tag: {$exists: true}},
-                        {type: "segmentation", validity: true, segmentation: {$exists: true}},
-                        {type: "segmentation", validity: true, completed_at: {$exists: false}, created_at: {$gt: oneHourAgo}}
-                    ]}
-                ],
-                aggregate = [
-                    {$match: {$and: filter}},
-                    {$project: {_id: false, image: true, tag: true, type: true}},
-                    {$group: {_id: {image: "$image", tag: "$tag"}, count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
-                    {$group: {_id: "$_id.image", tags : {$push : {image: "$_id.image", tag: "$_id.tag", count: "$count"}}, maxCount: {$max: "$count"}}},
-                    {$project: {_id: false, tags: true, maxCount: true}},
-                    {$unwind: "$tags"},
-                    {$project: {image: "$tags.image", tag: "$tags.tag", count: "$tags.count", equals: {$eq: ["$tags.count", "$maxCount"]}}},
-                    {$match: {equals : true}},
-                    {$project: {image: true, tag: true, count: true}},
-                    {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$count"}}},
-                    {$sort: {count: 1}},
-                    {$project: {_id: false, image: "$_id", tag: true, count: true}},
-                    {$limit: req.attached.limit},
-                ];
-            if (req.attached.collection) {
-                if (req.attached.collection.images.length !== 0) {
-                    filter.push(computeCollectionMatch(req.attached.collection));
-                } else {
-                    res.send({ status: "OK", results: []});
-                    return;
-                }
-            }
-            Action.aggregate(aggregate,
-                function (err, results) {
-                    if (err) {
-                        next(err);
+            if (req.errors.length) {
+                exports.algorithms.json.error(req, res);
+            } else {
+                var oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
+                    filter = [
+                        {$or: [
+                            {type: "tagging", validity: true, tag: {$exists: true}},
+                            {type: "segmentation", validity: true, segmentation: {$exists: true}},
+                            {type: "segmentation", validity: true, completed_at: {$exists: false}, created_at: {$gt: oneHourAgo}}
+                        ]}
+                    ],
+                    aggregate = [
+                        {$match: {$and: filter}},
+                        {$project: {_id: false, image: true, tag: true, type: true}},
+                        {$group: {_id: {image: "$image", tag: "$tag"}, count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
+                        {$group: {_id: "$_id.image", tags : {$push : {image: "$_id.image", tag: "$_id.tag", count: "$count"}}, maxCount: {$max: "$count"}}},
+                        {$project: {_id: false, tags: true, maxCount: true}},
+                        {$unwind: "$tags"},
+                        {$project: {image: "$tags.image", tag: "$tags.tag", count: "$tags.count", equals: {$eq: ["$tags.count", "$maxCount"]}}},
+                        {$match: {equals : true}},
+                        {$project: {image: true, tag: true, count: true}},
+                        {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$count"}}},
+                        {$sort: {count: 1}},
+                        {$project: {_id: false, image: "$_id", tag: true, count: true}},
+                        {$limit: req.attached.limit},
+                    ];
+                if (req.attached.collection) {
+                    if (req.attached.collection.images.length !== 0) {
+                        filter.push(computeCollectionMatch(req.attached.collection));
                     } else {
-                        res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: results});
+                        res.send({ status: "OK", results: []});
+                        return;
                     }
-                });
+                }
+                Action.aggregate(aggregate,
+                    function (err, results) {
+                        if (err) {
+                            next(err);
+                        } else {
+                            res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: results});
+                        }
+                    });
+            }
         }
     });
 };
