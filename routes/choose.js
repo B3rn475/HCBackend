@@ -52,7 +52,7 @@ exports.routes.image.random = function (req, res, next) {
         },
         json: function () {
             if (req.errors.length) {
-                exports.algorithms.json.error(req, res);
+                index.algorithms.json.error(req, res);
             } else {
                 var aggregate = [
                     {$group: {_id: null, count: {$sum: 1}}}
@@ -139,7 +139,7 @@ exports.routes.image.leastused = function (req, res, next) {
         },
         json: function () {
             if (req.errors.length) {
-                exports.algorithms.json.error(req, res);
+                index.algorithms.json.error(req, res);
             } else {
                 var query = {},
                     options = {
@@ -184,7 +184,7 @@ exports.routes.imageandtag.random = function (req, res, next) {
         },
         json: function () {
             if (req.errors.length) {
-                exports.algorithms.json.error(req, res);
+                index.algorithms.json.error(req, res);
             } else {
                 var aggregate = [
                     {$match: {type: "tagging", tag: {$exists: true}, validity: true}},
@@ -247,7 +247,7 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
         },
         json: function () {
             if (req.errors.length) {
-                exports.algorithms.json.error(req, res);
+                index.algorithms.json.error(req, res);
             } else {
                 var oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
                     filter = [
