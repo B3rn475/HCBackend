@@ -134,10 +134,19 @@ exports.routes.image.leastused = function (req, res, next) {
             res.send(501, "not Implemented");
         },
         json: function () {
-            var options = {
-                sort: {count: 1},
-                limit: req.attached.limit
-            };
+            var query = {},
+                options = {
+                    sort: {count: 1},
+                    limit: req.attached.limit
+                };
+            if (req.attached.collection) {
+                if (req.attached.collection.images.length !== 0) {
+                    query = computeCollectionMatch(req.attached.collection);
+                } else {
+                    res.send({ status: "OK", results: []});
+                    return;
+                }
+            }
             ImageTags.find({}, "image count", options, function (err, results) {
                 if (err) {
                     next(err);
