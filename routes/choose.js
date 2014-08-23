@@ -106,34 +106,7 @@ var computeCollectionMatch = function (collection) {
         item,
         or = [];
     if (images.length === 0) { return []; }
-    if (images.length === 1) { return [{$match: {image: images[0]}}]; }
-    item = {$gte: images[0], $lt: images[0]};
-    images.forEach(function (image) {
-        if (image === item.$lt) {
-            item.$lt = image + 1;
-        } else {
-            if (item.$lt === item.$gte + 1) {
-                or.push({image: item.$gte});
-            } else {
-                or.push({image: item});
-            }
-            item = {$gte: image, $lt: image + 1};
-        }
-    });
-    if (item.$lt === item.$gte + 1) {
-        or.push({image: item.$gte});
-    } else {
-        or.push({image: item});
-    }
-    return {$or: or};
-};
-
-var computeCollectionFilter = function (collection) {
-    var images = _.sortBy(collection.images, function (item) { return item; }),
-        item,
-        or = [];
-    if (images.length === 0) { return {}; }
-    if (images.length === 1) { return {image: images[0]}; }
+    if (images.length === 1) { return [{image: images[0]}]; }
     item = {$gte: images[0], $lt: images[0]};
     images.forEach(function (image) {
         if (image === item.$lt) {
