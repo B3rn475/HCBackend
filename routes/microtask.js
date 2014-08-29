@@ -56,7 +56,7 @@ exports.routes.add = function (req, res, next) {
 exports.routes.complete = function (req, res, next) {
     res.format({
         html: function () {
-            res.send(501, "not implemented");
+            res.status(501).send("not implemented");
         },
         json: function () {
             if (req.errors.length) {

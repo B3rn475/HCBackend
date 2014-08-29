@@ -47,7 +47,7 @@ exports.routes.add = function (req, res, next) {
     } else {
         res.format({
             html: function () {
-                res.send(501, "not implemented");
+                res.status(501).send("not implemented");
             },
             json: function () {
                 res.send({ status: "OK", id: req.attached.tag.id});
@@ -91,7 +91,7 @@ var getAlias = function (aliases, language) {
 exports.routes.addAlias = function (req, res, next) {
     res.format({
         html: function () {
-            res.send(501, "not implemented");
+            res.status(501).send("not implemented");
         },
         json: function () {
             if (req.errors.length) {
@@ -125,7 +125,7 @@ exports.routes.addAlias = function (req, res, next) {
 exports.routes.removeAlias = function (req, res, next) {
     res.format({
         html: function () {
-            res.send(501, "not implemented");
+            res.status(501).send("not implemented");
         },
         json: function () {
             if (req.errors.length) {

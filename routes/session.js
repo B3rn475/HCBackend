@@ -79,7 +79,7 @@ exports.routes.count = function (req, res, next) {
 exports.routes.complete = function (req, res, next) {
     res.format({
         html: function () {
-            res.send(501, "not implemented");
+            res.status(501).send("not implemented");
         },
         json: function () {
             if (req.errors.length) {
@@ -153,7 +153,7 @@ exports.checkers = {};
 exports.checkers.open = function (req, res, next) {
     res.format({
         html: function () {
-            res.send(501, "not implemented");
+            res.status(501).send("not implemented");
         },
         json: function () {
             if (req.attached.session && req.attached.session.completed_at) {

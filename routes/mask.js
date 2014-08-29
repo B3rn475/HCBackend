@@ -84,7 +84,7 @@ exports.routes.update = function (req, res, next) {
     var mask = req.attached.mask;
     res.format({
         html: function () {
-            res.send(501, "not implemented");
+            res.status(501).send("not implemented");
         },
         json: function () {
             if (req.errors.length) {

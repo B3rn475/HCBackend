@@ -23,7 +23,7 @@ exports.routes = {};
 exports.routes.list = function (req, res, next) {
     res.format({
         html: function () {
-            res.send(501, "not Implemented");
+            res.status(501).send("not Implemented");
         },
         json: function () {
             var statistics = {

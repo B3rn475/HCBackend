@@ -58,7 +58,7 @@ exports.routes.add = function (req, res, next) {
     } else {
         res.format({
             html: function () {
-                res.send(501, "not implemented");
+                res.status(501).send("not implemented");
             },
             json: function () {
                 res.send({ status: "OK", id: req.attached.user.id});
@@ -96,7 +96,7 @@ exports.routes.update = function (req, res, next) {
     var user = req.attached.user;
     res.format({
         html: function () {
-            res.send(501, "not implemented");
+            res.status(501).send("not implemented");
         },
         json: function () {
             if (req.errors.length) {

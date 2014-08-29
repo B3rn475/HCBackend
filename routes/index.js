@@ -55,10 +55,10 @@ exports.errorHandler = function (options) {
         return function (err, req, res, next) {
             res.format({
                 html: function () {
-                    res.send(500, "Internal Server Error");
+                    res.status(500).send("Internal Server Error");
                 },
                 json: function () {
-                    res.send(500, { status: "KO", errors: [{ location: "internal", message: "Internal Server Error" } ] });
+                    res.status(500).send({ status: "KO", errors: [{ location: "internal", message: "Internal Server Error" } ] });
                 }
             });
         };
@@ -66,7 +66,7 @@ exports.errorHandler = function (options) {
         return function (err, req, res, next) {
             res.format({
                 html: function () {
-                    res.send(500, "Internal Server Error");
+                    res.status(500).send("Internal Server Error");
                 },
                 json: function () {
                     var error = { location: "internal" };
@@ -78,7 +78,7 @@ exports.errorHandler = function (options) {
                     if (options.showStack) {
                         error.stack = err.stack;
                     }
-                    res.send(500, { status: "KO", errors: [error] });
+                    res.status(500).send({ status: "KO", errors: [error] });
                 }
             });
         };
@@ -105,10 +105,10 @@ exports.routes.index = function (req, res) {
 exports.routes.invalidRoute = function (req, res) {
     res.format({
         html: function () {
-            res.send(404, "invalid route");
+            res.status(404).send("invalid route");
         },
         json: function () {
-            res.send(404, { status: "KO", errors: { location: "url", message: "Invalid route"} });
+            res.status(404).send({ status: "KO", errors: { location: "url", message: "Invalid route"} });
         }
     });
 };
@@ -155,7 +155,7 @@ exports.algorithms.json.get = function (req, res, next, Model, populate) {
 };
 
 exports.algorithms.html.get = function (req, res, next, Model) {
-    res.send(501, "not implemented");
+    res.status(501).send("not implemented");
 };
 
 exports.algorithms.aggregate = function (req, res, next, Model, pipeline, grouping) {
@@ -356,19 +356,19 @@ exports.algorithms.json.error = function (req, res) {
 };
 
 exports.algorithms.html.list = function (req, res, next, Model, conditions, fields, options) {
-    res.send(501, "not implemented");
+    res.status(501).send("not implemented");
 };
 
 exports.algorithms.html.add = function (req, res, next, Model, obj, savecb) {
-    res.send(501, "not implemented");
+    res.status(501).send("not implemented");
 };
 
 exports.algorithms.html.update = function (req, res, next, Model, query, update, options, updatecb) {
-    res.send(501, "not implemented");
+    res.status(501).send("not implemented");
 };
 
 exports.algorithms.html.count = function (req, res, next, Model, query) {
-    res.send(501, "not implemented");
+    res.status(501).send("not implemented");
 };
 
 /**
