@@ -28,6 +28,8 @@ schema.options.toJSON = {
     }
 };
 
+schema.index({count: 1, image: 1, tag: 1});
+
 exports.schema = schema;
 
 var model = mongoose.model('ImageSegmentations',

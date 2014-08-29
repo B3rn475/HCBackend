@@ -28,6 +28,8 @@ schema.options.toJSON = {
     }
 };
 
+schema.index({image: 1, count: 1});
+
 exports.schema = schema;
 
 var model = mongoose.model('ImageTags',
