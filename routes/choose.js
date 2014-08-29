@@ -253,8 +253,9 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
                 var aggregate = [
                         {$sort: {count: 1, image: 1, tag: 1}},
                         {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$count"}}},
+                        {$sort: {count: 1}},
                         {$limit: req.attached.limit},
-                        {$project: {_id: false, image: "$_id", tag: "$tag", count: "$count"}}
+                        {$project: {_id: false, image: "$_id", tag: true, count: true}}
                     ];
                 if (req.attached.collection) {
                     if (req.attached.collection.images.length !== 0) {
