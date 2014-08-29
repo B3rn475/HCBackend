@@ -10,9 +10,10 @@
  */
 "use strict";
 
-var mongoose = require("mongoose");
-var mongooseAI = require("mongoose-auto-increment");
-var ImageTags = require("./imagetags.js").model;
+var mongoose = require("mongoose"),
+    mongooseAI = require("mongoose-auto-increment"),
+    ImageTags = require("./imagetags.js").model,
+    ImageSegmentations = require("./imagesegmentations.js").model;
 
 exports.regexp = { points: {}, history: {}, params: {}, query: {}};
 
@@ -59,6 +60,7 @@ schema.pre('save', function (next) {
     }
     this.wasCompletedAtModified = this.isModified("completed_at");
     this.wasValidityModified = this.isModified("validity");
+    this.wasSegmentationModified = this.isModified("segmentation");
     next();
 });
 
@@ -100,6 +102,29 @@ schema.post('save', function () {
         }
         if (addAndUpdate) {
             ImageTags.findOneAndUpdate({image: this.image, tags: {$nin: [this.tag]}}, {$addToSet: {tags: this.tag}, $inc: {count: 1}}, function (err) { if (err) { console.log(err); } });
+            ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {count: 0}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
+        }
+    } else if (this.type === "segmentation") {
+        if (this.wasNew) {
+            if (this.completed_at === undefined || this.segmentation !== undefined) {
+                ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {count: 1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
+            }
+        } else {
+            if (this.wasCompletedAtModified) {
+                if (this.segmentation === undefined) {
+                    ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {count: -1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
+                }
+            } else {
+                if (this.segmentation !== undefined) {
+                    if (this.wasValidityModified) {
+                        if (this.validity) {
+                            ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {count: 1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
+                        } else {
+                            ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {count: -1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
+                        }
+                    }
+                }
+            }
         }
     }
 });

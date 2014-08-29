@@ -12,6 +12,7 @@
 
 var index = require("./index.js"),
     ImageTags = require("../models/imagetags.js").model,
+    ImageSegmentations = require("../models/imagesegmentations.js").model,
     Action = require("../models/action.js").model,
     Image = require("../models/image.js").model,
     async = require("async"),
@@ -249,38 +250,27 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
             if (req.errors.length) {
                 index.algorithms.json.error(req, res);
             } else {
-                var oneHourAgo = new Date(new Date().setHours(new Date().getHours() - 1)),
-                    filter = [
-                        {$or: [
-                            {type: "tagging", validity: true, tag: {$exists: true}},
-                            {type: "segmentation", validity: true, segmentation: {$exists: true}},
-                            {type: "segmentation", validity: true, completed_at: {$exists: false}, created_at: {$gt: oneHourAgo}}
-                        ]}
-                    ],
-                    aggregate = [
-                        {$match: {$and: filter}},
-                        {$project: {_id: false, image: true, tag: true, type: true}},
-                        {$group: {_id: {image: "$image", tag: "$tag"}, count: {$sum: {$cond: [{$eq: ["$type", "tagging"]}, 0, 1]}}}},
-                        {$group: {_id: "$_id.image", tags : {$push : {image: "$_id.image", tag: "$_id.tag", count: "$count"}}, maxCount: {$max: "$count"}}},
-                        {$project: {_id: false, tags: true, maxCount: true}},
-                        {$unwind: "$tags"},
-                        {$project: {image: "$tags.image", tag: "$tags.tag", count: "$tags.count", equals: {$eq: ["$tags.count", "$maxCount"]}}},
-                        {$match: {equals : true}},
-                        {$project: {image: true, tag: true, count: true}},
+                var aggregate = [
+                        {$sort: {count: 1, image: 1, tag: 1}},
                         {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$count"}}},
-                        {$sort: {count: 1}},
-                        {$project: {_id: false, image: "$_id", tag: true, count: true}},
                         {$limit: req.attached.limit},
+                        {$project: {_id: false, image: "$_id", tag: true, count: true}}
                     ];
                 if (req.attached.collection) {
                     if (req.attached.collection.images.length !== 0) {
-                        filter.push(computeCollectionMatch(req.attached.collection));
+                        aggregate = [
+                            aggregate[0],
+                            {$match: computeCollectionMatch(req.attached.collection)},
+                            aggregate[1],
+                            aggregate[2],
+                            aggregate[3]
+                        ];
                     } else {
-                        res.send({ status: "OK", results: []});
+                        res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: []});
                         return;
                     }
                 }
-                Action.aggregate(aggregate,
+                ImageSegmentations.aggregate(aggregate,
                     function (err, results) {
                         if (err) {
                             next(err);
