@@ -1332,7 +1332,7 @@ exports.body.unchecked.base64jpg = function (property) {
                 req.attached[property] = buffer;
             } else {
                 req.attached[property] = undefined;
-                req.error.push(eNoJpg);
+                req.errors.push(eNoJpg);
             }
         }
         next();
