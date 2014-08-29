@@ -134,8 +134,8 @@ exports.routes.add = function (req, res, next) {
                 }
             });
         };
-    if (req.attached.payload) {
-        obj = sizeof(req.attached.payload);
+    if (data) {
+        obj = sizeof(data);
     } else {
         obj = {};
     }
