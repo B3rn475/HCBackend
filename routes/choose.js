@@ -264,7 +264,8 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
                             {$match: computeCollectionMatch(req.attached.collection)},
                             aggregate[1],
                             aggregate[2],
-                            aggregate[3]
+                            aggregate[3],
+                            aggregate[4]
                         ];
                     } else {
                         res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: []});
