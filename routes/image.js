@@ -15,6 +15,7 @@ var fs = require("fs"),
     ImageTags = require("../models/imagetags.js").model,
     location = require("../models/image.js").regexp.location,
     Action = require("../models/action.js").model,
+    ImageSegmentations = require("../models/imagesegmentations.js").model,
     Tag = require("../models/tag.js").model,
     index = require("./index.js"),
     _ = require("underscore-node"),
@@ -36,26 +37,17 @@ exports.routes.index = function (req, res, next) {
         json: function () {
             if (req.attached.min_segmentations !== undefined || req.attached.max_segmentations !== undefined) {
                 var _id = {},
-                    prematch = {$and: [
-                        {validity: true},
-                        {$or: [
-                            {type: "upload"},
-                            {type: "segmentation", segmentation: {$exists: true}},
-                        ]},
-                    ]},
-                    count = {},
-                    aggregate = [
-                        {$match: prematch},
-                        {$project: {image: true, type: true}},
-                        {$group: {_id: "$image", count: {$sum: {$cond: [{$eq: ["$type", "upload"]}, 0, 1]}}}},
-                        {$sort: {_id: -1}},
-                        {$match: {count: count}}
-                    ];
+                    segmentations = {},
+                    match = {segmentations: segmentations},
+                    aggregate = [{$match: match},
+                                 {$group: {_id: "$image"}},
+                                 {$sort: {image: -1}}
+                                ];
                 if (req.attached.min_segmentations !== undefined) {
-                    count.$gte = req.attached.min_segmentations;
+                    segmentations.$gte = req.attached.min_segmentations;
                 }
                 if (req.attached.max_segmentations !== undefined) {
-                    count.$lte = req.attached.max_segmentations;
+                    segmentations.$lte = req.attached.max_segmentations;
                 }
                 if (req.attached.since_id !== undefined || req.attached.max_id !== undefined) {
                     if (req.attached.since_id !== undefined) {
@@ -64,7 +56,7 @@ exports.routes.index = function (req, res, next) {
                     if (req.attached.max_id !== undefined) {
                         _id.$lte = req.attached.max_id;
                     }
-                    prematch.$and.push({_id: _id});
+                    match.image = _id;
                 }
                 if (req.attached.count !== undefined) {
                     aggregate.push(
@@ -75,7 +67,7 @@ exports.routes.index = function (req, res, next) {
                     {$group: {_id: null, images: {$push: "$_id"}}}
                 );
                 
-                Action.aggregate(aggregate, function (err, results) {
+                ImageSegmentations.aggregate(aggregate, function (err, results) {
                     if (err) {
                         next(err);
                     } else {
