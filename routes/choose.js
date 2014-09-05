@@ -110,8 +110,8 @@ var computeCollectionMatch = function (collection) {
     var images = _.sortBy(collection.images, function (item) { return item; }),
         item,
         or = [];
-    if (images.length === 0) { return []; }
-    if (images.length === 1) { return [{image: images[0]}]; }
+    if (images.length === 0) { return {}; }
+    if (images.length === 1) { return {image: images[0]}; }
     item = {$gte: images[0], $lt: images[0]};
     images.forEach(function (image) {
         if (image === item.$lt) {
@@ -250,9 +250,10 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
             if (req.errors.length) {
                 index.algorithms.json.error(req, res);
             } else {
-                var aggregate = [
+                var match = [{validity: true}],
+                    aggregate = [
                         {$sort: {count: 1, image: 1, tag: 1}},
-                        {$match: {validity: true}},
+                        {$match: {$and: match}},
                         {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$count"}}},
                         {$sort: {count: 1}},
                         {$limit: req.attached.limit},
@@ -260,14 +261,7 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
                     ];
                 if (req.attached.collection) {
                     if (req.attached.collection.images.length !== 0) {
-                        aggregate = [
-                            aggregate[0],
-                            {$match: computeCollectionMatch(req.attached.collection)},
-                            aggregate[1],
-                            aggregate[2],
-                            aggregate[3],
-                            aggregate[4]
-                        ];
+                        match.push(computeCollectionMatch(req.attached.collection));
                     } else {
                         res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: []});
                         return;
