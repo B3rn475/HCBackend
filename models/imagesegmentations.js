@@ -15,8 +15,8 @@ var mongooseAI = require("mongoose-auto-increment");
 
 var schema = mongoose.Schema({ image: {type: Number, min: 0, index: true, ref: "Image"},
                             tag : {type: Number, min: 0, index: true, ref: "Tag"},
-                            count: {type: Number, min: 0, index: true},
-                            validity: {type: Boolean}
+                            tagging: {type: Number, min: 0, index: true},
+                            segmentations: {type: Number, min: 0, index: true},
                                 }, { id: false});
 
 schema.virtual('id').get(function () { return this._id; });

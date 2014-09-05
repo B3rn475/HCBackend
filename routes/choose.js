@@ -250,11 +250,11 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
             if (req.errors.length) {
                 index.algorithms.json.error(req, res);
             } else {
-                var match = [{validity: true}],
+                var match = [{tagging: {$ne: 0}}],
                     aggregate = [
-                        {$sort: {count: 1, image: 1, tag: 1}},
+                        {$sort: {segmentations: 1, image: 1, tag: 1}},
                         {$match: {$and: match}},
-                        {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$count"}}},
+                        {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$segmentations"}}},
                         {$sort: {count: 1}},
                         {$limit: req.attached.limit},
                         {$project: {_id: false, image: "$_id", tag: true, count: true}}

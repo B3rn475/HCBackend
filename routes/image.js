@@ -99,40 +99,14 @@ exports.routes.add = function (req, res, next) {
     var obj,
         data = req.attached.payload || req.attached.url,
         cb = function (image, next) {
-            var action = new Action();
-            action.type = "upload";
-            action.image = image.id;
-            action.validity = undefined;
-            action.save(function (err) {
-                if (err) {
-                    next(err);
-                } else {
-                    if (isJPG(data)) {
-                        fs.writeFile("./storage/image/" + image.id.toString() + ".jpg",
-                            data,
-                            function (err) {
-                                if (err) {
-                                    next(err);
-                                } else {
-                                    action.validity = true;
-                                    action.completed_at = new Date();
-                                    action.save(next);
-                                }
-                            });
-                    } else {
-                        sharp(data).toFile("./storage/image/" + image.id.toString() + ".jpg",
-                            function (err) {
-                                if (err) {
-                                    next(err);
-                                } else {
-                                    action.validity = true;
-                                    action.completed_at = new Date();
-                                    action.save(next);
-                                }
-                            });
-                    }
-                }
-            });
+            if (isJPG(data)) {
+                fs.writeFile("./storage/image/" + image.id.toString() + ".jpg",
+                    data,
+                    next);
+            } else {
+                sharp(data).toFile("./storage/image/" + image.id.toString() + ".jpg",
+                    next);
+            }
         };
     if (data) {
         obj = sizeof(data);
@@ -196,11 +170,10 @@ exports.routes.count = function (req, res, next) {
 };
 
 exports.routes.tag = function (req, res, next) {
-    var image,
-        cbNext = function (err, objects) {
+    var cbNext = function (err, objects) {
             var query = {};
-            if (objects.length > 0 && objects[0].tags !== undefined) {
-                query._id = { $in: objects[0].tags};
+            if (objects.length > 0 && objects[0].tags_set !== undefined) {
+                query._id = { $in: objects[0].tags_set};
             } else {
                 query._id = { $in: []};
             }
@@ -214,8 +187,7 @@ exports.routes.tag = function (req, res, next) {
             });
         };
     if (req.attached.image) {
-        image = req.attached.image.id;
-        ImageTags.find({image: image}, cbNext);
+        ImageTags.find({image: req.attached.image.id}, cbNext);
     } else {
         cbNext(undefined, []);
     }

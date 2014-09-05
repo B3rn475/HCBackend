@@ -87,41 +87,57 @@ schema.post('save', function () {
                     if (this.validity) {
                         addAndUpdate = true;
                     } else {
-                        exports.model.count({type: "tagging", image: this.image, tag: this.tag, validity: true}, function (err, count) {
+                        ImageTags.update({image: this.image, tags: this.tag}, {$unset: {"tags.$": this.tag}}, function (err) {
                             if (err) {
                                 console.log(err);
                             } else {
-                                if (count === 0) {
-                                    ImageSegmentations.update({image: me.image, tag: me.tag}, {$set: {validity: false}}, function (err) { if (err) { console.log(err); } });
-                                    ImageTags.update({image: me.image, tags: {$in: [me.tag]}}, {$inc: {count: -1}, $pull: {tags: me.tag}}, function (err) { if (err) { console.log(err); } });
-                                }
+                                ImageTags.findOneAndUpdate({image: me.image,
+                                                        tags_set: {$in: [me.tag]},
+                                                        tags: {$nin: [me.tag]}
+                                                       },
+                                                       {$pull: {tags_set: me.tag},
+                                                        $inc: {count: -1}
+                                                       }, function (err) { if (err) { console.log(err); } });
+                                ImageTags.update({image: me.image}, {$pull: {tags: null}}, function (err) { if (err) { console.log(err); } });
                             }
                         });
+                        ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {tagging: -1, segmentations: 0}}, function (err) { if (err) { console.log(err); } });
                     }
                 }
             }
         }
         if (addAndUpdate) {
-            ImageTags.findOneAndUpdate({image: this.image, tags: {$nin: [this.tag]}}, {$addToSet: {tags: this.tag}, $inc: {count: 1}}, function (err) { if (err) { console.log(err); } });
-            ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {count: 0}, $set: {validity: true}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
+            ImageTags.update({image: this.image}, {$push: {tags: this.tag}}, function (err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    ImageTags.findOneAndUpdate({image: me.image,
+                                                tags_set: {$nin: [me.tag]}
+                                               },
+                                               {$addToSet: {tags_set: me.tag},
+                                                $inc: {count: 1}
+                                               }, function (err) { if (err) { console.log(err); } });
+                }
+            });
+            ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {tagging: 1, segmentations: 0}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
         }
     } else if (this.type === "segmentation") {
         if (this.wasNew) {
             if (this.completed_at === undefined || this.segmentation !== undefined) {
-                ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {count: 1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
+                ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {tagging: 0, segmentations: 1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
             }
         } else {
             if (this.wasCompletedAtModified) {
                 if (this.segmentation === undefined) {
-                    ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {count: -1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
+                    ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {tagging: 0, segmentations: -1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
                 }
             } else {
                 if (this.segmentation !== undefined) {
                     if (this.wasValidityModified) {
                         if (this.validity) {
-                            ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {count: 1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
+                            ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {tagging: 0, segmentations: 1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
                         } else {
-                            ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {count: -1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
+                            ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {tagging: 0, segmentations: -1}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
                         }
                     }
                 }

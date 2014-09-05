@@ -15,6 +15,7 @@ var mongooseAI = require("mongoose-auto-increment");
 
 var schema = mongoose.Schema({ image: {type: Number, min: 0, index: true, ref: "Image"},
                             tags : [{type: Number, min: 0, ref: "Tag"}],
+                            tags_set : [{type: Number, min: 0, ref: "Tag"}],
                             count: {type: Number, min: 0, index: true}
                                 }, { id: false});
 
