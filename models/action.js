@@ -102,7 +102,7 @@ schema.post('save', function () {
             }
         }
         if (addAndUpdate) {
-            ImageTags.findOneAndUpdate({image: this.image, tags: {$nin: [this.tag]}}, {$addToSet: {tags: this.tag}, $inc: {count: 1}}, function (err) { if (err) { console.log(err); } });
+            ImageTags.findOneAndUpdate({image: this.image, tag: {$nin: [this.tag]}}, {$addToSet: {tags: this.tag}, $inc: {count: 1}}, function (err) { if (err) { console.log(err); } });
             ImageSegmentations.update({image: this.image, tag: this.tag}, {$inc: {count: 0}, $set: {validity: true}}, {upsert: true}, function (err) { if (err) { console.log(err); } });
         }
     } else if (this.type === "segmentation") {
