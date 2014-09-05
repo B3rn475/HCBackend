@@ -178,9 +178,9 @@ exports.query = {
     route: {}
 };
 
-exports.query.mandatory.type = index.query.register("type", index.query.mandatory.regexp("type", regexp.query.type, "Action Type"));
+exports.query.mandatory.type = index.query.register("type", index.query.mandatory.regexp("type", regexp.type, "Action Type"));
 
-exports.query.optional.type = index.query.register("type", index.query.optional.regexp("type", regexp.query.type, "Action Type"));
+exports.query.optional.type = index.query.register("type", index.query.optional.regexp("type", regexp.type, "Action Type"));
 
 exports.query.mandatory.validity = index.query.register("validity", index.query.mandatory.boolean("validity"));
 
@@ -208,9 +208,9 @@ exports.body.mandatory.id = index.body.mandatory.id(Action);
 
 exports.body.optional.id = index.body.optional.id(Action);
 
-exports.body.mandatory.type = index.body.mandatory.regexp("type", regexp.params.type, "Action Type");
+exports.body.mandatory.type = index.body.mandatory.regexp("type", regexp.type, "Action Type");
 
-exports.body.optional.type = index.body.optional.regexp("type", regexp.params.type, "Action Type");
+exports.body.optional.type = index.body.optional.regexp("type", regexp.type, "Action Type");
 
 exports.body.mandatory.validity = index.body.mandatory.boolean("validity");
 
