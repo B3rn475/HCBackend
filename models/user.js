@@ -52,7 +52,7 @@ schema.methods.computeFields = function (cb) {
                 });
         },
         function (next) {
-            Action.aggregate([{$match: {user: obj.id}}, {$group : {_id: "session"}}, {$group : {_id: null, count : {$sum : 1}}}],
+            Action.aggregate([{$match: {user: obj.id}}, {$group : {_id: "$session"}}, {$group : {_id: null, count : {$sum : 1}}}],
                 function (err, result) {
                     if (err) {
                         next(err);
