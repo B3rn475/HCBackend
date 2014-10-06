@@ -157,7 +157,7 @@ exports.checkers.open = function (req, res, next) {
         },
         json: function () {
             if (req.attached.session && req.attached.session.completed_at) {
-                res.send(400, { status: "KO", error: "Session " + req.attached.session.id + " is already closed" });
+                res.status(400).send({ status: "KO", error: "Session " + req.attached.session.id + " is already closed" });
             } else {
                 next();
             }
