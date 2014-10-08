@@ -173,7 +173,7 @@ exports.routes.imageandtag.list = function (req, res, next) {
             res.send(501, "not Implemented");
         },
         json: function () {
-            res.send({ status: "OK", algorithms: ["random", "leastused"] });
+            res.send({ status: "OK", algorithms: ["random", "leastused", "mostused"] });
         }
     });
 };
@@ -256,6 +256,47 @@ exports.routes.imageandtag.leastused = function (req, res, next) {
                         {$match: {$and: match}},
                         {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$segmentations"}}},
                         {$sort: {count: 1}},
+                        {$limit: req.attached.limit},
+                        {$project: {_id: false, image: "$_id", tag: true, count: true}}
+                    ];
+                if (req.attached.collection) {
+                    if (req.attached.collection.images.length !== 0) {
+                        match.push(computeCollectionMatch(req.attached.collection));
+                    } else {
+                        res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: []});
+                        return;
+                    }
+                }
+                ImageSegmentations.aggregate(aggregate,
+                    function (err, results) {
+                        if (err) {
+                            next(err);
+                        } else {
+                            res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: results});
+                        }
+                    });
+            }
+        }
+    });
+};
+
+
+
+exports.routes.imageandtag.mostused = function (req, res, next) {
+    res.format({
+        html: function () {
+            res.send(501, "not Implemented");
+        },
+        json: function () {
+            if (req.errors.length) {
+                index.algorithms.json.error(req, res);
+            } else {
+                var match = [{tagging: {$ne: 0}}],
+                    aggregate = [
+                        {$sort: {segmentations: -1, image: 1, tag: 1}},
+                        {$match: {$and: match}},
+                        {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$segmentations"}}},
+                        {$sort: {count: -1}},
                         {$limit: req.attached.limit},
                         {$project: {_id: false, image: "$_id", tag: true, count: true}}
                     ];
