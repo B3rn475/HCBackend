@@ -146,6 +146,10 @@ exports.query = {
     route: {}
 };
 
+exports.query.mandatory.id = index.query.register(User.pname, index.query.mandatory.id(User), "id");
+
+exports.query.optional.id = index.query.register(User.pname, index.query.optional.id(User), "id");
+
 exports.query.mandatory.app_id = index.query.register("app_id", index.query.mandatory.integer("app_id", 0));
 
 exports.query.optional.app_id = index.query.register("app_id", index.query.optional.integer("app_id", 0));
