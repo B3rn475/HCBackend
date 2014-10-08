@@ -106,6 +106,7 @@ exports.routes.add = function (req, res, next) {
         obj = {};
     }
     if (req.attached.pose) { obj.pose = req.attached.pose; }
+    if (req.attached.source) { obj.source = req.attached.source; }
     res.format({
         html: function () {
             index.algorithms.html.add(req, res, next, Image, obj, cb);
@@ -244,6 +245,10 @@ exports.body.optional.payload = index.body.optional.base64jpg("payload");
 exports.body.mandatory.url = index.body.mandatory.urlFile("url");
 
 exports.body.optional.url = index.body.optional.urlFile("url");
+
+exports.body.mandatory.source = index.body.mandatory.string("source");
+
+exports.body.optional.source = index.body.optional.string("source");
 
 var checkInteger = function (int, min, max) {
     if (_.isUndefined(int)) { return false; }

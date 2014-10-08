@@ -36,6 +36,7 @@ exports.routes.index = function (req, res, next) {
     if (req.attached.image) { query.image = req.attached.image.id; }
     if (req.attached.tag) { query.tag = req.attached.tag.id; }
     if (req.attached.session) { query.session = req.attached.session.id; }
+    if (req.attached.user) { query.user = req.attached.user.id; }
     if (req.attached.populate === undefined || !req.attached.populate) { fields = "-segmentation.points -segmentation.history"; }
     res.format({
         html: function () {

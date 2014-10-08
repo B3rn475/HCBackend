@@ -119,6 +119,7 @@ app.route("/image")
     .post(image.body.optional.payload,
           image.body.optional.url,
           image.body.optional.pose,
+          image.body.optional.source,
           image.checkers.route.add,
           image.routes.add)
     .get(index.query.optional.count,
@@ -311,6 +312,7 @@ app.route("/session/:sessionId/action")
          action.query.optional.completed,
          image.query.optional.id,
          tag.query.optional.id,
+         user.query.optional.id,
          action.routes.index)
     .post(session.checkers.open,
           image.body.mandatory.id,
@@ -336,6 +338,7 @@ app.route("/action")
          image.query.optional.id,
          tag.query.optional.id,
          session.query.optional.id,
+         user.query.optional.id,
          action.routes.index)
     .post(session.body.mandatory.id,
           session.checkers.open,

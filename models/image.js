@@ -32,7 +32,8 @@ var part = mongoose.Schema({location: {type: String, enum: ["head", "torso", "le
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                     width: { type: Number, min: 1},
                                     height: { type: Number, min: 1},
-                                    pose: [part]
+                                    pose: [part],
+                                    source: { type: String }
                                 }, { id: false});
 
 schema.virtual('id').get(function () { return this._id; });
