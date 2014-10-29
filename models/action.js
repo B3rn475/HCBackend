@@ -19,7 +19,7 @@ exports.regexp = { points: {}, history: {}, params: {}, query: {}};
 
 exports.regexp.color = /^((rgb\(([0-1][0-9]{2}|2[0-4][0-9]|25[0-5]|[0-9]{2}|[0-9]),[ ]*([0-1][0-9]{2}|2[0-4][0-9]|25[0-5]|[0-9]{2}|[0-9]),[ ]*([0-1][0-9]{2}|2[0-4][0-9]|25[0-5]|[0-9]{2}|[0-9])\))|(rgba\(([0-1][0-9]{2}|2[0-4][0-9]|25[0-5]|[0-9]{2}|[0-9]),[ ]*([0-1][0-9]{2}|2[0-4][0-9]|25[0-5]|[0-9]{2}|[0-9]),[ ]*([0-1][0-9]{2}|2[0-4][0-9]|25[0-5]|[0-9]{2}|[0-9]),[ ]*(1|0|1\.0|0\.[0-9]+)\)))$/;
 
-exports.regexp.type = /tagging|segmentation$/;
+exports.regexp.type = /^tagging|segmentation$/;
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                     session: {type: Number, min: 0, index: true, ref: "Session"},
