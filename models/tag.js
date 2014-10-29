@@ -19,8 +19,8 @@ var mongooseAI = require("mongoose-auto-increment");
 
 exports.regexp = {};
 
-exports.regexp.language = /[a-z]{2}\-[A-Z]{2}$/;
-exports.regexp.name = /[a-zA-Z ]+$/;
+exports.regexp.language = /^[a-z]{2}\-[A-Z]{2}$/;
+exports.regexp.name = /^[a-zA-Z ]+$/;
 
 var alias = mongoose.Schema({language: {type: String, validate: exports.regexp.language}, name: {type: String, validate: exports.regexp.name}}, { id: false, _id: false});
 

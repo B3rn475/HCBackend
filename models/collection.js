@@ -19,7 +19,7 @@ var mongooseAI = require("mongoose-auto-increment");
 
 exports.regexp = {};
 
-exports.regexp.name = /[a-zA-Z ]+$/;
+exports.regexp.name = /^[a-zA-Z ]+$/;
 
 var schema = mongoose.Schema({ _id: { type: Number, min: 0, index: { unique: true }, select: false},
                                 name: { type: String, index: { unique: true }, validate: exports.regexp.name },
