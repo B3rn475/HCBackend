@@ -344,7 +344,7 @@ exports.routes.imageandtag.worstquality = function (req, res, next) {
                 }
                 aggregate = _.union(aggregate, [
                     {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$segmentations"}, quality: {$first: "$quality"}}},
-                    {$sort: {quality: -1}},
+                    {$sort: {quality: 1}},
                     {$limit: req.attached.limit},
                     {$project: {_id: false, image: "$_id", tag: true, count: true, quality: true}}
                 ]);
