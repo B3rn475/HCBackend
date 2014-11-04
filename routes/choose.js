@@ -332,7 +332,7 @@ exports.routes.imageandtag.worstquality = function (req, res, next) {
                 index.algorithms.json.error(req, res);
             } else {
                 var aggregate = [
-                        {$sort: {quality: -1, image: 1, tag: 1}}
+                        {$sort: {quality: 1, image: 1, tag: 1}}
                     ];
                 if (req.attached.collection) {
                     if (req.attached.collection.images.length !== 0) {
