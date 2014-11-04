@@ -429,6 +429,10 @@ app.route("/choose/imageandtag/mostused")
     .get(collection.query.optional.id,
          choose.query.optional.limit,
          choose.routes.imageandtag.mostused);
+app.route("/choose/imageandtag/worstquality")
+    .get(collection.query.optional.id,
+         choose.query.optional.limit,
+         choose.routes.imageandtag.worstquality);
 
 /**
  * Statistics

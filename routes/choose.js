@@ -15,6 +15,7 @@ var index = require("./index.js"),
     ImageSegmentations = require("../models/imagesegmentations.js").model,
     Action = require("../models/action.js").model,
     Image = require("../models/image.js").model,
+    Mask = require("../models/mask.js").model,
     async = require("async"),
     _ = require("underscore-node");
 
@@ -173,7 +174,7 @@ exports.routes.imageandtag.list = function (req, res, next) {
             res.send(501, "not Implemented");
         },
         json: function () {
-            res.send({ status: "OK", algorithms: ["random", "leastused", "mostused"] });
+            res.send({ status: "OK", algorithms: ["random", "leastused", "mostused", "worstquality"] });
         }
     });
 };
@@ -309,6 +310,45 @@ exports.routes.imageandtag.mostused = function (req, res, next) {
                     }
                 }
                 ImageSegmentations.aggregate(aggregate,
+                    function (err, results) {
+                        if (err) {
+                            next(err);
+                        } else {
+                            res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: results});
+                        }
+                    });
+            }
+        }
+    });
+};
+
+exports.routes.imageandtag.worstquality = function (req, res, next) {
+    res.format({
+        html: function () {
+            res.send(501, "not Implemented");
+        },
+        json: function () {
+            if (req.errors.length) {
+                index.algorithms.json.error(req, res);
+            } else {
+                var aggregate = [
+                        {$sort: {quality: -1, image: 1, tag: 1}}
+                    ];
+                if (req.attached.collection) {
+                    if (req.attached.collection.images.length !== 0) {
+                        aggregate.push({$match: computeCollectionMatch(req.attached.collection)});
+                    } else {
+                        res.send({ status: "OK", completed_in: Date.now() - req.started_at, results: []});
+                        return;
+                    }
+                }
+                aggregate = _.union(aggregate, [
+                    {$group: {_id: "$image", tag: {$first: "$tag"}, count: {$first: "$segmentations"}, quality: {$first: "$quality"}}},
+                    {$sort: {quality: -1}},
+                    {$limit: req.attached.limit},
+                    {$project: {_id: false, image: "$_id", tag: true, count: true, quality: true}}
+                ]);
+                Mask.aggregate(aggregate,
                     function (err, results) {
                         if (err) {
                             next(err);
