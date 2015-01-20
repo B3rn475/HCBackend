@@ -359,6 +359,7 @@ app.route("/action/count")
          image.query.optional.id,
          tag.query.optional.id,
          session.query.optional.id,
+         user.query.optional.id,
          action.routes.count);
 app.route("/action/:actionId")
     .get(index.query.optional.populate,
