@@ -188,7 +188,7 @@ If there are not errors during the operation the following object will be sent:
 
 ```json
 {
-    "status": "OK"
+    "status": "OK",
     ... //Other data related to the api
 }
 ```
@@ -314,7 +314,7 @@ Example result:
 {
     "status" : "OK",
     "search_metadata" : {
-        "count" : 100
+        "count" : 100,
         "refresh_url" : "?since_id=0&count=100"
     },
     "tags" : [
@@ -714,9 +714,8 @@ complete a microtask
 
 * __body__ : action : __mandatory__ : the action that executes the task
 
-/**
- * Choose Routes
- */
+**Choose Routes**
+_________________
  
 **GET** : /choose
 returns the list of the available objects to choose
@@ -753,9 +752,8 @@ choose the least used combination of __image__ and __tag__ that has already been
 
 actions open from more than 1 hour are considered skipped from this route.
 
-/**
- * Statistics Routes
- */
+**Statistics Routes**
+_____________________
  
 **GET** : /statistics
 returns statistics about the system
