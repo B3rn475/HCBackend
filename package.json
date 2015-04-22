@@ -25,6 +25,6 @@
     , "is-jpg": "*"
     , "is-png": "*"
     , "valid-url": "*"
-    , "sharp" : "*"
+    , "sharp" : "^0.7.0"
   }
 }
